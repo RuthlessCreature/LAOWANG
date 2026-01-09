@@ -77,6 +77,18 @@ def high_position_filter(dist: Optional[float]) -> bool:
     return float(dist) < 0.15
 
 
+def latest_sma(df_daily: pd.DataFrame, window: int) -> Optional[float]:
+    if df_daily is None or df_daily.empty:
+        return None
+    if window <= 0:
+        return None
+    close = pd.to_numeric(df_daily["close"], errors="coerce").tail(int(window))
+    if len(close) < int(window) or close.isna().any():
+        return None
+    v = float(close.mean())
+    return v if np.isfinite(v) else None
+
+
 def score_trend(df_daily: pd.DataFrame, df_ind: pd.DataFrame) -> float:
     ma20 = df_ind["ma20"].iloc[-1]
     ma60 = df_ind["ma60"].iloc[-1]
@@ -84,6 +96,14 @@ def score_trend(df_daily: pd.DataFrame, df_ind: pd.DataFrame) -> float:
     close = float(df_daily["close"].iloc[-1])
     if not all(pd.notna([ma20, ma60, ma120])) or close <= 0:
         return 0.0
+
+    # TREND_UP basic requirement: close above MA5 or MA10.
+    ma5 = latest_sma(df_daily, 5)
+    ma10 = latest_sma(df_daily, 10)
+    if ma5 is not None or ma10 is not None:
+        above_fast_ma = (ma5 is not None and close > float(ma5)) or (ma10 is not None and close > float(ma10))
+        if not above_fast_ma:
+            return 0.0
 
     ma20 = float(ma20)
     ma60 = float(ma60)
@@ -274,25 +294,40 @@ def score_space(
     close: float,
     atr14: Optional[float],
     resistance_level: Optional[float],
+    settings: Settings,
 ) -> Tuple[float, Optional[float], Optional[float]]:
     if close <= 0 or atr14 is None or not np.isfinite(atr14):
         return 0.0, None, None
 
     expected_return = float((float(atr14) * 20.0) / close)
+    if not np.isfinite(expected_return):
+        return 0.0, None, None
+
     if resistance_level is None or not np.isfinite(resistance_level) or float(resistance_level) <= close:
-        resistance_distance = 1.0
+        resistance_distance = None
     else:
         resistance_distance = float((float(resistance_level) - close) / close)
 
-    cond1 = expected_return >= 0.18
-    cond2 = resistance_distance >= 0.25
-    if cond1 and cond2:
+    # Space score should be constrained by overhead resistance.
+    # If resistance is too close, there is essentially no operating room even if ATR is high.
+    min_space_pct = float(settings.near_resistance_pct) * 2.0
+
+    if resistance_distance is None:
+        # No usable resistance -> be conservative and only score by volatility potential.
+        score = 5.0 if expected_return >= 0.18 else 0.0
+        return score, expected_return, None
+
+    if resistance_distance < min_space_pct:
+        return 0.0, expected_return, float(resistance_distance)
+
+    reachable_space = float(min(expected_return, resistance_distance))
+    if reachable_space >= 0.18:
         score = 10.0
-    elif cond1 or cond2:
+    elif reachable_space >= min_space_pct:
         score = 5.0
     else:
         score = 0.0
-    return score, expected_return, resistance_distance
+    return score, expected_return, float(resistance_distance)
 
 
 def build_status_tags(
@@ -374,6 +409,7 @@ def calc_score_v3(
         close=close,
         atr14=float(df_ind["atr14"].iloc[-1]) if pd.notna(df_ind["atr14"].iloc[-1]) else None,
         resistance_level=resistance_level,
+        settings=settings,
     )
 
     total = (
@@ -413,4 +449,3 @@ def calc_score_v3(
         tags_json,
         risk_flags,
     )
-

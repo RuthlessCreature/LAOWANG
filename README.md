@@ -14,7 +14,8 @@
 - **v3 模型（低位主升浪）**
   - 强制过滤（否决项）：急跌/恐慌放量、高位套牢盘距离过近
   - v3 评分表：`stock_scores_v3`（含 `status_tags`：JSON 标签数组）
-- **导出股票池**：按最新评分日导出 CSV
+- **导出股票池（laowang.py）**：按最新评分日导出 CSV（支持 `min-score` / `require-tags` / `min-resistance-distance`）
+- **FHKQ（fhkq.py）*F*：连续跌停开板 / 反抽博弈评分（极端情绪模型），从日线数据中筛出当日跌停并输出评分 CSV
 - **回测**：随机抽 `nd` 个交易日，筛 `score>=k`，观察后续 `ne` 日窗口最高/最低/最终表现，输出 CSV+Markdown
 - **信号后表现**：统计信号后 `ne=5/10/20/30` 的最大涨幅/最大回撤/最终收益，写入 `stock_future_perf` 并输出报告
 
@@ -23,6 +24,8 @@
 ## 目录结构
 
 - `astock_analyzer.py`：命令行入口
+- `laowang.py`：v3 股票池导出脚本（从 DB 读取 `stock_scores_v3`）
+- `fhkq.py`：FHKQ 连续跌停博弈评分导出脚本
 - `a_stock_analyzer/`：核心逻辑
 - `config.ini`：数据库配置（MySQL/SQLite）
 - `data/`：默认 SQLite DB 目录
@@ -99,13 +102,26 @@ python astock_analyzer.py run --workers 16 --start-date 20000101 --end-date 2026
 ### 3) 导出股票池
 
 ```powershell
-python astock_analyzer.py export --output output/pool.csv --top 200 --min-score 80
+python laowang.py --output output/pool.csv --top 200 --min-score 80
 ```
 
 `status_tags`（JSON 数组）常见值：
 `TREND_UP` / `LOW_BASE` / `PULLBACK` / `AT_SUPPORT` / `SPACE_OK` / `NEAR_RESISTANCE` / `RISK_FILTERED`
 
-### 4) 信号后表现（ne=5/10/20/30）
+### 4) FHKQ 连续跌停博弈评分（可选）
+
+```powershell
+# 自动取 stock_daily 的最新日期
+python fhkq.py
+
+# 指定日期（支持 YYYYMMDD 或 YYYY-MM-DD）
+python fhkq.py --trade-date 20260107 --workers 16
+```
+
+输出：
+- `output/fhkq_YYYYMMDD.csv`
+
+### 5) 信号后表现（ne=5/10/20/30）
 
 ```powershell
 python astock_analyzer.py future-perf --ne 5,10,20,30 --min-score 80 --workers 16 --out-dir output
@@ -116,7 +132,7 @@ python astock_analyzer.py future-perf --ne 5,10,20,30 --min-score 80 --workers 1
 - `output/future_perf_*.md`
 - 入库：`stock_future_perf`
 
-### 5) 回测（随机 nd 个交易日）
+### 6) 回测（随机 nd 个交易日）
 
 ```powershell
 python astock_analyzer.py backtest --nd 50 --ne 20 --k 80 --seed 42 --workers 16 --out-dir output
@@ -149,5 +165,7 @@ python astock_analyzer.py backtest --nd 50 --ne 20 --k 80 --seed 42 --workers 16
 ## 文档
 
 - 完整说明：`document.md`
+- LAOWANG v3 评分机制：`docs/scoring_laowang.md`
+- FHKQ 评分机制：`docs/scoring_fhkq.md`
+- FHKQ 使用说明：`docs/fhkq.md`
 - MySQL 快捷说明：`docs/mysql_and_backtest.md`
-

@@ -1,0 +1,2 @@
+trade_date,stock_code,stock_name,consecutive_limit_down,last_limit_down,volume_ratio,amount_ratio,open_board_flag,liquidity_exhaust,fhkq_score,fhkq_level
+2026-01-08,600721,百花医药,2,1,0.9335765963159188,0.8221189446920795,1,0,45,C

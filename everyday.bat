@@ -5,6 +5,7 @@ set today=%datetime:~0,8%
 call conda activate p312
 
 python astock_analyzer.py run --start-date %today% --end-date %today% --workers 16
-python astock_analyzer.py export --output output/pool_%today%.csv --top 200 --min-score 70 --require-tags TREND_UP,AT_SUPPORT
+python laowang.py --output output/pool_%today%.csv --top 200 --min-score 60
+python fhkq.py
 
 pause

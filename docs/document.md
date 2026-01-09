@@ -8,6 +8,8 @@
 ## 1. 目录结构
 
 - `astock_analyzer.py`：命令行入口
+- `laowang.py`：评分结果导出（v3 股票池）
+- `fhkq.py`：连续跌停开板 / 反抽博弈评分导出
 - `a_stock_analyzer/`：核心逻辑
 - `requirements.txt`：Python 依赖
 - `data/`：默认 SQLite 数据库目录
@@ -143,12 +145,14 @@ v3 强制过滤（否决项，先执行）：
 
 ---
 
-## 7. 导出股票池（export）
+## 7. 导出股票池（laowang.py）
+
+说明：股票池导出已拆分为独立脚本 `laowang.py`；`astock_analyzer.py` 不再提供 `export` 子命令。
 
 命令：
 
 ```powershell
-python astock_analyzer.py export --output output/pool.csv --top 200 --min-score 80 --require-tags TREND_UP,AT_SUPPORT --min-resistance-distance 0.10
+python laowang.py --output output/pool.csv --top 200 --min-score 80 --require-tags TREND_UP,AT_SUPPORT --min-resistance-distance 0.10
 ```
 
 参数说明：
@@ -165,7 +169,42 @@ python astock_analyzer.py export --output output/pool.csv --top 200 --min-score 
 
 ---
 
-## 8. 回测接口（backtest）
+## 8. 连续跌停开板博弈评分（fhkq）
+
+用途：从数据库读取指定交易日的日线数据，筛出“当日跌停”的股票，统计连续跌停天数并给出博弈评分，导出 CSV。
+
+命令：
+
+```powershell
+# 自动取 stock_daily 的最新日期
+python fhkq.py
+
+# 指定日期（支持 YYYYMMDD 或 YYYY-MM-DD）
+python fhkq.py --trade-date 20260107 --workers 16
+
+# 指定数据库与输出路径（DB 参数规则与 astock_analyzer.py 一致）
+python fhkq.py --trade-date 2026-01-07 --db-url "mysql+pymysql://user:pass@127.0.0.1:3306/astock?charset=utf8mb4" --output output/fhkq_20260107.csv --workers 16
+```
+
+参数说明：
+
+- `--trade-date`：评分日期（默认取 `stock_daily` 的最新日期）
+- `--output`：输出 CSV 路径（默认 `output/fhkq_YYYYMMDD.csv`）
+- `--workers`：线程数（MySQL 可适当调大；SQLite 会自动强制 1）
+
+输出字段（CSV）：
+
+- `trade_date` / `stock_code` / `stock_name`
+- `consecutive_limit_down` / `last_limit_down`
+- `volume_ratio` / `amount_ratio`
+- `open_board_flag` / `liquidity_exhaust`
+- `fhkq_score` / `fhkq_level`
+
+风险提示：该模块属于“极端情绪博弈模型”，不用于中长期持仓；建议 A/B 级信号人工确认、仓位控制在常规策略的 20% 以内。
+
+---
+
+## 9. 回测接口（backtest）
 
 功能：随机抽取 `nd` 个交易日，在当日选出 `score>=k` 的股票，观察其后续 `ne` 个交易日的表现，输出：
 
@@ -206,7 +245,7 @@ python astock_analyzer.py backtest --nd 50 --ne 20 --k 80 --seed 42 --workers 16
 
 ---
 
-## 9. 信号后表现（future-perf）
+## 10. 信号后表现（future-perf）
 
 用途：按评分表 `stock_scores_v3` 中的“信号”（`total_score >= k` 且非 `RISK_FILTERED`），统计信号后 `ne` 个交易日的最大涨幅/最大回撤/最终收益，并写入 `stock_future_perf`。
 
@@ -224,7 +263,7 @@ python astock_analyzer.py future-perf --signal-date 2026-01-05 --ne 20 --min-sco
 
 ---
 
-## 10. SQLite 强制使用（可选）
+## 11. SQLite 强制使用（可选）
 
 如果你填了 `config.ini`（MySQL），但临时想用 SQLite 测试：
 

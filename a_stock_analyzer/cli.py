@@ -1,21 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import logging
 from pathlib import Path
 from typing import List, Optional
 
-from . import db
+from .base_ops import init_db, update_daily_and_score_v3
 from .backtest import run_backtest
-from .config import resolve_db_target
 from .future_perf import run_future_perf
-from .pipeline import export_pool, run_pipeline
-from .settings import Settings, today_yyyymmdd
-
-
-def setup_logging(level: str) -> None:
-    lvl = getattr(logging, level.upper(), logging.INFO)
-    logging.basicConfig(level=lvl, format="%(asctime)s %(levelname)s %(message)s")
+from .runtime import resolve_db_from_args, setup_logging
+from .settings import today_yyyymmdd
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -36,15 +29,6 @@ def build_parser() -> argparse.ArgumentParser:
     s_run.add_argument("--end-date", default=today_yyyymmdd())
     s_run.add_argument("--workers", type=int, default=8, help="Thread workers (MySQL recommended)")
     s_run.add_argument("--limit-stocks", type=int, default=None)
-
-    s_export = sub.add_parser("export", help="Export pool CSV from DB")
-    s_export.add_argument("--db", default=None, help="SQLite db path (optional)")
-    s_export.add_argument("--db-url", default=None, help="SQLAlchemy DB URL; overrides --db")
-    s_export.add_argument("--output", default=f"output/pool_{today_yyyymmdd()}.csv")
-    s_export.add_argument("--top", type=int, default=200)
-    s_export.add_argument("--min-score", type=float, default=None)
-    s_export.add_argument("--require-tags", default=None, help="Comma-separated, e.g. TREND_UP,AT_SUPPORT")
-    s_export.add_argument("--min-resistance-distance", type=float, default=None, help="e.g. 0.10 for 10%")
 
     s_bt = sub.add_parser("backtest", help="Random day backtest based on score table")
     s_bt.add_argument("--db", default=None, help="SQLite db path (optional)")
@@ -74,37 +58,19 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = parser.parse_args(argv)
     setup_logging(args.log_level)
 
-    db_target = resolve_db_target(
-        db_url_arg=getattr(args, "db_url", None),
-        db_arg=getattr(args, "db", None),
-        config_path=Path(args.config) if args.config else None,
-    )
+    db_target = resolve_db_from_args(args)
 
     if args.cmd == "init-db":
-        engine = db.make_engine(db_target, pool_size=5, max_overflow=10)
-        db.init_db(engine)
-        logging.info("DB initialized: %s", db_target)
+        init_db(db_target)
         return 0
 
     if args.cmd == "run":
-        settings = Settings(
-            db=db_target,
+        update_daily_and_score_v3(
+            db_target=db_target,
             start_date=args.start_date,
             end_date=args.end_date,
             workers=args.workers,
-        )
-        run_pipeline(settings, limit_stocks=args.limit_stocks)
-        return 0
-
-    if args.cmd == "export":
-        require_tags = args.require_tags.split(",") if args.require_tags else None
-        export_pool(
-            db_target=db_target,
-            output_csv=Path(args.output),
-            top_n=args.top,
-            min_score=args.min_score,
-            require_tags=require_tags,
-            min_resistance_distance=args.min_resistance_distance,
+            limit_stocks=args.limit_stocks,
         )
         return 0
 
