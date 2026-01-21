@@ -1,11 +1,9 @@
 @echo off
-for /f "tokens=2 delims==" %%i in ('wmic os get localdatetime /value') do set datetime=%%i
-set today=%datetime:~0,8%
+setlocal EnableExtensions EnableDelayedExpansion
+
+REM Windows convenience wrapper. Cross-platform entry is:
+REM   python everyday.py --config config.ini
 
 call conda activate p312
+python everyday.py --config config.ini
 
-python astock_analyzer.py run --start-date %today% --end-date %today% --workers 16
-python laowang.py --output output/pool_%today%.csv --top 200 --min-score 60
-python fhkq.py
-
-pause

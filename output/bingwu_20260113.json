@@ -1,0 +1,130 @@
+{
+  "requested_trade_date": "2026-01-13",
+  "trade_date": "2026-01-13",
+  "prev_trade_date": "2026-01-12",
+  "data_source": {
+    "trade_date": "akshare"
+  },
+  "market": {
+    "market_emotion": "震荡期",
+    "emotion_score": 75,
+    "operation_permission": true,
+    "limit_up_count": 66,
+    "limit_down_count": 0,
+    "max_consecutive": 12,
+    "prev_max_consecutive": 11,
+    "broken_count": 62,
+    "sealed_count": 66,
+    "broken_rate": 0.484375
+  },
+  "themes": {
+    "concept": [],
+    "industry": [
+      {
+        "theme_type": "industry",
+        "theme_name": "医疗服务",
+        "theme_score": 4,
+        "is_core_theme": false,
+        "limit_up_count": 9,
+        "max_consecutive": 3,
+        "is_new_theme": false,
+        "tail_inflow": true
+      },
+      {
+        "theme_type": "industry",
+        "theme_name": "文化传媒",
+        "theme_score": 4,
+        "is_core_theme": false,
+        "limit_up_count": 7,
+        "max_consecutive": 3,
+        "is_new_theme": false,
+        "tail_inflow": true
+      },
+      {
+        "theme_type": "industry",
+        "theme_name": "通用设备",
+        "theme_score": 4,
+        "is_core_theme": false,
+        "limit_up_count": 2,
+        "max_consecutive": 12,
+        "is_new_theme": false,
+        "tail_inflow": true
+      },
+      {
+        "theme_type": "industry",
+        "theme_name": "电网设备",
+        "theme_score": 2,
+        "is_core_theme": false,
+        "limit_up_count": 3,
+        "max_consecutive": 1,
+        "is_new_theme": false,
+        "tail_inflow": true
+      },
+      {
+        "theme_type": "industry",
+        "theme_name": "水泥建材",
+        "theme_score": 2,
+        "is_core_theme": false,
+        "limit_up_count": 2,
+        "max_consecutive": 4,
+        "is_new_theme": false,
+        "tail_inflow": true
+      },
+      {
+        "theme_type": "industry",
+        "theme_name": "软件开发",
+        "theme_score": 2,
+        "is_core_theme": false,
+        "limit_up_count": 2,
+        "max_consecutive": 4,
+        "is_new_theme": false,
+        "tail_inflow": true
+      },
+      {
+        "theme_type": "industry",
+        "theme_name": "化学制药",
+        "theme_score": 2,
+        "is_core_theme": false,
+        "limit_up_count": 2,
+        "max_consecutive": 1,
+        "is_new_theme": false,
+        "tail_inflow": true
+      },
+      {
+        "theme_type": "industry",
+        "theme_name": "生物制品",
+        "theme_score": 2,
+        "is_core_theme": false,
+        "limit_up_count": 2,
+        "max_consecutive": 1,
+        "is_new_theme": false,
+        "tail_inflow": true
+      },
+      {
+        "theme_type": "industry",
+        "theme_name": "非金属材",
+        "theme_score": 2,
+        "is_core_theme": false,
+        "limit_up_count": 1,
+        "max_consecutive": 6,
+        "is_new_theme": false,
+        "tail_inflow": true
+      },
+      {
+        "theme_type": "industry",
+        "theme_name": "半导体",
+        "theme_score": 2,
+        "is_core_theme": false,
+        "limit_up_count": 1,
+        "max_consecutive": 2,
+        "is_new_theme": false,
+        "tail_inflow": true
+      }
+    ]
+  },
+  "advice": "空仓建议（未形成清晰主线题材）",
+  "risk": {
+    "max_position": "30%",
+    "risk_level": "中"
+  }
+}

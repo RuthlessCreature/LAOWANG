@@ -1,0 +1,2 @@
+trade_date,market_emotion,emotion_score,operation_permission,limit_up_count,limit_down_count,max_consecutive,prev_max_consecutive,broken_count,sealed_count,broken_rate,max_position,risk_level,top_concepts,top_industries,symbol,stock_name,role,lb_count,structure_stage,structure_score,primary_concept,primary_industry,tradable,stock_score,operation_type,entry_conditions,stop_loss_rules,take_profit_logic,sell_plan
+2026-01-13,退潮期,65,False,66,0,12,11,62,66,0.9393939393939394,0%,高,,,,,,,,,,,,,,,,,

@@ -49,6 +49,15 @@ def run_pipeline(settings: Settings, limit_stocks: Optional[int] = None) -> None
     except Exception:  # noqa: BLE001
         logging.exception("Failed to load float market cap snapshot; market cap score will default to 0.")
 
+    # For a brand-new DB, fetching full history for every stock (e.g. from 20000101)
+    # is extremely slow and often unnecessary for indicators/levels/score windows.
+    # We cap the initial fetch to a rolling window (calendar days) for speed.
+    try:
+        end_dt = dt.datetime.strptime(str(settings.end_date), "%Y%m%d").date()
+        initial_start_cap = (end_dt - dt.timedelta(days=1500)).strftime("%Y%m%d")
+    except Exception:
+        initial_start_cap = str(settings.start_date)
+
     def process_stock(code: str, name: str) -> None:
         try:
             with engine.connect() as conn:
@@ -58,7 +67,8 @@ def run_pipeline(settings: Settings, limit_stocks: Optional[int] = None) -> None
             if date_max:
                 start = (dt.datetime.strptime(date_max, "%Y-%m-%d").date() + dt.timedelta(days=1)).strftime("%Y%m%d")
             else:
-                start = settings.start_date
+                # Cap first pull for this stock (only when we have no history at all).
+                start = max(str(settings.start_date), str(initial_start_cap))
 
             df_new = pd.DataFrame()
             if start <= settings.end_date:

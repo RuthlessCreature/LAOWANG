@@ -10,7 +10,7 @@ from typing import Any, Dict, Optional
 
 import numpy as np
 import pandas as pd
-from sqlalchemy import text
+from sqlalchemy import bindparam, text
 
 from a_stock_analyzer import db
 from a_stock_analyzer.runtime import (
@@ -318,36 +318,132 @@ def run_fhkq_from_db(
     w = max(1, int(workers))
     engine, w = make_engine_for_workers(db_target, w)
 
+    # Performance: do NOT load 120-day history for every stock.
+    # Prefilter candidates using only (today close, prev close) to find limit-down
+    # stocks, then bulk-load histories for candidates only.
+    with engine.connect() as conn:
+        prev = conn.execute(
+            text("SELECT MAX(date) FROM stock_daily WHERE date < :d"),
+            {"d": trade_date_norm},
+        ).fetchone()[0]
+    if not prev:
+        raise RuntimeError(f"Cannot resolve prev trade date for {trade_date_norm}")
+    prev = str(prev)
+
     with engine.connect() as conn:
         rows = conn.execute(
             text(
                 """
-                SELECT d.stock_code, COALESCE(i.name, '') AS name
+                SELECT
+                  d.stock_code,
+                  COALESCE(i.name, '') AS stock_name,
+                  d.close AS close,
+                  p.close AS prev_close
                 FROM stock_daily d
-                LEFT JOIN stock_info i ON i.stock_code = d.stock_code
-                WHERE d.date = :trade_date
+                INNER JOIN stock_daily p
+                  ON p.stock_code = d.stock_code AND p.date = :prev
+                LEFT JOIN stock_info i
+                  ON i.stock_code = d.stock_code
+                WHERE d.date = :d
                 """
             ),
-            {"trade_date": trade_date_norm},
+            {"d": trade_date_norm, "prev": prev},
         ).fetchall()
 
-    stocks = [(str(r[0]), str(r[1] or "")) for r in rows if r and r[0]]
-    if not stocks:
+    if not rows:
         raise RuntimeError(f"No stock_daily rows found for trade_date={trade_date_norm}. Did you run pipeline?")
 
-    hist_limit = 120
+    eps = 1e-3
+    candidates: list[tuple[str, str]] = []
+    for r in rows:
+        code = str(r[0])
+        name = str(r[1] or "")
+        close = _to_float(r[2])
+        prev_close = _to_float(r[3])
+        if not (np.isfinite(close) and np.isfinite(prev_close) and prev_close > 0):
+            continue
+        if _is_st_name(name):
+            continue
+        limit_pct = float(_infer_limit_pct(code, name, False))
+        limit_down = float(_round_half_up_2(pd.Series([prev_close * (1.0 - limit_pct)])).iloc[0])
+        if abs(close - limit_down) <= eps:
+            candidates.append((code, name))
 
-    def process_stock(code: str, name: str) -> Optional[Dict[str, Any]]:
-        try:
-            with engine.connect() as conn:
+    if not candidates:
+        out0 = pd.DataFrame(columns=OUTPUT_COLUMNS)
+        write_dataframe_csv(out0, output_csv, columns=OUTPUT_COLUMNS)
+        logging.info("Exported 0 rows -> %s", output_csv)
+        return out0
+
+    hist_limit = 120
+    name_map = {c: n for c, n in candidates}
+
+    df_all = pd.DataFrame()
+    if engine.dialect.name == "mysql":
+        codes_only = [c for c, _n in candidates]
+        with engine.connect() as conn:
+            q = (
+                text(
+                    """
+                    SELECT stock_code, date, open, high, low, close, volume, amount
+                    FROM (
+                      SELECT
+                        sd.stock_code,
+                        sd.date,
+                        sd.open,
+                        sd.high,
+                        sd.low,
+                        sd.close,
+                        sd.volume,
+                        sd.amount,
+                        ROW_NUMBER() OVER (PARTITION BY sd.stock_code ORDER BY sd.date DESC) AS rn
+                      FROM stock_daily sd
+                      WHERE sd.stock_code IN :codes
+                        AND sd.date <= :d
+                    ) t
+                    WHERE t.rn <= :lim
+                    ORDER BY stock_code, date
+                    """
+                ).bindparams(bindparam("codes", expanding=True))
+            )
+            df_all = pd.read_sql_query(
+                q,
+                conn,
+                params={"codes": codes_only, "d": trade_date_norm, "lim": int(hist_limit)},
+            )
+    else:
+        parts: list[pd.DataFrame] = []
+        with engine.connect() as conn:
+            for code, _name in candidates:
                 hist = db.load_daily_until(conn, code, end_date=trade_date_norm, limit=hist_limit)
-            if hist is None or hist.empty:
-                return None
+                if hist is None or hist.empty:
+                    continue
+                hist = hist.copy()
+                hist["stock_code"] = code
+                parts.append(hist)
+        if parts:
+            df_all = pd.concat(parts, ignore_index=True).sort_values(["stock_code", "date"]).reset_index(drop=True)
+
+    if df_all is None or df_all.empty:
+        out0 = pd.DataFrame(columns=OUTPUT_COLUMNS)
+        write_dataframe_csv(out0, output_csv, columns=OUTPUT_COLUMNS)
+        logging.info("Exported 0 rows -> %s", output_csv)
+        return out0
+
+    for c in ["open", "high", "low", "close", "volume", "amount"]:
+        if c in df_all.columns:
+            df_all[c] = pd.to_numeric(df_all[c], errors="coerce")
+
+    groups = list(df_all.groupby("stock_code", sort=False))
+
+    def process_stock(code: str, grp: pd.DataFrame) -> Optional[Dict[str, Any]]:
+        try:
+            hist = grp[["date", "open", "high", "low", "close", "volume", "amount"]].copy()
             return _calc_fhkq_for_one_stock(
                 hist,
                 trade_date=trade_date_norm,
                 stock_code=code,
-                stock_name=name,
+                stock_name=name_map.get(code, ""),
             )
         except Exception:  # noqa: BLE001
             logging.exception("FHKQ failed: %s", code)
@@ -355,13 +451,14 @@ def run_fhkq_from_db(
 
     out_rows: list[Dict[str, Any]] = []
     if w <= 1:
-        for code, name in stocks:
-            r = process_stock(code, name)
+        for code, grp in groups:
+            r = process_stock(str(code), grp)
             if r:
                 out_rows.append(r)
     else:
-        with ThreadPoolExecutor(max_workers=w) as ex:
-            futures = [ex.submit(process_stock, code, name) for code, name in stocks]
+        w2 = min(int(w), len(groups), 64)
+        with ThreadPoolExecutor(max_workers=w2) as ex:
+            futures = [ex.submit(process_stock, str(code), grp) for code, grp in groups]
             for f in as_completed(futures):
                 r = f.result()
                 if r:

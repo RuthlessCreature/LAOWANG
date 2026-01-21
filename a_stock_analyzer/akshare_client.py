@@ -50,47 +50,48 @@ def normalize_daily_df(df: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame(columns=["date", "open", "high", "low", "close", "volume", "amount"])
 
     df = df.copy()
-    # Some AkShare endpoints return date as index.
-    if "date" not in df.columns and "日期" not in df.columns:
+    df.columns = [str(c).strip() for c in df.columns]
+
+    # Robust column picking: AkShare endpoints may return either English columns
+    # or Chinese columns (e.g. 日期/开盘/最高/最低/收盘/成交量/成交额).
+    date_col = pick_col(df, ["date", "日期", "时间", "交易日期"])
+    if date_col is None and len(df.columns) >= 1:
+        # Some endpoints return date as the first unnamed column.
+        c0 = df.columns[0]
+        dt0 = pd.to_datetime(df[c0], errors="coerce")
+        if dt0.notna().mean() >= 0.8:
+            date_col = c0
+
+    if date_col is None:
+        # Some endpoints return date in index.
         idx_dt = pd.to_datetime(df.index, errors="coerce")
         if idx_dt.notna().mean() >= 0.8:
             df = df.reset_index()
-            df = df.rename(columns={df.columns[0]: "date"})
-    df.columns = [str(c).strip() for c in df.columns]
-
-    rename_map = {}
-    for c in df.columns:
-        lc = str(c).lower()
-        if lc in {"date", "日期"}:
-            rename_map[c] = "date"
-        elif lc in {"open", "开盘"}:
-            rename_map[c] = "open"
-        elif lc in {"high", "最高"}:
-            rename_map[c] = "high"
-        elif lc in {"low", "最低"}:
-            rename_map[c] = "low"
-        elif lc in {"close", "收盘"}:
-            rename_map[c] = "close"
-        elif lc in {"volume", "成交量"}:
-            rename_map[c] = "volume"
-        elif lc in {"amount", "成交额"}:
-            rename_map[c] = "amount"
-    df = df.rename(columns=rename_map)
-
-    if "date" not in df.columns:
-        raise ValueError(f"Daily DF missing date column; columns={list(df.columns)}")
-
-    df["date"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m-%d")
-
-    for c in ["open", "high", "low", "close", "volume", "amount"]:
-        if c in df.columns:
-            df[c] = pd.to_numeric(df[c], errors="coerce")
+            df.columns = [str(c).strip() for c in df.columns]
+            date_col = str(df.columns[0])
         else:
-            df[c] = np.nan
+            raise ValueError(f"Daily DF missing date column; columns={list(df.columns)}")
 
-    df = df[["date", "open", "high", "low", "close", "volume", "amount"]]
-    df = df.dropna(subset=["date", "close"]).drop_duplicates(subset=["date"]).sort_values("date")
-    return df
+    open_col = pick_col(df, ["open", "开盘"])
+    high_col = pick_col(df, ["high", "最高"])
+    low_col = pick_col(df, ["low", "最低"])
+    close_col = pick_col(df, ["close", "收盘"])
+    vol_col = pick_col(df, ["volume", "成交量"])
+    amt_col = pick_col(df, ["amount", "成交额"])
+
+    out = pd.DataFrame(
+        {
+            "date": pd.to_datetime(df[date_col], errors="coerce").dt.strftime("%Y-%m-%d"),
+            "open": pd.to_numeric(df[open_col], errors="coerce") if open_col else np.nan,
+            "high": pd.to_numeric(df[high_col], errors="coerce") if high_col else np.nan,
+            "low": pd.to_numeric(df[low_col], errors="coerce") if low_col else np.nan,
+            "close": pd.to_numeric(df[close_col], errors="coerce") if close_col else np.nan,
+            "volume": pd.to_numeric(df[vol_col], errors="coerce") if vol_col else np.nan,
+            "amount": pd.to_numeric(df[amt_col], errors="coerce") if amt_col else np.nan,
+        }
+    )
+    out = out.dropna(subset=["date", "close"]).drop_duplicates(subset=["date"]).sort_values("date")
+    return out
 
 
 def fetch_stock_list() -> List[Tuple[str, str]]:
@@ -130,27 +131,43 @@ def fetch_daily(stock_code: str, start_date: str, end_date: str) -> pd.DataFrame
     # Prefer Eastmoney history (often more stable), fallback to Sina daily.
     last_error: Optional[Exception] = None
 
-    try:
-        df = ak.stock_zh_a_hist(
-            symbol=stock_code,
-            period="daily",
-            start_date=start_date,
-            end_date=end_date,
-            adjust="",
-        )
-        return normalize_daily_df(df)
-    except Exception as e:  # noqa: BLE001
-        last_error = e
-
-    for sym in [to_ak_symbol(stock_code), stock_code]:
+    # Transient upstream failures sometimes manifest as KeyError('date') inside
+    # AkShare parsers. Retry a bit before giving up.
+    for _attempt in range(3):
         try:
-            df = ak.stock_zh_a_daily(symbol=sym, start_date=start_date, end_date=end_date)
+            df = ak.stock_zh_a_hist(
+                symbol=stock_code,
+                period="daily",
+                start_date=start_date,
+                end_date=end_date,
+                adjust="",
+            )
             return normalize_daily_df(df)
         except Exception as e:  # noqa: BLE001
             last_error = e
-            continue
+            try:
+                import time
 
-    raise RuntimeError(f"Failed to fetch daily for {stock_code}: {last_error}")
+                time.sleep(0.6)
+            except Exception:
+                pass
+
+    for sym in [to_ak_symbol(stock_code), stock_code]:
+        for _attempt in range(2):
+            try:
+                df = ak.stock_zh_a_daily(symbol=sym, start_date=start_date, end_date=end_date)
+                return normalize_daily_df(df)
+            except Exception as e:  # noqa: BLE001
+                last_error = e
+                try:
+                    import time
+
+                    time.sleep(0.6)
+                except Exception:
+                    pass
+                continue
+
+    raise RuntimeError(f"Failed to fetch daily for {stock_code}: {type(last_error).__name__}: {last_error}")
 
 
 def parse_market_cap_billion(raw) -> Optional[float]:
@@ -262,4 +279,3 @@ def fetch_market_cap_score(stock_code: str) -> int:
         except Exception:  # noqa: BLE001
             continue
     return 0
-

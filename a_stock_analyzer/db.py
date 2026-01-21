@@ -187,9 +187,11 @@ stock_future_perf = Table(
     mysql_charset="utf8mb4",
 )
 
-Index("idx_stock_daily_date", stock_daily.c.date)
+Index("idx_stock_daily_date", stock_daily.c.date)  
 Index("idx_stock_scores_date", stock_scores.c.score_date)
 Index("idx_stock_scores_v3_date", stock_scores_v3.c.score_date)
+# Speeds up Top-N queries like: WHERE score_date=? ORDER BY total_score DESC LIMIT N
+Index("idx_stock_scores_v3_date_score", stock_scores_v3.c.score_date, stock_scores_v3.c.total_score)
 Index("idx_stock_future_perf_signal_date", stock_future_perf.c.signal_date)
 
 
@@ -197,6 +199,31 @@ def init_db(engine: Engine) -> None:
     _META.create_all(engine)
     if engine.dialect.name == "mysql":
         _init_mysql_views(engine)
+        _ensure_mysql_indexes(engine)
+
+
+def _ensure_mysql_indexes(engine: Engine) -> None:
+    """
+    SQLAlchemy's create_all() won't add new indexes to an existing table.
+    Keep a tiny idempotent "migration" here for performance-critical indexes.
+    """
+    with engine.begin() as conn:
+        exists = conn.execute(
+            text(
+                """
+                SELECT 1
+                FROM information_schema.statistics
+                WHERE table_schema = DATABASE()
+                  AND table_name = 'stock_scores_v3'
+                  AND index_name = 'idx_stock_scores_v3_date_score'
+                LIMIT 1
+                """
+            )
+        ).fetchone()
+        if not exists:
+            conn.execute(
+                text("CREATE INDEX idx_stock_scores_v3_date_score ON stock_scores_v3 (score_date, total_score)")
+            )
 
 
 def _init_mysql_views(engine: Engine) -> None:

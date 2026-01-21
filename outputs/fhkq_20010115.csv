@@ -1,0 +1,4 @@
+trade_date,stock_code,stock_name,consecutive_limit_down,last_limit_down,volume_ratio,amount_ratio,open_board_flag,liquidity_exhaust,fhkq_score,fhkq_level
+2001-01-15,600834,申通地铁,2,1,1.522004051974957,1.4001670279982792,1,0,55,C
+2001-01-15,000008,神州高铁,4,1,0.4961498074903745,0.3616142246371261,0,0,30,D
+2001-01-15,600183,生益科技,3,1,0.3601160635615106,0.2662087142529731,0,0,20,D

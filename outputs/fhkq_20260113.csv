@@ -1,0 +1,3 @@
+trade_date,stock_code,stock_name,consecutive_limit_down,last_limit_down,volume_ratio,amount_ratio,open_board_flag,liquidity_exhaust,fhkq_score,fhkq_level
+2026-01-13,603359,东珠生态,2,1,1.5744651193275232,1.391795923589454,1,0,55,C
+2026-01-13,605255,天普股份,2,1,0.5439321785546077,0.5091963753084264,0,0,25,D
