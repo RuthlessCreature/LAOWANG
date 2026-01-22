@@ -36,41 +36,6 @@ import everyday
 
 
 DEFAULT_DB = "data/stock.db"
-FAVICON_PATH = Path(__file__).with_name("favicon.ico")
-
-TAG_LABELS = {
-    "TREND_UP": "趋势向上",
-    "LOW_BASE": "低位平台",
-    "PULLBACK": "回踩",
-    "AT_SUPPORT": "支撑附近",
-    "SPACE_OK": "空间充足",
-    "NEAR_RESISTANCE": "临近压力",
-    "RISK_FILTERED": "风险过滤",
-}
-
-LAOWANG_COLS: Sequence[Tuple[str, str]] = [
-    ("rank_no", "排名"),
-    ("stock_code", "代码"),
-    ("stock_name", "名称"),
-    ("close", "收盘价"),
-    ("support_level", "支撑位"),
-    ("resistance_level", "压力位"),
-    ("total_score", "总分"),
-    ("status_tags", "标签"),
-]
-
-FHKQ_COLS: Sequence[Tuple[str, str]] = [
-    ("stock_code", "代码"),
-    ("stock_name", "名称"),
-    ("consecutive_limit_down", "连板天数"),
-    ("last_limit_down", "前一日跌停"),
-    ("volume_ratio", "量能比"),
-    ("amount_ratio", "成交额比"),
-    ("open_board_flag", "开板标记"),
-    ("liquidity_exhaust", "流动性衰竭"),
-    ("fhkq_score", "FHKQ得分"),
-    ("fhkq_level", "等级"),
-]
 
 
 @dataclass
@@ -177,8 +142,7 @@ HTML_PAGE = r"""<!doctype html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>粪海狂蛆-爆头先锋</title>
-    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <title>LAOWANG / FHKQ</title>
     <style>
       :root {
         --bg: #070a0f;
@@ -215,13 +179,6 @@ HTML_PAGE = r"""<!doctype html>
         position: sticky; top: 10px; z-index: 10;
         backdrop-filter: blur(8px);
       }
-      .brand { display: flex; flex-direction: column; gap: 4px; }
-      .brand .title {
-        font-size: 16px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-      }
-      .brand .sub { font-size: 12px; color: var(--muted); }
       .controls { display: flex; gap: 10px; align-items: center; }
       select {
         background: rgba(10,14,22,0.95);
@@ -283,14 +240,6 @@ HTML_PAGE = r"""<!doctype html>
         font-size: 11px;
         color: rgba(219,231,255,0.92);
       }
-      @media (max-width: 768px) {
-        .wrap { padding: 12px; }
-        .topbar { flex-direction: column; align-items: flex-start; gap: 8px; }
-        .controls { width: 100%; flex-wrap: wrap; }
-        select { width: 100%; }
-        thead th, tbody td { font-size: 11px; padding: 6px; }
-        .panel { margin-top: 14px; }
-      }
       .empty {
         padding: 18px;
         color: var(--muted);
@@ -302,12 +251,8 @@ HTML_PAGE = r"""<!doctype html>
   <body>
     <div class="wrap">
       <div class="topbar">
-        <div class="brand">
-          <div class="title">粪海狂蛆</div>
-          <div class="sub">爆头先锋 · LAOWANG & FHKQ</div>
-        </div>
         <div class="controls">
-          <label for="tradeDate">最新交易日</label>
+          <label for="tradeDate">交易日</label>
           <select id="tradeDate"></select>
         </div>
         <div class="status">
@@ -318,7 +263,7 @@ HTML_PAGE = r"""<!doctype html>
 
       <div class="panel">
         <div class="panel-header">
-          <div>LAOWANG 股票池</div>
+          <div>model_laowang_pool</div>
           <div id="metaLaowang"></div>
         </div>
         <div class="table-wrap">
@@ -332,7 +277,7 @@ HTML_PAGE = r"""<!doctype html>
 
       <div class="panel">
         <div class="panel-header">
-          <div>FHKQ 连板博弈</div>
+          <div>model_fhkq</div>
           <div id="metaFhkq"></div>
         </div>
         <div class="table-wrap">
@@ -465,39 +410,21 @@ HTML_PAGE = r"""<!doctype html>
 """
 
 
-def _translate_rows(rows: List[Dict[str, Any]], mapping: Sequence[Tuple[str, str]]) -> List[Dict[str, Any]]:
-    translated: List[Dict[str, Any]] = []
-    for row in rows:
-        new_row: Dict[str, Any] = {}
-        for en, cn in mapping:
-            val = row.get(en)
-            if cn == "标签" and isinstance(val, list):
-                new_row[cn] = val
-            else:
-                new_row[cn] = val
-        translated.append(new_row)
-    return translated
-
-
 def _parse_status_tags(raw: Any) -> List[str]:
-    values: List[str]
     if raw is None:
-        values = []
-    elif isinstance(raw, list):
-        values = [str(x) for x in raw if str(x).strip()]
-    elif isinstance(raw, str):
+        return []
+    if isinstance(raw, list):
+        return [str(x) for x in raw if str(x).strip()]
+    if isinstance(raw, str):
         try:
             data = json.loads(raw)
         except Exception:  # noqa: BLE001
             data = None
         if isinstance(data, list):
-            values = [str(x) for x in data if str(x).strip()]
-        else:
-            cleaned = raw.strip()
-            values = [cleaned] if cleaned else []
-    else:
-        values = []
-    return [TAG_LABELS.get(v, v) for v in values]
+            return [str(x) for x in data if str(x).strip()]
+        cleaned = raw.strip()
+        return [cleaned] if cleaned else []
+    return []
 
 
 def _json(handler: BaseHTTPRequestHandler, obj: Any, *, status: int = 200) -> None:
@@ -554,7 +481,7 @@ class AppContext:
         }
 
     def fetch_laowang(self, trade_date: str) -> Dict[str, Any]:
-        en_cols = [c for c, _ in LAOWANG_COLS]
+        cols = ["rank_no", "stock_code", "stock_name", "close", "support_level", "resistance_level", "total_score", "status_tags"]
         with self.engine.connect() as conn:
             rows = conn.execute(
                 text(
@@ -567,25 +494,31 @@ class AppContext:
                 ),
                 {"d": trade_date},
             ).fetchall()
-        raw_rows: List[Dict[str, Any]] = []
+        out_rows: List[Dict[str, Any]] = []
         for row in rows:
             data = {}
-            for idx, col in enumerate(en_cols):
+            for idx, col in enumerate(cols):
                 val = row[idx] if idx < len(row) else None
                 if col == "status_tags":
                     data[col] = _parse_status_tags(val)
                 else:
                     data[col] = val
-            raw_rows.append(data)
-        cn_rows = _translate_rows(raw_rows, LAOWANG_COLS)
-        return {
-            "columns": [cn for _, cn in LAOWANG_COLS],
-            "rows": cn_rows,
-            "meta": {"rows": len(cn_rows), "empty_hint": "0 rows"},
-        }
+            out_rows.append(data)
+        return {"columns": cols, "rows": out_rows, "meta": {"rows": len(out_rows), "empty_hint": "0 rows"}}
 
     def fetch_fhkq(self, trade_date: str) -> Dict[str, Any]:
-        en_cols = [c for c, _ in FHKQ_COLS]
+        cols = [
+            "stock_code",
+            "stock_name",
+            "consecutive_limit_down",
+            "last_limit_down",
+            "volume_ratio",
+            "amount_ratio",
+            "open_board_flag",
+            "liquidity_exhaust",
+            "fhkq_score",
+            "fhkq_level",
+        ]
         with self.engine.connect() as conn:
             rows = conn.execute(
                 text(
@@ -599,13 +532,8 @@ class AppContext:
                 ),
                 {"d": trade_date},
             ).fetchall()
-        raw_rows = [{en_cols[idx]: row[idx] if idx < len(row) else None for idx in range(len(en_cols))} for row in rows]
-        cn_rows = _translate_rows(raw_rows, FHKQ_COLS)
-        return {
-            "columns": [cn for _, cn in FHKQ_COLS],
-            "rows": cn_rows,
-            "meta": {"rows": len(cn_rows), "empty_hint": "0 rows"},
-        }
+        out_rows = [{col: row[idx] if idx < len(row) else None for idx, col in enumerate(cols)} for row in rows]
+        return {"columns": cols, "rows": out_rows, "meta": {"rows": len(out_rows), "empty_hint": "0 rows"}}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -624,18 +552,6 @@ class Handler(BaseHTTPRequestHandler):
         q = parse_qs(u.query or "")
         if path in {"", "/"}:
             _text(self, HTML_PAGE, content_type="text/html; charset=utf-8")
-            return
-        if path == "/favicon.ico":
-            if FAVICON_PATH.exists():
-                data = FAVICON_PATH.read_bytes()
-                self.send_response(200)
-                self.send_header("Content-Type", "image/x-icon")
-                self.send_header("Cache-Control", "max-age=86400")
-                self.send_header("Content-Length", str(len(data)))
-                self.end_headers()
-                self.wfile.write(data)
-            else:
-                _text(self, "", status=404)
             return
         if path == "/api/dates":
             dates, latest = self.app.list_dates()
