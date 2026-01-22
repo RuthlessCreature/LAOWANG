@@ -283,6 +283,17 @@ HTML_PAGE = r"""<!doctype html>
         font-size: 11px;
         color: rgba(219,231,255,0.92);
       }
+      .footer {
+        margin-top: 18px;
+        text-align: center;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .footer .status-line { margin-bottom: 6px; }
+      .status-busy { color: var(--warn); }
+      .status-ok { color: var(--ok); }
+      .status-fail { color: var(--err); }
       @media (max-width: 768px) {
         .wrap { padding: 12px; }
         .topbar { flex-direction: column; align-items: flex-start; gap: 8px; }
@@ -342,6 +353,10 @@ HTML_PAGE = r"""<!doctype html>
           </table>
           <div class="empty" id="emptyFhkq" style="display:none;"></div>
         </div>
+      </div>
+      <div class="footer">
+        <div id="autoStatus" class="status-line status-busy">等待自动更新…</div>
+        <div>粪海狂蛆出品</div>
       </div>
     </div>
 
@@ -455,10 +470,26 @@ HTML_PAGE = r"""<!doctype html>
         if (sel.value) await loadDate(sel.value);
       }
 
+      async function pollAutoStatus() {
+        try {
+          const data = await apiGet("/api/auto-status");
+          const el = $("autoStatus");
+          if (!el) return;
+          el.textContent = data.message || "";
+          el.classList.remove("status-busy", "status-ok", "status-fail");
+          if (data.state === "ok") el.classList.add("status-ok");
+          else if (data.state === "fail") el.classList.add("status-fail");
+          else el.classList.add("status-busy");
+        } catch (e) {
+          // ignore
+        }
+      }
       boot().catch(e => {
         console.error(e);
         setStatus("err", "load error");
       });
+      setInterval(pollAutoStatus, 5000);
+      pollAutoStatus();
     </script>
   </body>
 </html>
@@ -521,9 +552,10 @@ def _text(handler: BaseHTTPRequestHandler, s: str, *, status: int = 200, content
 
 
 class AppContext:
-    def __init__(self, engine: Engine, min_trade_date: Optional[str]) -> None:
+    def __init__(self, engine: Engine, min_trade_date: Optional[str], job_runner: Optional["DailyJobRunner"]) -> None:
         self.engine = engine
         self.min_trade_date = min_trade_date  # YYYY-MM-DD
+        self.job_runner = job_runner
 
     def list_dates(self) -> Tuple[List[str], Optional[str]]:
         with self.engine.connect() as conn:
@@ -649,6 +681,12 @@ class Handler(BaseHTTPRequestHandler):
                 return
             _json(self, self.app.status(trade_date))
             return
+        if path == "/api/auto-status":
+            if self.app.job_runner:
+                _json(self, self.app.job_runner.status())
+            else:
+                _json(self, {"state": "none", "message": "自动任务已关闭"})
+            return
         if path.startswith("/api/model/"):
             trade_date = (q.get("trade_date") or [""])[0]
             trade_date = str(trade_date).strip()
@@ -693,6 +731,8 @@ class DailyJobRunner:
         self.laowang_min_score = float(laowang_min_score)
         self.hour, self.minute = self._parse_time(auto_time)
         self.last_run_date: Optional[dt.date] = None
+        self.state = "idle"
+        self.message = "等待自动更新…"
         self.thread = threading.Thread(target=self._loop, name="DailyJobRunner", daemon=True)
         self.thread.start()
 
@@ -706,6 +746,8 @@ class DailyJobRunner:
             return 15, 5
 
     def _run_job(self) -> None:
+        self.state = "running"
+        self.message = f"{dt.date.today().strftime('%Y%m%d')} 数据更新中…"
         logging.info("[auto] everyday start")
         try:
             everyday.run_once(
@@ -720,8 +762,12 @@ class DailyJobRunner:
                 laowang_min_score=self.laowang_min_score,
             )
             logging.info("[auto] everyday finished")
+            self.state = "ok"
+            self.message = f"{dt.date.today().strftime('%Y%m%d')} 数据更新完毕"
         except Exception:
             logging.exception("[auto] everyday failed")
+            self.state = "fail"
+            self.message = f"{dt.date.today().strftime('%Y%m%d')} 数据更新失败"
 
     def _loop(self) -> None:
         while True:
@@ -734,6 +780,9 @@ class DailyJobRunner:
                 target = target + dt.timedelta(days=1)
             sleep_sec = max(30.0, min(300.0, (target - now).total_seconds()))
             time.sleep(sleep_sec)
+
+    def status(self) -> Dict[str, str]:
+        return {"state": self.state, "message": self.message}
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -760,8 +809,6 @@ def main(argv: Optional[List[str]] = None) -> int:
     db_target = resolve_db_target(args)
     engine = make_engine(db_target)
 
-    min_date_iso = _normalize_iso_date(args.start_date)
-    app = AppContext(engine, min_trade_date=min_date_iso)
     scheduler: Optional[DailyJobRunner] = None
     if not args.disable_auto_update:
         scheduler = DailyJobRunner(
@@ -777,6 +824,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             laowang_min_score=float(args.auto_laowang_min_score),
         )
 
+    min_date_iso = _normalize_iso_date(args.start_date)
+    app = AppContext(engine, min_trade_date=min_date_iso, job_runner=scheduler)
     httpd = ThreadingHTTPServer((str(args.host), int(args.port)), Handler)
     httpd.app = app  # type: ignore[attr-defined]
     url = f"http://{args.host}:{int(args.port)}"
