@@ -391,7 +391,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             logging.info("%s(%s) +%d 行", code, name, inserted)
 
     with ThreadPoolExecutor(max_workers=workers) as ex:
-        futs = {ex.submit(worker, code, name): code for code, name in stocks}
+        futs = {ex.submit(worker, code, name): code for code, name, _cap in stocks}
         for fut in as_completed(futs):
             _code = futs[fut]
             try:
