@@ -2,7 +2,7 @@
 
 > 风险声明：连续跌停博弈属于极端情绪交易，波动和不确定性极高。本模型仅用于研究与辅助决策，不构成投资建议。
 
-本文解释 `fhkq.py` 的评分逻辑：它会在指定交易日（`trade_date`）从日线数据中筛出“当日跌停”的股票，统计连续跌停天数并给出 0～100 的博弈评分与等级。
+本文解释 `scoring_fhkq.py` 的评分逻辑：它会在指定交易日（`trade_date`）从日线数据中筛出“当日跌停”的股票，统计连续跌停天数并给出 0～100 的博弈评分与等级。
 
 ---
 
@@ -10,7 +10,7 @@
 
 ### 1.1 输入数据（单股票或多股票）
 
-`fhkq.py` 评分依赖日线 OHLCV（**日K**）数据，字段口径如下：
+`scoring_fhkq.py` 评分依赖日线 OHLCV（**日K**）数据，字段口径如下：
 
 - 必需列：`stock_code`, `date`, `open`, `high`, `low`, `close`, `volume`, `amount`
 - 可选列：`stock_name`, `is_st`, `limit_down`
@@ -198,4 +198,3 @@ fhkq_score =
 - `volume_ratio`, `amount_ratio`
 - `open_board_flag`, `liquidity_exhaust`
 - `fhkq_score`, `fhkq_level`
-

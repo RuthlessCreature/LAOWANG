@@ -5,8 +5,9 @@ everyday.py
 
 单文件“每日流程”脚本：自动执行
 1) getData.py：补齐 K 线
-2) laowang.py：更新评分
-3) fhkq.py：更新连板模型
+2) scoring_laowang.py：更新老王评分
+3) scoring_stwg.py：更新缩头乌龟评分
+4) scoring_fhkq.py：更新粪海狂蛆连板模型
 
 - 自动根据 stock_daily 中的最新日期决定 start-date
 - 用于 CLI 手动运行，也用于 ui.py 的后台计划任务
@@ -28,9 +29,10 @@ from typing import List, Optional
 from sqlalchemy import text
 from sqlalchemy.engine import Engine, create_engine
 
-import fhkq as fhkq_mod
+import scoring_fhkq as fhkq_mod
 import getData as getdata_mod
-import laowang as laowang_mod
+import scoring_laowang as laowang_mod
+import scoring_stwg as stwg_mod
 
 
 def _normalize_yyyymmdd(date_str: str) -> str:
@@ -160,8 +162,23 @@ def _run_pipeline(args: argparse.Namespace, *, setup_logging: bool) -> None:
         "--min-score",
         str(args.laowang_min_score),
     ]
-    logging.info("[everyday] laowang: %s -> %s", score_start_iso, score_end_iso)
+    logging.info("[everyday] scoring_laowang: %s -> %s", score_start_iso, score_end_iso)
     laowang_mod.main(lw_cli)
+
+    st_cli = base_cli + [
+        "--start-date",
+        score_start_iso,
+        "--end-date",
+        score_end_iso,
+        "--workers",
+        str(args.stwg_workers),
+        "--top",
+        str(args.stwg_top),
+        "--min-score",
+        str(args.stwg_min_score),
+    ]
+    logging.info("[everyday] scoring_stwg: %s -> %s", score_start_iso, score_end_iso)
+    stwg_mod.main(st_cli)
 
     fk_cli = base_cli + [
         "--start-date",
@@ -171,7 +188,7 @@ def _run_pipeline(args: argparse.Namespace, *, setup_logging: bool) -> None:
         "--workers",
         str(args.fhkq_workers),
     ]
-    logging.info("[everyday] fhkq: %s -> %s", score_start_iso, score_end_iso)
+    logging.info("[everyday] scoring_fhkq: %s -> %s", score_start_iso, score_end_iso)
     fhkq_mod.main(fk_cli)
 
     logging.info("[everyday] 完成：latest=%s", score_end_iso)
@@ -185,9 +202,12 @@ def run_once(
     initial_start_date: str,
     getdata_workers: int,
     laowang_workers: int,
+    stwg_workers: int,
     fhkq_workers: int,
     laowang_top: int,
     laowang_min_score: float,
+    stwg_top: int,
+    stwg_min_score: float,
 ) -> None:
     args = argparse.Namespace(
         config=config,
@@ -196,25 +216,31 @@ def run_once(
         initial_start_date=initial_start_date,
         getdata_workers=int(getdata_workers),
         laowang_workers=int(laowang_workers),
+        stwg_workers=int(stwg_workers),
         fhkq_workers=int(fhkq_workers),
         laowang_top=int(laowang_top),
         laowang_min_score=float(laowang_min_score),
+        stwg_top=int(stwg_top),
+        stwg_min_score=float(stwg_min_score),
         log_level=logging.getLevelName(logging.getLogger().level),
     )
     _run_pipeline(args, setup_logging=False)
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-    parser = argparse.ArgumentParser(description="每日自动流程（getData → laowang → fhkq）")
+    parser = argparse.ArgumentParser(description="每日自动流程（getData → scoring_laowang → scoring_stwg → scoring_fhkq）")
     parser.add_argument("--config", default=None, help="config.ini 路径")
     parser.add_argument("--db-url", default=None, help="SQLAlchemy DB URL")
     parser.add_argument("--db", default=None, help="SQLite 文件")
     parser.add_argument("--initial-start-date", default="2000-01-01", help="数据库为空时的起始日期")
     parser.add_argument("--getdata-workers", type=int, default=16)
     parser.add_argument("--laowang-workers", type=int, default=16)
+    parser.add_argument("--stwg-workers", type=int, default=16)
     parser.add_argument("--fhkq-workers", type=int, default=8)
     parser.add_argument("--laowang-top", type=int, default=200)
     parser.add_argument("--laowang-min-score", type=float, default=60.0)
+    parser.add_argument("--stwg-top", type=int, default=150)
+    parser.add_argument("--stwg-min-score", type=float, default=55.0)
     parser.add_argument("--log-level", default="INFO")
     args = parser.parse_args(argv)
 

@@ -2,9 +2,9 @@
 
 > 风险声明：本模型仅用于学习研究与辅助决策，不构成任何投资建议；请自行承担交易风险。
 
-本文解释“LAOWANG v3”评分（`stock_scores_v3`）的计算逻辑，以及 `laowang.py` 导出股票池时使用的筛选口径。
+本文解释“LAOWANG v3”评分（`stock_scores_v3`）的计算逻辑，以及 `scoring_laowang.py` 导出股票池时使用的筛选口径。
 
-> 重要提示：`laowang.py` **不计算评分**，它只从数据库导出 `astock_analyzer.py run` 已写入的最新评分结果（表：`stock_scores_v3`）。
+> 重要提示：`scoring_laowang.py` **不计算评分**，它只从数据库导出 `astock_analyzer.py run` 已写入的最新评分结果（表：`stock_scores_v3`）。
 
 ---
 
@@ -245,13 +245,12 @@ total_score =
 
 ---
 
-## 6. laowang.py 导出筛选口径
+## 6. scoring_laowang.py 导出筛选口径
 
-`laowang.py` 默认从 `stock_scores_v3` 取 **最新评分日**（`MAX(score_date)`），并执行导出筛选：
+`scoring_laowang.py` 默认从 `stock_scores_v3` 取 **最新评分日**（`MAX(score_date)`），并执行导出筛选：
 
 - 自动排除 `status_tags` 含 `RISK_FILTERED` 的股票
 - 可选：
   - `--min-score`：总分阈值
   - `--require-tags`：必须包含的标签集合（如 `TREND_UP,AT_SUPPORT`）
   - `--min-resistance-distance`：要求 `(resistance_level - close)/close >= x`（用于过滤“压力太近”的票）
-

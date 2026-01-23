@@ -4,9 +4,9 @@
 ui.py
 
 简化版本地 Web UI：
-- 仅从数据库读取 model_laowang_pool / model_fhkq
+- 仅从数据库读取 model_laowang_pool / model_stwg_pool / model_fhkq
 - 不再触发任何计算任务
-- LAOWANG 表展示 status_tags 徽章
+- 表格展示 status_tags 徽章
 """
 
 from __future__ import annotations
@@ -46,6 +46,12 @@ TAG_LABELS = {
     "SPACE_OK": "空间充足",
     "NEAR_RESISTANCE": "临近压力",
     "RISK_FILTERED": "风险过滤",
+    "STAGE_A_OK": "阶段A",
+    "STAGE_B_COMPRESSED": "阶段B压缩",
+    "VOLUME_DRY_UP": "缩量",
+    "AT_PLATFORM": "平台支撑",
+    "BREAKOUT_R": "突破R",
+    "VOLUME_EXPANSION": "放量突破",
 }
 
 LAOWANG_COLS: Sequence[Tuple[str, str]] = [
@@ -70,6 +76,17 @@ FHKQ_COLS: Sequence[Tuple[str, str]] = [
     ("liquidity_exhaust", "流动性衰竭"),
     ("fhkq_score", "FHKQ得分"),
     ("fhkq_level", "等级"),
+]
+
+STWG_COLS: Sequence[Tuple[str, str]] = [
+    ("rank_no", "排名"),
+    ("stock_code", "代码"),
+    ("stock_name", "名称"),
+    ("close", "收盘价"),
+    ("total_score", "总分"),
+    ("stageB_compression_score", "缩量压缩"),
+    ("breakout_confirmation_score", "突破确认"),
+    ("status_tags", "标签"),
 ]
 
 
@@ -177,7 +194,7 @@ HTML_PAGE = r"""<!doctype html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>粪海狂蛆-爆头先锋</title>
+    <title>爆头先锋</title>
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <style>
       :root {
@@ -314,8 +331,8 @@ HTML_PAGE = r"""<!doctype html>
     <div class="wrap">
       <div class="topbar">
         <div class="brand">
-          <div class="title">粪海狂蛆</div>
-          <div class="sub">爆头先锋 · LAOWANG & FHKQ</div>
+          <div class="title">爆头先锋</div>
+          <div class="sub">老王 · 缩头乌龟 · 粪海狂蛆</div>
         </div>
         <div class="controls">
           <label for="tradeDate">最新交易日</label>
@@ -329,7 +346,21 @@ HTML_PAGE = r"""<!doctype html>
 
       <div class="panel">
         <div class="panel-header">
-          <div>LAOWANG 股票池</div>
+          <div>缩头乌龟 股票池</div>
+          <div id="metaStwg"></div>
+        </div>
+        <div class="table-wrap">
+          <table id="tableStwg">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+          <div class="empty" id="emptyStwg" style="display:none;"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>老王 股票池</div>
           <div id="metaLaowang"></div>
         </div>
         <div class="table-wrap">
@@ -343,7 +374,7 @@ HTML_PAGE = r"""<!doctype html>
 
       <div class="panel">
         <div class="panel-header">
-          <div>FHKQ 连板博弈</div>
+          <div>粪海狂蛆 连板博弈</div>
           <div id="metaFhkq"></div>
         </div>
         <div class="table-wrap">
@@ -356,7 +387,7 @@ HTML_PAGE = r"""<!doctype html>
       </div>
       <div class="footer">
         <div id="autoStatus" class="status-line status-busy">等待自动更新…</div>
-        <div>粪海狂蛆出品</div>
+        <div>爆头先锋</div>
       </div>
     </div>
 
@@ -430,24 +461,29 @@ HTML_PAGE = r"""<!doctype html>
       async function loadDate(dateStr) {
         if (!dateStr) return;
         setStatus("warn", "loading");
+        $("metaStwg").textContent = "";
         $("metaLaowang").textContent = "";
         $("metaFhkq").textContent = "";
         const st = await apiGet(`/api/status?trade_date=${encodeURIComponent(dateStr)}`);
         if (!st.has_stock_daily) {
           setStatus("err", "该日无K线数据");
+          renderTable("tableStwg", "emptyStwg", { columns: [], rows: [], meta: { empty_hint: "no data" }});
           renderTable("tableLaowang", "emptyLaowang", { columns: [], rows: [], meta: { empty_hint: "no data" }});
           renderTable("tableFhkq", "emptyFhkq", { columns: [], rows: [], meta: { empty_hint: "no data" }});
           return;
         }
-        const ok = st.laowang_rows > 0 || st.fhkq_rows > 0;
-        setStatus(ok ? "ok" : "warn", `LW:${st.laowang_rows} F:${st.fhkq_rows}`);
+        const ok = st.laowang_rows > 0 || st.fhkq_rows > 0 || st.stwg_rows > 0;
+        setStatus(ok ? "ok" : "warn", `老王:${st.laowang_rows} 缩头乌龟:${st.stwg_rows} 粪海狂蛆:${st.fhkq_rows}`);
 
-        const [lw, fk] = await Promise.all([
+        const [stwg, lw, fk] = await Promise.all([
+          apiGet(`/api/model/stwg?trade_date=${encodeURIComponent(dateStr)}`),
           apiGet(`/api/model/laowang?trade_date=${encodeURIComponent(dateStr)}`),
           apiGet(`/api/model/fhkq?trade_date=${encodeURIComponent(dateStr)}`),
         ]);
+        $("metaStwg").textContent = `rows=${stwg.meta && stwg.meta.rows ? stwg.meta.rows : stwg.rows.length}`;
         $("metaLaowang").textContent = `rows=${lw.meta && lw.meta.rows ? lw.meta.rows : lw.rows.length}`;
         $("metaFhkq").textContent = `rows=${fk.meta && fk.meta.rows ? fk.meta.rows : fk.rows.length}`;
+        renderTable("tableStwg", "emptyStwg", stwg);
         renderTable("tableLaowang", "emptyLaowang", lw);
         renderTable("tableFhkq", "emptyFhkq", fk);
       }
@@ -572,16 +608,19 @@ class AppContext:
                 "trade_date": trade_date,
                 "has_stock_daily": False,
                 "laowang_rows": 0,
+                "stwg_rows": 0,
                 "fhkq_rows": 0,
             }
         with self.engine.connect() as conn:
             has_daily = conn.execute(text("SELECT 1 FROM stock_daily WHERE date = :d LIMIT 1"), {"d": trade_date}).fetchone()
             lw = conn.execute(text("SELECT COUNT(*) FROM model_laowang_pool WHERE trade_date = :d"), {"d": trade_date}).fetchone()[0]
+            stwg = conn.execute(text("SELECT COUNT(*) FROM model_stwg_pool WHERE trade_date = :d"), {"d": trade_date}).fetchone()[0]
             fk = conn.execute(text("SELECT COUNT(*) FROM model_fhkq WHERE trade_date = :d"), {"d": trade_date}).fetchone()[0]
         return {
             "trade_date": trade_date,
             "has_stock_daily": bool(has_daily),
             "laowang_rows": int(lw or 0),
+            "stwg_rows": int(stwg or 0),
             "fhkq_rows": int(fk or 0),
         }
 
@@ -635,6 +674,38 @@ class AppContext:
         cn_rows = _translate_rows(raw_rows, FHKQ_COLS)
         return {
             "columns": [cn for _, cn in FHKQ_COLS],
+            "rows": cn_rows,
+            "meta": {"rows": len(cn_rows), "empty_hint": "0 rows"},
+        }
+
+    def fetch_stwg(self, trade_date: str) -> Dict[str, Any]:
+        en_cols = [c for c, _ in STWG_COLS]
+        with self.engine.connect() as conn:
+            rows = conn.execute(
+                text(
+                    """
+                    SELECT rank_no, stock_code, stock_name, close, total_score,
+                           stageB_compression_score, breakout_confirmation_score, status_tags
+                    FROM model_stwg_pool
+                    WHERE trade_date = :d
+                    ORDER BY rank_no ASC
+                    """
+                ),
+                {"d": trade_date},
+            ).fetchall()
+        raw_rows: List[Dict[str, Any]] = []
+        for row in rows:
+            data = {}
+            for idx, col in enumerate(en_cols):
+                val = row[idx] if idx < len(row) else None
+                if col == "status_tags":
+                    data[col] = _parse_status_tags(val)
+                else:
+                    data[col] = val
+            raw_rows.append(data)
+        cn_rows = _translate_rows(raw_rows, STWG_COLS)
+        return {
+            "columns": [cn for _, cn in STWG_COLS],
             "rows": cn_rows,
             "meta": {"rows": len(cn_rows), "empty_hint": "0 rows"},
         }
@@ -697,6 +768,9 @@ class Handler(BaseHTTPRequestHandler):
             if name == "laowang":
                 _json(self, self.app.fetch_laowang(trade_date))
                 return
+            if name == "stwg":
+                _json(self, self.app.fetch_stwg(trade_date))
+                return
             if name == "fhkq":
                 _json(self, self.app.fetch_fhkq(trade_date))
                 return
@@ -716,9 +790,12 @@ class DailyJobRunner:
         initial_start: str,
         get_workers: int,
         laowang_workers: int,
+        stwg_workers: int,
         fhkq_workers: int,
         laowang_top: int,
         laowang_min_score: float,
+        stwg_top: int,
+        stwg_min_score: float,
     ) -> None:
         self.config = config
         self.db_url = db_url
@@ -726,9 +803,12 @@ class DailyJobRunner:
         self.initial_start = initial_start
         self.get_workers = int(get_workers)
         self.laowang_workers = int(laowang_workers)
+        self.stwg_workers = int(stwg_workers)
         self.fhkq_workers = int(fhkq_workers)
         self.laowang_top = int(laowang_top)
         self.laowang_min_score = float(laowang_min_score)
+        self.stwg_top = int(stwg_top)
+        self.stwg_min_score = float(stwg_min_score)
         self.hour, self.minute = self._parse_time(auto_time)
         self.last_run_date: Optional[dt.date] = None
         self.state = "idle"
@@ -757,9 +837,12 @@ class DailyJobRunner:
                 initial_start_date=self.initial_start,
                 getdata_workers=self.get_workers,
                 laowang_workers=self.laowang_workers,
+                stwg_workers=self.stwg_workers,
                 fhkq_workers=self.fhkq_workers,
                 laowang_top=self.laowang_top,
                 laowang_min_score=self.laowang_min_score,
+                stwg_top=self.stwg_top,
+                stwg_min_score=self.stwg_min_score,
             )
             logging.info("[auto] everyday finished")
             self.state = "ok"
@@ -799,9 +882,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--auto-init-start-date", default="2000-01-01")
     parser.add_argument("--auto-getdata-workers", type=int, default=16)
     parser.add_argument("--auto-laowang-workers", type=int, default=16)
+    parser.add_argument("--auto-stwg-workers", type=int, default=16)
     parser.add_argument("--auto-fhkq-workers", type=int, default=8)
     parser.add_argument("--auto-laowang-top", type=int, default=200)
     parser.add_argument("--auto-laowang-min-score", type=float, default=60.0)
+    parser.add_argument("--auto-stwg-top", type=int, default=150)
+    parser.add_argument("--auto-stwg-min-score", type=float, default=55.0)
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=getattr(logging, args.log_level.upper(), logging.INFO), format="%(asctime)s %(levelname)s %(message)s")
@@ -819,9 +905,12 @@ def main(argv: Optional[List[str]] = None) -> int:
             initial_start=args.auto_init_start_date,
             get_workers=int(args.auto_getdata_workers),
             laowang_workers=int(args.auto_laowang_workers),
+            stwg_workers=int(args.auto_stwg_workers),
             fhkq_workers=int(args.auto_fhkq_workers),
             laowang_top=int(args.auto_laowang_top),
             laowang_min_score=float(args.auto_laowang_min_score),
+            stwg_top=int(args.auto_stwg_top),
+            stwg_min_score=float(args.auto_stwg_min_score),
         )
 
     min_date_iso = _normalize_iso_date(args.start_date)

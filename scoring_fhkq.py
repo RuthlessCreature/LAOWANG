@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-fhkq.py
+scoring_fhkq.py
 
 功能：根据数据库中的 K 线数据，按交易日计算 FHKQ 连板开板/反抽信号，并写入 model_fhkq。
 - 支持 start-date / end-date

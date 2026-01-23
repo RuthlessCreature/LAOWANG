@@ -6,7 +6,7 @@ init.py
 项目首次部署用的唯一入口：
 - 自动解析 config.ini / 环境变量 / CLI DB 参数
 - 如为 MySQL，会先 CREATE DATABASE IF NOT EXISTS
-- 创建所需表：stock_info / stock_daily / stock_scores_v3 / stock_levels / model_laowang_pool / model_fhkq
+- 创建所需表：stock_info / stock_daily / stock_scores_v3 / stock_levels / model_laowang_pool / model_fhkq / stock_scores_stwg / model_stwg_pool
 """
 
 from __future__ import annotations
@@ -24,6 +24,7 @@ from typing import Optional
 
 from sqlalchemy import text
 from sqlalchemy.engine import Engine, create_engine
+from sqlalchemy.exc import SQLAlchemyError
 
 
 DEFAULT_DB = "data/stock.db"
@@ -210,6 +211,36 @@ DDL_STATEMENTS = [
     )
     """,
     """
+    CREATE TABLE IF NOT EXISTS stock_scores_stwg (
+        stock_code VARCHAR(16) NOT NULL,
+        score_date VARCHAR(10) NOT NULL,
+        total_score DOUBLE NULL,
+        trend_base_score DOUBLE NULL,
+        stageA_structure_score DOUBLE NULL,
+        stageB_compression_score DOUBLE NULL,
+        platform_support_score DOUBLE NULL,
+        breakout_confirmation_score DOUBLE NULL,
+        rsi_state_score DOUBLE NULL,
+        space_after_breakout_score DOUBLE NULL,
+        status_tags TEXT NULL,
+        PRIMARY KEY (stock_code, score_date)
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS model_stwg_pool (
+        trade_date VARCHAR(10) NOT NULL,
+        rank_no INT NULL,
+        stock_code VARCHAR(16) NOT NULL,
+        stock_name VARCHAR(255) NULL,
+        close DOUBLE NULL,
+        total_score DOUBLE NULL,
+        stageB_compression_score DOUBLE NULL,
+        breakout_confirmation_score DOUBLE NULL,
+        status_tags TEXT NULL,
+        PRIMARY KEY (trade_date, stock_code)
+    )
+    """,
+    """
     CREATE TABLE IF NOT EXISTS model_fhkq (
         trade_date VARCHAR(10) NOT NULL,
         stock_code VARCHAR(16) NOT NULL,
@@ -228,10 +259,28 @@ DDL_STATEMENTS = [
 ]
 
 
+def _is_table_exists_error(exc: SQLAlchemyError) -> bool:
+    msg = ""
+    orig = getattr(exc, "orig", exc)
+    if hasattr(orig, "args") and orig.args:
+        msg = " ".join(str(a) for a in orig.args if a)
+    if not msg:
+        msg = str(exc)
+    msg = msg.lower()
+    return "already exists" in msg or "exists" in msg and "table" in msg
+
+
 def run_init(engine: Engine) -> None:
     with engine.begin() as conn:
-        for stmt in DDL_STATEMENTS:
-            conn.execute(text(stmt))
+        for idx, stmt in enumerate(DDL_STATEMENTS, start=1):
+            try:
+                conn.execute(text(stmt))
+            except SQLAlchemyError as exc:
+                if _is_table_exists_error(exc):
+                    logging.info("DDL #%d 表已存在，跳过", idx)
+                    continue
+                logging.error("DDL #%d 执行失败，需要处理：%s", idx, exc)
+                raise
     logging.info("数据库表创建完成（如已存在则跳过）")
 
 

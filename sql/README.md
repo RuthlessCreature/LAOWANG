@@ -13,11 +13,11 @@
 
 - `stock_info`
   - 股票基础信息：`stock_code`、`name`
-  - 主要被 `fhkq.py`、`laowang.py` 通过 JOIN 使用
+  - 主要被 `scoring_fhkq.py`、`scoring_laowang.py`、`scoring_stwg.py` 通过 JOIN 使用
 
 - `stock_daily`
   - 日线 OHLCV：`open/high/low/close/volume/amount`
-  - 全部模型依赖（更新管线写入；`fhkq.py`/`bingwu.py`/回测读取）
+  - 全部模型依赖（更新管线写入；`scoring_fhkq.py`/`bingwu.py`/回测读取）
 
 ### 2.2 指标与结构表
 
@@ -31,7 +31,11 @@
 
 - `stock_scores_v3`
   - 核心评分结果：`total_score` + 分项 + `status_tags`（JSON 文本）
-  - `laowang.py` 输出 CSV 主要来源
+  - `scoring_laowang.py` 输出 CSV 主要来源
+
+- `stock_scores_stwg`
+  - 缩头乌龟模型得分（含阶段/突破分项 + 标签）
+  - `scoring_stwg.py` 写入，UI 读取
 
 - `stock_scores`
   - 旧评分表（保留兼容；当前主要用 v3）
@@ -54,6 +58,10 @@
 
 - `model_laowang_pool`
   - LAOWANG 每日池（TopN / 阈值由 `models_update.py` 控制）
+  - 主键：`(trade_date, stock_code)`
+
+- `model_stwg_pool`
+  - 缩头乌龟每日池（TopN / 阈值由 `scoring_stwg.py` 控制）
   - 主键：`(trade_date, stock_code)`
 
 - `model_fhkq`

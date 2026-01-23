@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-laowang.py
+scoring_laowang.py
 
 功能：读取数据库中的 K 线数据，批量计算 LAOWANG 评分并写入
   - stock_scores_v3（逐股逐日评分）
