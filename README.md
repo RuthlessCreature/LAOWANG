@@ -13,7 +13,7 @@ A 股日线数据 + 四个模型评分 + 只读 Web UI。数据抓取默认使�
 | `scoring_stwg.py` | 计算缩头乌龟评分，写入 `stock_scores_stwg` / `model_stwg_pool` |
 | `scoring_fhkq.py` | 计算粪海狂蛆连板信号，写入 `model_fhkq` |
 | `everyday.py` | 每日自动流程（增量抓取 + 评分），抓取阶段强制 `workers=1` |
-| `ui.py` | 只读 UI（不主动更新数据），保留每日 15:05 自动调度 |
+| `ui.py` | 只读 UI（不主动更新数据），保留每个交易日 17:35 自动调度 |
 
 > 仓库中仍保留 `getData.py` / `getData2.py` 等抓取脚本，当前主流程默认使用 `getDataBaoStock.py`。
 
@@ -62,7 +62,7 @@ python everyday.py --config config.ini --initial-start-date 2020-01-01
 ## UI 与自动更新
 
 - UI **只读**：仅从数据库读取模型结果
-- 默认 **每天 15:05** 触发 `everyday.py`
+- 默认 **每个交易日（周一至周五）17:35** 触发 `everyday.py`（以服务器时间为准）
 - **启动 UI 不会立即触发** 自动任务
 - 可通过 `--disable-auto-update` 关闭自动任务
 - 可通过 `--auto-time HH:MM` 指定自动时间

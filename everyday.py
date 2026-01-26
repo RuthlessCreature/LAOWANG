@@ -89,6 +89,19 @@ def _max_stock_daily(engine: Engine) -> Optional[str]:
     return str(row[0])
 
 
+def _first_trade_date_between(engine: Engine, start_iso: str, end_iso: str) -> Optional[str]:
+    if not start_iso or not end_iso or start_iso > end_iso:
+        return None
+    with engine.connect() as conn:
+        row = conn.execute(
+            text("SELECT MIN(date) FROM stock_daily WHERE date >= :start AND date <= :end"),
+            {"start": start_iso, "end": end_iso},
+        ).fetchone()
+    if not row or not row[0]:
+        return None
+    return str(row[0])
+
+
 def _build_common_cli(args: argparse.Namespace) -> List[str]:
     cli: List[str] = []
     if getattr(args, "config", None):
@@ -152,6 +165,13 @@ def _run_pipeline(args: argparse.Namespace, *, setup_logging: bool) -> None:
 
     score_start_iso = _yyyymmdd_to_iso(score_start_yyyymmdd)
     score_end_iso = latest_iso
+    trade_start_iso = _first_trade_date_between(engine, score_start_iso, score_end_iso)
+    if not trade_start_iso:
+        logging.info("[everyday] scoring: 区间内没有交易日（%s → %s），跳过评分任务", score_start_iso, score_end_iso)
+        return
+    if trade_start_iso != score_start_iso:
+        logging.info("[everyday] scoring: start-date 由 %s 调整为首个交易日 %s", score_start_iso, trade_start_iso)
+    score_start_iso = trade_start_iso
 
     lw_cli = base_cli + [
         "--start-date",

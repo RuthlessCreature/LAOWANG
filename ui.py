@@ -903,12 +903,15 @@ class DailyJobRunner:
 
     def _parse_time(self, s: str) -> Tuple[int, int]:
         try:
-            parts = str(s or "15:05").split(":")
+            parts = str(s or "17:35").split(":")
             h = max(0, min(23, int(parts[0])))
             m = max(0, min(59, int(parts[1]) if len(parts) > 1 else 0))
             return h, m
         except Exception:
-            return 15, 5
+            return 17, 35
+
+    def _is_trading_day(self, day: dt.date) -> bool:
+        return day.weekday() < 5
 
     def _run_job(self) -> None:
         self.state = "running"
@@ -945,9 +948,14 @@ class DailyJobRunner:
             now = dt.datetime.now()
             target = now.replace(hour=self.hour, minute=self.minute, second=0, microsecond=0)
             if now >= target:
-                if self.last_run_date != now.date():
-                    self._run_job()
-                    self.last_run_date = now.date()
+                today = now.date()
+                if self.last_run_date != today:
+                    if self._is_trading_day(today):
+                        self._run_job()
+                    else:
+                        self.state = "idle"
+                        self.message = f"{today.strftime('%Y%m%d')} 非交易日，自动任务跳过"
+                    self.last_run_date = today
                 target = target + dt.timedelta(days=1)
             sleep_sec = max(30.0, min(300.0, (target - now).total_seconds()))
             time.sleep(sleep_sec)
@@ -965,8 +973,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--log-level", default="INFO")
     parser.add_argument("--start-date", default=None, help="仅显示该日期及之后的交易日 (YYYYMMDD 或 YYYY-MM-DD)")
-    parser.add_argument("--disable-auto-update", action="store_true", help="禁用 15:05 自动执行 everyday.py")
-    parser.add_argument("--auto-time", default="15:05", help="HH:MM（默认 15:05）")
+    parser.add_argument("--disable-auto-update", action="store_true", help="禁用 17:35 自动执行 everyday.py（仅交易日）")
+    parser.add_argument("--auto-time", default="17:35", help="HH:MM（默认 17:35）")
     parser.add_argument("--auto-init-start-date", default="2000-01-01")
     parser.add_argument("--auto-getdata-workers", type=int, default=1)
     parser.add_argument("--auto-laowang-workers", type=int, default=16)
@@ -1014,7 +1022,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     url = f"http://{args.host}:{int(args.port)}"
     logging.info("UI running: %s", url)
     if scheduler:
-        logging.info("自动任务每日 %s 运行", args.auto_time)
+        logging.info("自动任务每个交易日 %s 运行", args.auto_time)
     httpd.serve_forever()
     return 0
 
