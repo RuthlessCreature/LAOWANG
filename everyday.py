@@ -30,11 +30,12 @@ from typing import List, Optional
 from sqlalchemy import text
 from sqlalchemy.engine import Engine, create_engine
 
-import scoring_fhkq as fhkq_mod
 import getDataBaoStock as getdata_mod
+import scoring_fhkq as fhkq_mod
 import scoring_laowang as laowang_mod
 import scoring_stwg as stwg_mod
 import scoring_ywcx as ywcx_mod
+import tgBot as tgbot_mod
 
 
 def _normalize_yyyymmdd(date_str: str) -> str:
@@ -230,6 +231,15 @@ def _run_pipeline(args: argparse.Namespace, *, setup_logging: bool) -> None:
     fhkq_mod.main(fk_cli)
 
     logging.info("[everyday] 完成：latest=%s", score_end_iso)
+    try:
+        tgbot_mod.push_latest_pools(
+            engine=engine,
+            token=None,
+            store=tgbot_mod.SubscriberStore(),
+            limit=min(int(args.laowang_top), 20),
+        )
+    except Exception:
+        logging.exception("[everyday] 推送 Telegram 失败")
 
 
 def run_once(

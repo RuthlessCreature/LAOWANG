@@ -14,6 +14,7 @@ A 股日线数据 + 四个模型评分 + 只读 Web UI。数据抓取默认使�
 | `scoring_fhkq.py` | 计算粪海狂蛆连板信号，写入 `model_fhkq` |
 | `everyday.py` | 每日自动流程（增量抓取 + 评分），抓取阶段强制 `workers=1` |
 | `ui.py` | 只读 UI（不主动更新数据），保留每个交易日 17:35 自动调度 |
+| `tgBot.py` | Telegram 机器人 / 推送辅助（查询四个股票池或推送最新结果） |
 
 > 仓库中仍保留 `getData.py` / `getData2.py` 等抓取脚本，当前主流程默认使用 `getDataBaoStock.py`。
 
@@ -66,6 +67,14 @@ python everyday.py --config config.ini --initial-start-date 2020-01-01
 - **启动 UI 不会立即触发** 自动任务
 - 可通过 `--disable-auto-update` 关闭自动任务
 - 可通过 `--auto-time HH:MM` 指定自动时间
+
+## Telegram Bot
+
+- 运行轮询服务：`python tgBot.py --config config.ini --mode serve`
+- 手动推送一次：`python tgBot.py --config config.ini --mode push`
+- Token 默认读取 `TG_BOT_TOKEN`（可覆盖默认 8322336287:AAHR4RqsL1SwZsYuRfzNL_rbMNUPL87Bd0c）
+- 订阅者列表：`data/tg_subscribers.json`（与 bot 对话一次即可自动加入）
+- everyday.py 完成后会自动调用 push，将当日四个股票池推送给所有订阅者
 
 ## 数据表（MySQL / SQLite 通用）
 

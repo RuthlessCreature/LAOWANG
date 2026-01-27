@@ -6,3 +6,4 @@ sqlalchemy>=2.0
 pymysql>=1.1
 cryptography>=41.0
 baostock
+requests>=2.0
