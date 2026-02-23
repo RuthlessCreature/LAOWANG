@@ -1,0 +1,38 @@
+{
+  "score_rawprob": {
+    "strategy": "score_rawprob",
+    "model_version": "mlp_h56_e320_gt1-2026-02-23T001849",
+    "start_date": "2020-01-01",
+    "end_date": "2026-02-13",
+    "rules_file": "rules.txt",
+    "sell_rule": "strong_hold_t3",
+    "initial_capital": 10000.0,
+    "final_capital": 82551.85545600002,
+    "ret_pct": 7.255185545600002,
+    "max_dd_pct": 0.7576868765902471,
+    "total_fee": 1598.2215000000003,
+    "trade_count": 148,
+    "alloc_pct": 1.0,
+    "operations_csv": "reports/backtest_recalc_20260223/score_rawprob_operations.csv",
+    "trades_csv": "reports/backtest_recalc_20260223/score_rawprob_trades.csv",
+    "operation_rows": 296
+  },
+  "selected": {
+    "strategy": "selected",
+    "model_version": "mlp_h56_e320_gt1-2026-02-23T001849",
+    "start_date": "2020-01-01",
+    "end_date": "2026-02-13",
+    "rules_file": "rules.txt",
+    "sell_rule": "strong_hold_t3",
+    "initial_capital": 10000.0,
+    "final_capital": 229462.17156087677,
+    "ret_pct": 21.946217156087677,
+    "max_dd_pct": 0.2887607837735701,
+    "total_fee": 2389.8926861232503,
+    "trade_count": 88,
+    "alloc_pct": 1.0,
+    "operations_csv": "reports/backtest_recalc_20260223/selected_operations.csv",
+    "trades_csv": "reports/backtest_recalc_20260223/selected_trades.csv",
+    "operation_rows": 176
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "round": 3,
+  "seed_offset": 194,
+  "retain_ratio": 0.9,
+  "avg_ret_pct": 2332.27,
+  "avg_dd_pct": 30.2,
+  "indicator": 77.2274834437086,
+  "improved": false,
+  "metrics_by_threshold": {
+    "0.5": {
+      "final": 243226.72,
+      "ret_pct": 2332.27,
+      "dd_pct": 30.2,
+      "fee": 3711.35,
+      "trades": 72,
+      "cfg": "mlp_h72_e380_gt15/a15/loss_rebound_t3/k2/gap[-0.02,0.04]/board<=None/risk=balanced/alloc=1.00"
+    },
+    "0.75": {
+      "final": 243226.72,
+      "ret_pct": 2332.27,
+      "dd_pct": 30.2,
+      "fee": 3711.35,
+      "trades": 72,
+      "cfg": "mlp_h72_e380_gt15/a15/loss_rebound_t3/k2/gap[-0.02,0.04]/board<=None/risk=balanced/alloc=1.00"
+    },
+    "0.99": {
+      "final": 243226.72,
+      "ret_pct": 2332.27,
+      "dd_pct": 30.2,
+      "fee": 3711.35,
+      "trades": 72,
+      "cfg": "mlp_h72_e380_gt15/a15/loss_rebound_t3/k2/gap[-0.02,0.04]/board<=None/risk=balanced/alloc=1.00"
+    }
+  }
+}

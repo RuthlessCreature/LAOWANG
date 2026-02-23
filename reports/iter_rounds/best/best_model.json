@@ -1,0 +1,25 @@
+{
+  "best_round": 1,
+  "best_indicator": 31.12,
+  "best_avg_ret_pct": 31.12,
+  "best_avg_dd_pct": 0.0,
+  "metric_mode": "ret_over_dd",
+  "dd_penalty": 1.0,
+  "seed_offset": 0,
+  "retain_ratio": 0.8,
+  "thresholds": [
+    0.75
+  ],
+  "metrics_by_threshold": {
+    "0.75": {
+      "final": 13112.0,
+      "ret_pct": 31.12,
+      "dd_pct": 0.0,
+      "fee": 40.0,
+      "trades": 4,
+      "cfg": "mlp_h64_e360_gt2/a2/strong_hold_t3/k2/gap[-0.02,0.04]/board<=2/risk=balanced/alloc=1.00"
+    }
+  },
+  "rules_file": "rules.txt",
+  "start_date": "2026-01-01"
+}

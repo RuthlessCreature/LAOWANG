@@ -1,0 +1,49 @@
+{
+  "train_start_date": "2020-01-01",
+  "backtest_start_date": "2020-01-01",
+  "end_date": "2026-02-13",
+  "max_dd_limit": 0.1,
+  "initial_capital": 10000.0,
+  "rules_file": "rules.txt",
+  "patience": 3,
+  "max_rounds": 8,
+  "history_rows": 8,
+  "best": {
+    "round_no": 5,
+    "seed_offset": 388,
+    "variant": "mlp_h56_e320_gt1",
+    "alpha": 10,
+    "threshold": 0.55,
+    "sell_rule": "profit_lock_t3",
+    "top_k": 1,
+    "gap_min": null,
+    "gap_max": 0.02,
+    "max_board": null,
+    "risk_profile": "off",
+    "max_broken_rate": null,
+    "min_red_rate": null,
+    "max_limit_down": null,
+    "max_pullback": null,
+    "alloc_pct": 0.2,
+    "train_acc": 0.6068292682926829,
+    "ret": 0.36493204639999965,
+    "max_dd": 0.055009715302010105,
+    "trades": 104,
+    "final_capital": 13649.320463999997,
+    "fee": 1040.0
+  },
+  "best_cfg_text": "mlp_h56_e320_gt1/a10/profit_lock_t3/k1/gap[None,0.02]/board<=None/risk=off/alloc=0.20",
+  "best_detail": {
+    "final_capital": 13649.320463999997,
+    "ret_pct": 36.493204639999966,
+    "max_dd_pct": 5.500971530201011,
+    "trade_n": 104,
+    "total_fee": 1040.0
+  },
+  "outputs": {
+    "history_csv": "reports/selected_opt_20200101_20260213/history.csv",
+    "trades_csv": "reports/selected_opt_20200101_20260213/best_selected_trades.csv",
+    "operations_csv": "reports/selected_opt_20200101_20260213/best_selected_operations.csv"
+  },
+  "timestamp": "2026-02-23 22:43:12"
+}

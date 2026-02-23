@@ -1,0 +1,36 @@
+{
+  "score_rawprob": {
+    "strategy": "score_rawprob",
+    "model_version": "mlp_h56_e320_gt1-2026-02-23T001849",
+    "start_date": "2025-01-01",
+    "end_date": "2026-02-13",
+    "rules_file": "rules.txt",
+    "sell_rule": "strong_hold_t3",
+    "initial_capital": 10000.0,
+    "final_capital": 95693.73748359099,
+    "ret_pct": 8.569373748359098,
+    "max_dd_pct": 0.5420708931999999,
+    "total_fee": 953.613710409,
+    "trade_count": 77,
+    "operations_csv": "reports/backtest_20250101/score_rawprob_operations.csv",
+    "trades_csv": "reports/backtest_20250101/score_rawprob_trades.csv",
+    "operation_rows": 154
+  },
+  "selected": {
+    "strategy": "selected",
+    "model_version": "mlp_h56_e320_gt1-2026-02-23T001849",
+    "start_date": "2025-01-01",
+    "end_date": "2026-02-13",
+    "rules_file": "rules.txt",
+    "sell_rule": "strong_hold_t3",
+    "initial_capital": 10000.0,
+    "final_capital": 129880.71526445501,
+    "ret_pct": 11.9880715264455,
+    "max_dd_pct": 0.47010805500000036,
+    "total_fee": 1400.8615765449997,
+    "trade_count": 74,
+    "operations_csv": "reports/backtest_20250101/selected_operations.csv",
+    "trades_csv": "reports/backtest_20250101/selected_trades.csv",
+    "operation_rows": 148
+  }
+}

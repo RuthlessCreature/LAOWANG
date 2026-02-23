@@ -19,7 +19,7 @@ python init.py --config config.ini
 
 | 脚本 | 依赖表 | 写入表 |
 | --- | --- | --- |
-| `getData.py` | `stock_info`*、`stock_daily`* | `stock_info`（含 `float_cap_billion`）、`stock_daily` |
+| `legacy/getData.py` | `stock_info`*、`stock_daily`* | `stock_info`（含 `float_cap_billion`）、`stock_daily`（历史脚本） |
 | `scoring_laowang.py` | `stock_info`、`stock_daily` | `stock_scores_v3`、`stock_levels`、`model_laowang_pool` |
 | `scoring_ywcx.py` | `stock_info`、`stock_daily` | `stock_scores_ywcx`、`model_ywcx_pool` |
 | `scoring_stwg.py` | `stock_info`、`stock_daily` | `stock_scores_stwg`、`model_stwg_pool` |

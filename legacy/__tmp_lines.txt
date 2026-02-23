@@ -1,0 +1,1027 @@
+   1: # -*- coding: utf-8 -*-
+   2: from __future__ import annotations
+   3: 
+   4: import argparse
+   5: import datetime as dt
+   6: import math
+   7: import re
+   8: from dataclasses import dataclass
+   9: from pathlib import Path
+  10: from typing import Any, Dict, List, Optional, Sequence, Tuple
+  11: 
+  12: import numpy as np
+  13: import pandas as pd
+  14: from sqlalchemy import text
+  15: 
+  16: import relay_strategy_model as relay_model
+  17: 
+  18: EPS = 1e-9
+  19: 
+  20: 
+  21: @dataclass
+  22: class ModelVariant:
+  23:     name: str
+  24:     hidden: int
+  25:     epochs: int
+  26:     lr: float
+  27:     weight_decay: float
+  28:     target_gt: float
+  29:     seed: int
+  30: 
+  31: 
+  32: @dataclass
+  33: class SearchResult:
+  34:     variant: str
+  35:     alpha: int
+  36:     sell_rule: str
+  37:     top_k: int
+  38:     gap_min: Optional[float]
+  39:     gap_max: Optional[float]
+  40:     max_board: Optional[int]
+  41:     train_acc: float
+  42:     threshold_metrics: Dict[float, Dict[str, float]]
+  43:     min_ret: float
+  44:     avg_ret: float
+  45:     objective: float
+  46: 
+  47: 
+  48: @dataclass
+  49: class ExecutionRules:
+  50:     source_file: str
+  51:     buy_delay: int
+  52:     block_limit_up_buy: bool
+  53:     fee_rate: float
+  54:     min_fee: float
+  55: 
+  56: 
+  57: def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
+  58:     p = argparse.ArgumentParser(description="Iterative retrain + mock backtests.")
+  59:     p.add_argument("--config", default="config.ini")
+  60:     p.add_argument("--db-url", default=None)
+  61:     p.add_argument("--db", default=None)
+  62:     p.add_argument("--rules-file", default="rules.txt")
+  63:     p.add_argument("--start-date", default="2025-01-01")
+  64:     p.add_argument("--thresholds", default="0.5,0.75,0.99")
+  65:     p.add_argument("--initial-capital", type=float, default=10000.0)
+  66:     return p.parse_args(argv)
+  67: 
+  68: 
+  69: def _to_iso(d: str) -> str:
+  70:     s = str(d or "").strip()
+  71:     if len(s) == 8 and s.isdigit():
+  72:         return f"{s[0:4]}-{s[4:6]}-{s[6:8]}"
+  73:     return dt.datetime.strptime(s, "%Y-%m-%d").strftime("%Y-%m-%d")
+  74: 
+  75: 
+  76: def _fmt_pct(v: float) -> str:
+  77:     if not math.isfinite(v):
+  78:         return "N/A"
+  79:     return f"{v * 100.0:.2f}%"
+  80: 
+  81: 
+  82: def _fmt_opt_pct(v: Optional[float]) -> str:
+  83:     if v is None:
+  84:         return "不限"
+  85:     return f"{v * 100.0:.2f}%"
+  86: 
+  87: 
+  88: def _fmt_opt_int(v: Optional[int]) -> str:
+  89:     if v is None:
+  90:         return "不限"
+  91:     return str(int(v))
+  92: 
+  93: 
+  94: def _safe_float(v: Any, default: float = float("nan")) -> float:
+  95:     try:
+  96:         x = float(v)
+  97:         if math.isfinite(x):
+  98:             return x
+  99:     except Exception:
+ 100:         pass
+ 101:     return default
+ 102: 
+ 103: 
+ 104: def _safe_date(v: Any) -> str:
+ 105:     if v is None:
+ 106:         return ""
+ 107:     s = str(v).strip()
+ 108:     if not s or s.lower() == "nan":
+ 109:         return ""
+ 110:     return s
+ 111: 
+ 112: 
+ 113: def _threshold_tag(th: float) -> str:
+ 114:     return f"{float(th):.2f}".rstrip("0").rstrip(".")
+ 115: 
+ 116: 
+ 117: def _round_half_up_2(v: float) -> float:
+ 118:     return float(math.floor(v * 100.0 + 0.5) / 100.0)
+ 119: 
+ 120: 
+ 121: def _feature_cols() -> List[str]:
+ 122:     cols = [
+ 123:         "board_count",
+ 124:         "one_word",
+ 125:         "opened_limit",
+ 126:         "ret1",
+ 127:         "ret2",
+ 128:         "ret3",
+ 129:         "amount_chg1",
+ 130:         "amp",
+ 131:         "close_open_ret",
+ 132:         "pullback",
+ 133:         "lu_recent3",
+ 134:         "broken_recent3",
+ 135:         "float_cap_billion",
+ 136:         "limit_up_count",
+ 137:         "limit_down_count",
+ 138:         "broken_rate",
+ 139:         "max_board",
+ 140:         "red_rate",
+ 141:         "broken_red_rate",
+ 142:         "amount_change5",
+ 143:     ]
+ 144:     lag_bases = [
+ 145:         "limit_up_count",
+ 146:         "limit_down_count",
+ 147:         "broken_rate",
+ 148:         "max_board",
+ 149:         "red_rate",
+ 150:         "broken_red_rate",
+ 151:         "amount_change5",
+ 152:     ]
+ 153:     for c in lag_bases:
+ 154:         for lag in (1, 2, 3):
+ 155:             cols.append(f"{c}_lag{lag}")
+ 156:     return cols
+ 157: 
+ 158: 
+ 159: def _parse_fee_rate(text: str) -> float:
+ 160:     m = re.search(r"手续费[^\d]*([\d.]+)\s*%", text)
+ 161:     if not m:
+ 162:         return 0.00025
+ 163:     try:
+ 164:         return float(m.group(1)) / 100.0
+ 165:     except Exception:
+ 166:         return 0.00025
+ 167: 
+ 168: 
+ 169: def _parse_min_fee(text: str) -> float:
+ 170:     m = re.search(r"不满\s*([\d.]+)\s*�?, text)
+ 171:     if not m:
+ 172:         return 5.0
+ 173:     try:
+ 174:         return float(m.group(1))
+ 175:     except Exception:
+ 176:         return 5.0
+ 177: 
+ 178: 
+ 179: def _parse_buy_delay(text: str) -> int:
+ 180:     m = re.search(r"T\+(\d+)", text)
+ 181:     if not m:
+ 182:         return 1
+ 183:     try:
+ 184:         return max(1, int(m.group(1)))
+ 185:     except Exception:
+ 186:         return 1
+ 187: 
+ 188: 
+ 189: def _load_execution_rules(path: str) -> ExecutionRules:
+ 190:     p = Path(path)
+ 191:     if not p.exists():
+ 192:         return ExecutionRules(
+ 193:             source_file=path,
+ 194:             buy_delay=1,
+ 195:             block_limit_up_buy=True,
+ 196:             fee_rate=0.00025,
+ 197:             min_fee=5.0,
+ 198:         )
+ 199:     text = p.read_text(encoding="utf-8", errors="ignore")
+ 200:     return ExecutionRules(
+ 201:         source_file=str(p.as_posix()),
+ 202:         buy_delay=_parse_buy_delay(text),
+ 203:         block_limit_up_buy=("涨停" in text and "买不�? in text),
+ 204:         fee_rate=_parse_fee_rate(text),
+ 205:         min_fee=_parse_min_fee(text),
+ 206:     )
+ 207: 
+ 208: 
+ 209: def _load_trade_dates(engine, start_date: str) -> List[str]:
+ 210:     with engine.connect() as conn:
+ 211:         rows = conn.execute(
+ 212:             text("SELECT DISTINCT date FROM stock_daily WHERE date >= :s ORDER BY date ASC"),
+ 213:             {"s": start_date},
+ 214:         ).fetchall()
+ 215:     return [str(r[0]) for r in rows if r and r[0]]
+ 216: 
+ 217: 
+ 218: def _attach_future_fields(engine, df: pd.DataFrame, start_date: str) -> pd.DataFrame:
+ 219:     with engine.connect() as conn:
+ 220:         d = pd.read_sql(
+ 221:             text("SELECT stock_code, date, open, close FROM stock_daily WHERE date >= :s"),
+ 222:             conn,
+ 223:             params={"s": start_date},
+ 224:         )
+ 225:     out = df.copy()
+ 226:     future_cols = [
+ 227:         "next_date",
+ 228:         "next_open",
+ 229:         "next_close",
+ 230:         "next2_date",
+ 231:         "next2_close",
+ 232:         "next3_date",
+ 233:         "next3_close",
+ 234:     ]
+ 235:     out = out.drop(columns=[c for c in future_cols if c in out.columns], errors="ignore")
+ 236:     if d.empty:
+ 237:         for c in future_cols:
+ 238:             out[c] = np.nan
+ 239:         return out
+ 240: 
+ 241:     d["stock_code"] = d["stock_code"].astype(str)
+ 242:     d["date"] = d["date"].astype(str)
+ 243:     d["open"] = pd.to_numeric(d["open"], errors="coerce")
+ 244:     d["close"] = pd.to_numeric(d["close"], errors="coerce")
+ 245:     d = d.sort_values(["stock_code", "date"])
+ 246:     grp = d.groupby("stock_code", sort=False)
+ 247:     d["next_date"] = grp["date"].shift(-1)
+ 248:     d["next_open"] = grp["open"].shift(-1)
+ 249:     d["next_close"] = grp["close"].shift(-1)
+ 250:     d["next2_date"] = grp["date"].shift(-2)
+ 251:     d["next2_close"] = grp["close"].shift(-2)
+ 252:     d["next3_date"] = grp["date"].shift(-3)
+ 253:     d["next3_close"] = grp["close"].shift(-3)
+ 254: 
+ 255:     keep = ["stock_code", "date"] + future_cols
+ 256:     return out.merge(d[keep], on=["stock_code", "date"], how="left")
+ 257: 
+ 258: 
+ 259: def _score_from_raw_prob(raw_prob: np.ndarray, alpha: int) -> np.ndarray:
+ 260:     arr = np.asarray(raw_prob, dtype=float)
+ 261:     if arr.size == 0:
+ 262:         return arr
+ 263:     fill_v = float(np.nanmean(arr)) if np.isfinite(arr).any() else 0.5
+ 264:     arr = np.where(np.isfinite(arr), arr, fill_v)
+ 265:     order = np.argsort(arr)
+ 266:     ranks = np.empty_like(order, dtype=float)
+ 267:     ranks[order] = np.arange(1, len(arr) + 1, dtype=float)
+ 268:     cdf = ranks / float(len(arr))
+ 269:     score = 1.0 - np.power(1.0 - cdf, int(alpha))
+ 270:     return np.clip(score, 0.0, 1.0)
+ 271: 
+ 272: 
+ 273: def _build_ranked_by_date(df: pd.DataFrame) -> Dict[str, List[Dict[str, Any]]]:
+ 274:     if df.empty:
+ 275:         return {}
+ 276:     ordered = df.sort_values(["date", "score"], ascending=[True, False])
+ 277:     out: Dict[str, List[Dict[str, Any]]] = {}
+ 278:     for d, g in ordered.groupby("date", sort=True):
+ 279:         rows: List[Dict[str, Any]] = []
+ 280:         for row in g.itertuples(index=False):
+ 281:             rows.append(
+ 282:                 {
+ 283:                     "date": str(getattr(row, "date")),
+ 284:                     "stock_code": str(getattr(row, "stock_code", "")),
+ 285:                     "stock_name": str(getattr(row, "stock_name", "")),
+ 286:                     "is_st": bool(getattr(row, "is_st", False)),
+ 287:                     "score": _safe_float(getattr(row, "score")),
+ 288:                     "raw_prob": _safe_float(getattr(row, "raw_prob")),
+ 289:                     "close": _safe_float(getattr(row, "close")),
+ 290:                     "next_date": _safe_date(getattr(row, "next_date", "")),
+ 291:                     "next_open": _safe_float(getattr(row, "next_open")),
+ 292:                     "next2_date": _safe_date(getattr(row, "next2_date", "")),
+ 293:                     "next2_close": _safe_float(getattr(row, "next2_close")),
+ 294:                     "next3_date": _safe_date(getattr(row, "next3_date", "")),
+ 295:                     "next3_close": _safe_float(getattr(row, "next3_close")),
+ 296:                     "board_count": int(_safe_float(getattr(row, "board_count"), 0.0)),
+ 297:                     "ret1": _safe_float(getattr(row, "ret1")),
+ 298:                     "tomorrow_stage": str(getattr(row, "tomorrow_stage", "N/A") or "N/A"),
+ 299:                     "tomorrow_prob": _safe_float(getattr(row, "tomorrow_prob")),
+ 300:                 }
+ 301:             )
+ 302:         out[str(d)] = rows
+ 303:     return out
+ 304: 
+ 305: 
+ 306: def _limit_pct_for_code(stock_code: str, is_st: bool) -> float:
+ 307:     code = str(stock_code or "")
+ 308:     if bool(is_st):
+ 309:         return 0.05
+ 310:     if code.startswith(("300", "301", "688")):
+ 311:         return 0.20
+ 312:     if code.startswith(("8", "4")):
+ 313:         return 0.30
+ 314:     return 0.10
+ 315: 
+ 316: 
+ 317: def _limit_up_price(prev_close: float, stock_code: str, is_st: bool) -> float:
+ 318:     if not (math.isfinite(prev_close) and prev_close > 0):
+ 319:         return float("nan")
+ 320:     pct = _limit_pct_for_code(stock_code=stock_code, is_st=is_st)
+ 321:     return _round_half_up_2(prev_close * (1.0 + pct))
+ 322: 
+ 323: 
+ 324: def _calc_fee(amount: float, fee_rate: float, min_fee: float) -> float:
+ 325:     if not (math.isfinite(amount) and amount > 0):
+ 326:         return 0.0
+ 327:     return max(float(min_fee), float(amount) * float(fee_rate))
+ 328: 
+ 329: 
+ 330: def _max_lots_for_cash(cash: float, buy_px: float, fee_rate: float, min_fee: float) -> int:
+ 331:     if not (math.isfinite(cash) and cash > 0 and math.isfinite(buy_px) and buy_px > 0):
+ 332:         return 0
+ 333:     lots = int(cash // (buy_px * 100.0))
+ 334:     while lots > 0:
+ 335:         amt = lots * 100.0 * buy_px
+ 336:         need = amt + _calc_fee(amt, fee_rate=fee_rate, min_fee=min_fee)
+ 337:         if need <= cash + 1e-9:
+ 338:             return lots
+ 339:         lots -= 1
+ 340:     return 0
+ 341: 
+ 342: 
+ 343: def _can_buy_by_rules(
+ 344:     row: Dict[str, Any],
+ 345:     rules: ExecutionRules,
+ 346:     gap_min: Optional[float],
+ 347:     gap_max: Optional[float],
+ 348: ) -> Tuple[bool, str]:
+ 349:     buy_date = _safe_date(row.get("next_date"))
+ 350:     buy_px = _safe_float(row.get("next_open"))
+ 351:     if not buy_date:
+ 352:         return False, "缺少T+1交易日，无法买入"
+ 353:     if not (math.isfinite(buy_px) and buy_px > 0):
+ 354:         return False, "缺少T+1开盘价，无法买�?
+ 355: 
+ 356:     signal_close = _safe_float(row.get("close"))
+ 357:     if (gap_min is not None) or (gap_max is not None):
+ 358:         if not (math.isfinite(signal_close) and signal_close > 0):
+ 359:             return False, "缺少信号日收盘价，无法判断开盘跳�?
+ 360:         gap = buy_px / signal_close - 1.0
+ 361:         if gap_min is not None and gap < float(gap_min) - EPS:
+ 362:             return False, f"开盘跳空{gap*100:.2f}%低于下限{float(gap_min)*100:.2f}%"
+ 363:         if gap_max is not None and gap > float(gap_max) + EPS:
+ 364:             return False, f"开盘跳空{gap*100:.2f}%高于上限{float(gap_max)*100:.2f}%"
+ 365: 
+ 366:     if rules.block_limit_up_buy:
+ 367:         limit_up = _limit_up_price(
+ 368:             prev_close=signal_close,
+ 369:             stock_code=str(row.get("stock_code", "")),
+ 370:             is_st=bool(row.get("is_st", False)),
+ 371:         )
+ 372:         if math.isfinite(limit_up) and buy_px >= limit_up - EPS:
+ 373:             return False, f"T+1开盘价{buy_px:.3f}触及涨停价{limit_up:.3f}，按规则视为买不�?
+ 374:     return True, ""
+ 375: 
+ 376: 
+ 377: def _decide_sell(row: Dict[str, Any], buy_price: float, sell_rule: str) -> Tuple[str, float, str]:
+ 378:     t2 = _safe_float(row.get("next2_close"))
+ 379:     t3 = _safe_float(row.get("next3_close"))
+ 380:     d2 = _safe_date(row.get("next2_date"))
+ 381:     d3 = _safe_date(row.get("next3_date"))
+ 382:     if not (math.isfinite(buy_price) and buy_price > 0 and math.isfinite(t2) and t2 > 0 and d2):
+ 383:         return "", float("nan"), "缺少T+2收盘价，无法卖出"
+ 384: 
+ 385:     r2 = t2 / buy_price - 1.0
+ 386:     if sell_rule == "t2_close":
+ 387:         return d2, t2, "固定规则：T+2收盘卖出（买入后�?个可卖日�?
+ 388:     if sell_rule == "weak_hold_t3":
+ 389:         if r2 <= -0.03 and math.isfinite(t3) and t3 > 0 and d3:
+ 390:             return d3, t3, f"T+2收盘回撤{r2*100:.2f}%<=-3%，延长到T+3收盘卖出"
+ 391:         return d2, t2, f"T+2收盘回撤{r2*100:.2f}%未触发延长，T+2收盘卖出"
+ 392:     if sell_rule == "strong_hold_t3":
+ 393:         if r2 >= 0.06 and math.isfinite(t3) and t3 > 0 and d3:
+ 394:             return d3, t3, f"T+2收盘上涨{r2*100:.2f}%>=6%，延长到T+3收盘卖出"
+ 395:         return d2, t2, f"T+2收盘上涨{r2*100:.2f}%未触发延长，T+2收盘卖出"
+ 396:     return d2, t2, "未知规则，降级为T+2收盘卖出"
+ 397: 
+ 398: 
+ 399: def _select_candidate(
+ 400:     rows: List[Dict[str, Any]],
+ 401:     *,
+ 402:     threshold: float,
+ 403:     top_k: int,
+ 404:     max_board: Optional[int],
+ 405:     gap_min: Optional[float],
+ 406:     gap_max: Optional[float],
+ 407:     rules: ExecutionRules,
+ 408: ) -> Tuple[Optional[Dict[str, Any]], str, int]:
+ 409:     if not rows:
+ 410:         return None, "no_candidate", 0
+ 411: 
+ 412:     cap = min(len(rows), max(1, int(top_k)))
+ 413:     cand = rows[:cap]
+ 414:     has_above_threshold = False
+ 415:     last_reason = "threshold_blocked"
+ 416: 
+ 417:     for idx, row in enumerate(cand, 1):
+ 418:         if _safe_float(row.get("score")) < threshold:
+ 419:             continue
+ 420:         has_above_threshold = True
+ 421: 
+ 422:         board = int(_safe_float(row.get("board_count"), 0.0))
+ 423:         if (max_board is not None) and (board > int(max_board)):
+ 424:             last_reason = "board_blocked"
+ 425:             continue
+ 426: 
+ 427:         ok_buy, reason = _can_buy_by_rules(
+ 428:             row=row,
+ 429:             rules=rules,
+ 430:             gap_min=gap_min,
+ 431:             gap_max=gap_max,
+ 432:         )
+ 433:         if not ok_buy:
+ 434:             if "涨停�? in reason:
+ 435:                 last_reason = "rule_blocked"
+ 436:             elif "开盘跳�? in reason:
+ 437:                 last_reason = "gap_blocked"
+ 438:             else:
+ 439:                 last_reason = "bad_buy_quote"
+ 440:             continue
+ 441:         return row, "ok", idx
+ 442: 
+ 443:     if not has_above_threshold:
+ 444:         return None, "threshold_blocked", 0
+ 445:     return None, last_reason, 0
+ 446: 
+ 447: 
+ 448: def _simulate_fast(
+ 449:     *,
+ 450:     trade_dates: List[str],
+ 451:     ranked_by_date: Dict[str, List[Dict[str, Any]]],
+ 452:     threshold: float,
+ 453:     initial_capital: float,
+ 454:     sell_rule: str,
+ 455:     top_k: int,
+ 456:     max_board: Optional[int],
+ 457:     gap_min: Optional[float],
+ 458:     gap_max: Optional[float],
+ 459:     rules: ExecutionRules,
+ 460: ) -> Dict[str, float]:
+ 461:     date_idx = {d: i for i, d in enumerate(trade_dates)}
+ 462:     cash = float(initial_capital)
+ 463:     trades = 0
+ 464:     total_fee = 0.0
+ 465:     i = 0
+ 466: 
+ 467:     while i < len(trade_dates):
+ 468:         d = trade_dates[i]
+ 469:         row, _, _ = _select_candidate(
+ 470:             rows=ranked_by_date.get(d, []),
+ 471:             threshold=threshold,
+ 472:             top_k=top_k,
+ 473:             max_board=max_board,
+ 474:             gap_min=gap_min,
+ 475:             gap_max=gap_max,
+ 476:             rules=rules,
+ 477:         )
+ 478:         if row is None:
+ 479:             i += 1
+ 480:             continue
+ 481: 
+ 482:         buy_date = _safe_date(row.get("next_date"))
+ 483:         buy_px = _safe_float(row.get("next_open"))
+ 484:         if buy_date not in date_idx or not (math.isfinite(buy_px) and buy_px > 0):
+ 485:             i += 1
+ 486:             continue
+ 487:         buy_idx = date_idx[buy_date]
+ 488:         if buy_idx <= i:
+ 489:             i += 1
+ 490:             continue
+ 491: 
+ 492:         lots = _max_lots_for_cash(
+ 493:             cash=cash,
+ 494:             buy_px=buy_px,
+ 495:             fee_rate=rules.fee_rate,
+ 496:             min_fee=rules.min_fee,
+ 497:         )
+ 498:         shares = lots * 100
+ 499:         if shares < 100:
+ 500:             i += 1
+ 501:             continue
+ 502: 
+ 503:         sell_date, sell_px, _ = _decide_sell(row, buy_price=buy_px, sell_rule=sell_rule)
+ 504:         if not sell_date or sell_date not in date_idx or not (math.isfinite(sell_px) and sell_px > 0):
+ 505:             i += 1
+ 506:             continue
+ 507:         sell_idx = date_idx[sell_date]
+ 508:         if sell_idx <= buy_idx:
+ 509:             i += 1
+ 510:             continue
+ 511: 
+ 512:         buy_amt = shares * buy_px
+ 513:         buy_fee = _calc_fee(buy_amt, fee_rate=rules.fee_rate, min_fee=rules.min_fee)
+ 514:         if buy_amt + buy_fee > cash + 1e-9:
+ 515:             i += 1
+ 516:             continue
+ 517: 
+ 518:         sell_amt = shares * sell_px
+ 519:         sell_fee = _calc_fee(sell_amt, fee_rate=rules.fee_rate, min_fee=rules.min_fee)
+ 520:         cash = cash - buy_amt - buy_fee + sell_amt - sell_fee
+ 521:         total_fee += buy_fee + sell_fee
+ 522:         trades += 1
+ 523:         i = sell_idx + 1
+ 524: 
+ 525:     ret = cash / float(initial_capital) - 1.0
+ 526:     return {"final": cash, "ret": ret, "trades": float(trades), "fee": total_fee}
+ 527: def _simulate_detailed(
+ 528:     *,
+ 529:     trade_dates: List[str],
+ 530:     ranked_by_date: Dict[str, List[Dict[str, Any]]],
+ 531:     threshold: float,
+ 532:     initial_capital: float,
+ 533:     sell_rule: str,
+ 534:     variant_name: str,
+ 535:     alpha: int,
+ 536:     top_k: int,
+ 537:     max_board: Optional[int],
+ 538:     gap_min: Optional[float],
+ 539:     gap_max: Optional[float],
+ 540:     rules: ExecutionRules,
+ 541: ) -> Dict[str, Any]:
+ 542:     date_idx = {d: i for i, d in enumerate(trade_dates)}
+ 543:     cash = float(initial_capital)
+ 544:     total_fee = 0.0
+ 545:     trades: List[Dict[str, Any]] = []
+ 546:     skip_counts: Dict[str, int] = {
+ 547:         "no_candidate": 0,
+ 548:         "threshold_blocked": 0,
+ 549:         "board_blocked": 0,
+ 550:         "gap_blocked": 0,
+ 551:         "rule_blocked": 0,
+ 552:         "bad_buy_quote": 0,
+ 553:         "calendar_miss": 0,
+ 554:         "insufficient_cash": 0,
+ 555:         "bad_exit": 0,
+ 556:     }
+ 557: 
+ 558:     i = 0
+ 559:     while i < len(trade_dates):
+ 560:         d = trade_dates[i]
+ 561:         row, reason, rank = _select_candidate(
+ 562:             rows=ranked_by_date.get(d, []),
+ 563:             threshold=threshold,
+ 564:             top_k=top_k,
+ 565:             max_board=max_board,
+ 566:             gap_min=gap_min,
+ 567:             gap_max=gap_max,
+ 568:             rules=rules,
+ 569:         )
+ 570:         if row is None:
+ 571:             skip_counts[reason] = int(skip_counts.get(reason, 0)) + 1
+ 572:             i += 1
+ 573:             continue
+ 574: 
+ 575:         buy_date = _safe_date(row.get("next_date"))
+ 576:         buy_px = _safe_float(row.get("next_open"))
+ 577:         if not (math.isfinite(buy_px) and buy_px > 0 and buy_date):
+ 578:             skip_counts["bad_buy_quote"] += 1
+ 579:             i += 1
+ 580:             continue
+ 581:         if buy_date not in date_idx:
+ 582:             skip_counts["calendar_miss"] += 1
+ 583:             i += 1
+ 584:             continue
+ 585:         buy_idx = date_idx[buy_date]
+ 586:         if buy_idx <= i:
+ 587:             skip_counts["calendar_miss"] += 1
+ 588:             i += 1
+ 589:             continue
+ 590: 
+ 591:         lots = _max_lots_for_cash(
+ 592:             cash=cash,
+ 593:             buy_px=buy_px,
+ 594:             fee_rate=rules.fee_rate,
+ 595:             min_fee=rules.min_fee,
+ 596:         )
+ 597:         shares = lots * 100
+ 598:         if shares < 100:
+ 599:             skip_counts["insufficient_cash"] += 1
+ 600:             i += 1
+ 601:             continue
+ 602: 
+ 603:         sell_date, sell_px, sell_logic = _decide_sell(row, buy_price=buy_px, sell_rule=sell_rule)
+ 604:         if not sell_date or sell_date not in date_idx or not (math.isfinite(sell_px) and sell_px > 0):
+ 605:             skip_counts["bad_exit"] += 1
+ 606:             i += 1
+ 607:             continue
+ 608:         sell_idx = date_idx[sell_date]
+ 609:         if sell_idx <= buy_idx:
+ 610:             skip_counts["bad_exit"] += 1
+ 611:             i += 1
+ 612:             continue
+ 613: 
+ 614:         buy_amt = shares * buy_px
+ 615:         buy_fee = _calc_fee(buy_amt, fee_rate=rules.fee_rate, min_fee=rules.min_fee)
+ 616:         if buy_amt + buy_fee > cash + 1e-9:
+ 617:             skip_counts["insufficient_cash"] += 1
+ 618:             i += 1
+ 619:             continue
+ 620:         sell_amt = shares * sell_px
+ 621:         sell_fee = _calc_fee(sell_amt, fee_rate=rules.fee_rate, min_fee=rules.min_fee)
+ 622: 
+ 623:         cash_before = cash
+ 624:         cash = cash - buy_amt - buy_fee + sell_amt - sell_fee
+ 625:         total_fee += buy_fee + sell_fee
+ 626:         pnl = cash - cash_before
+ 627:         pnl_pct = pnl / (buy_amt + buy_fee) if (buy_amt + buy_fee) > 0 else 0.0
+ 628: 
+ 629:         pick_reason = (
+ 630:             f"Top{top_k} pick rank={rank}; score={_fmt_pct(_safe_float(row.get('score')))}; "
+ 631:             f"raw_prob={_fmt_pct(_safe_float(row.get('raw_prob')))}; "
+ 632:             f"board={int(_safe_float(row.get('board_count'), 0.0))}; "
+ 633:             f"ret1={_fmt_pct(_safe_float(row.get('ret1')))}."
+ 634:         )
+ 635:         buy_reason = (
+ 636:             f"model={variant_name}, alpha={alpha}; score>=threshold; "
+ 637:             f"gap_filter=[{_fmt_opt_pct(gap_min)}, {_fmt_opt_pct(gap_max)}], "
+ 638:             f"max_board={_fmt_opt_int(max_board)}; "
+ 639:             "T signal -> T+1 open buy, limit-up open is unfilled."
+ 640:         )
+ 641:         sell_reason = f"{sell_logic} (no intraday-high optimization)."
+ 642: 
+ 643:         trades.append(
+ 644:             {
+ 645:                 "signal_date": d,
+ 646:                 "buy_date": buy_date,
+ 647:                 "buy_time": "09:30:00",
+ 648:                 "sell_date": sell_date,
+ 649:                 "sell_time": "15:00:00",
+ 650:                 "stock_code": row.get("stock_code", ""),
+ 651:                 "stock_name": row.get("stock_name", ""),
+ 652:                 "shares": shares,
+ 653:                 "buy_price": buy_px,
+ 654:                 "sell_price": sell_px,
+ 655:                 "buy_amount": buy_amt,
+ 656:                 "sell_amount": sell_amt,
+ 657:                 "buy_fee": buy_fee,
+ 658:                 "sell_fee": sell_fee,
+ 659:                 "total_fee": buy_fee + sell_fee,
+ 660:                 "pnl": pnl,
+ 661:                 "pnl_pct": pnl_pct,
+ 662:                 "equity_after": cash,
+ 663:                 "pick_reason": pick_reason,
+ 664:                 "buy_reason": buy_reason,
+ 665:                 "sell_reason": sell_reason,
+ 666:             }
+ 667:         )
+ 668:         i = sell_idx + 1
+ 669: 
+ 670:     trade_n = len(trades)
+ 671:     win_n = sum(1 for t in trades if t["pnl"] > 0)
+ 672:     loss_n = sum(1 for t in trades if t["pnl"] < 0)
+ 673:     win_rate = (win_n / trade_n) if trade_n else 0.0
+ 674:     avg_pnl = (sum(t["pnl_pct"] for t in trades) / trade_n) if trade_n else 0.0
+ 675:     final_cap = cash
+ 676:     total_ret = final_cap / float(initial_capital) - 1.0
+ 677: 
+ 678:     curve = [initial_capital]
+ 679:     for t in trades:
+ 680:         curve.append(float(t["equity_after"]))
+ 681:     peak = curve[0] if curve else initial_capital
+ 682:     max_dd = 0.0
+ 683:     for v in curve:
+ 684:         peak = max(peak, v)
+ 685:         if peak > 0:
+ 686:             max_dd = max(max_dd, (peak - v) / peak)
+ 687: 
+ 688:     return {
+ 689:         "threshold": threshold,
+ 690:         "initial_capital": initial_capital,
+ 691:         "final_capital": final_cap,
+ 692:         "total_ret": total_ret,
+ 693:         "total_fee": total_fee,
+ 694:         "trade_n": trade_n,
+ 695:         "win_n": win_n,
+ 696:         "loss_n": loss_n,
+ 697:         "win_rate": win_rate,
+ 698:         "avg_pnl": avg_pnl,
+ 699:         "max_dd": max_dd,
+ 700:         "trades": trades,
+ 701:         "skip_counts": skip_counts,
+ 702:     }
+ 703: 
+ 704: 
+ 705: def _sort_key_for_threshold(sr: SearchResult, th: float) -> Tuple[float, float, float, float]:
+ 706:     m = sr.threshold_metrics.get(float(th), {})
+ 707:     return (
+ 708:         float(m.get("ret", -1e9)),
+ 709:         float(m.get("trades", 0.0)),
+ 710:         float(sr.min_ret),
+ 711:         float(sr.avg_ret),
+ 712:     )
+ 713: 
+ 714: 
+ 715: def _render_report(
+ 716:     *,
+ 717:     threshold: float,
+ 718:     start_date: str,
+ 719:     end_date: str,
+ 720:     variant: ModelVariant,
+ 721:     selected: SearchResult,
+ 722:     detail: Dict[str, Any],
+ 723:     rules: ExecutionRules,
+ 724:     search_top: List[SearchResult],
+ 725: ) -> str:
+ 726:     lines: List[str] = [
+ 727:         f"# Mock Backtest Report (threshold {threshold:.2f})",
+ 728:         "",
+ 729:         f"- Range: {start_date} ~ {end_date}",
+ 730:         f"- Initial capital: {detail['initial_capital']:.2f}",
+ 731:         (
+ 732:             f"- Final strategy: model={variant.name} "
+ 733:             f"(hidden={variant.hidden}, epochs={variant.epochs}, lr={variant.lr}, "
+ 734:             f"target=T+1 open -> T+2 close > {variant.target_gt:.2%})"
+ 735:         ),
+ 736:         f"- Score mapping: score = 1 - (1 - CDF(raw_prob))^{selected.alpha}",
+ 737:         f"- Sell rule: {selected.sell_rule}",
+ 738:         (
+ 739:             f"- Filters: TopK={selected.top_k}, gap=[{_fmt_opt_pct(selected.gap_min)}, "
+ 740:             f"{_fmt_opt_pct(selected.gap_max)}], max_board={_fmt_opt_int(selected.max_board)}"
+ 741:         ),
+ 742:         f"- Model train acc: {_fmt_pct(selected.train_acc)}",
+ 743:         "",
+ 744:         "## Rules (rules.txt)",
+ 745:         f"- Rules file: {rules.source_file}",
+ 746:         f"- Buy: T signal then T+{rules.buy_delay} open (current run uses T+1)",
+ 747:         f"- Limit-up open unfilled: {'yes' if rules.block_limit_up_buy else 'no'}",
+ 748:         f"- Fee: {rules.fee_rate*100:.4f}% per side, min {rules.min_fee:.2f} CNY/order",
+ 749:         "- Slippage: ignored",
+ 750:         "- Execution: buy at T+1 open, sell at rule close, no intraday-high optimization",
+ 751:         "",
+ 752:         "## Search Top 8 (current threshold)",
+ 753:     ]
+ 754:     for i, r in enumerate(search_top[:8], 1):
+ 755:         cur = r.threshold_metrics.get(float(threshold), {})
+ 756:         lines.append(
+ 757:             f"- {i}. {r.variant}, alpha={r.alpha}, rule={r.sell_rule}, topk={r.top_k}, "
+ 758:             f"gap=[{_fmt_opt_pct(r.gap_min)},{_fmt_opt_pct(r.gap_max)}], "
+ 759:             f"board<={_fmt_opt_int(r.max_board)}, train_acc={_fmt_pct(r.train_acc)}, "
+ 760:             f"R@{threshold:.2f}={_fmt_pct(cur.get('ret', float('nan')))}, "
+ 761:             f"trades={int(cur.get('trades', 0.0) or 0)}, minR={_fmt_pct(r.min_ret)}"
+ 762:         )
+ 763: 
+ 764:     lines.extend(
+ 765:         [
+ 766:             "",
+ 767:             "## Summary",
+ 768:             f"- Final capital: {detail['final_capital']:.2f}",
+ 769:             f"- Total return: {_fmt_pct(detail['total_ret'])}",
+ 770:             f"- Total fees: {detail['total_fee']:.2f}",
+ 771:             f"- Trades: {detail['trade_n']}",
+ 772:             f"- Win rate: {_fmt_pct(detail['win_rate'])} ({detail['win_n']}W/{detail['loss_n']}L)",
+ 773:             f"- Avg trade return: {_fmt_pct(detail['avg_pnl'])}",
+ 774:             f"- Max drawdown: {_fmt_pct(detail['max_dd'])}",
+ 775:             "",
+ 776:             "## Skip stats",
+ 777:             f"- no_candidate: {detail['skip_counts'].get('no_candidate', 0)}",
+ 778:             f"- threshold_blocked: {detail['skip_counts'].get('threshold_blocked', 0)}",
+ 779:             f"- board_blocked: {detail['skip_counts'].get('board_blocked', 0)}",
+ 780:             f"- gap_blocked: {detail['skip_counts'].get('gap_blocked', 0)}",
+ 781:             f"- rule_blocked: {detail['skip_counts'].get('rule_blocked', 0)}",
+ 782:             f"- bad_buy_quote: {detail['skip_counts'].get('bad_buy_quote', 0)}",
+ 783:             f"- calendar_miss: {detail['skip_counts'].get('calendar_miss', 0)}",
+ 784:             f"- insufficient_cash: {detail['skip_counts'].get('insufficient_cash', 0)}",
+ 785:             f"- bad_exit: {detail['skip_counts'].get('bad_exit', 0)}",
+ 786:             "",
+ 787:             "## Trades",
+ 788:         ]
+ 789:     )
+ 790: 
+ 791:     trades = detail["trades"]
+ 792:     if not trades:
+ 793:         lines.append("- No executed trades.")
+ 794:         return "\n".join(lines) + "\n"
+ 795: 
+ 796:     for i, t in enumerate(trades, 1):
+ 797:         lines.extend(
+ 798:             [
+ 799:                 "",
+ 800:                 f"### {i}. {t['stock_code']} {t['stock_name']}",
+ 801:                 f"- Signal date: {t['signal_date']}",
+ 802:                 f"- Pick reason: {t['pick_reason']}",
+ 803:                 "- Buy:",
+ 804:                 f"  - Time: {t['buy_date']} {t['buy_time']}",
+ 805:                 f"  - Price: {t['buy_price']:.3f}",
+ 806:                 f"  - Shares: {t['shares']}",
+ 807:                 f"  - Amount: {t['buy_amount']:.2f}",
+ 808:                 f"  - Fee: {t['buy_fee']:.2f}",
+ 809:                 f"  - Reason: {t['buy_reason']}",
+ 810:                 "- Sell:",
+ 811:                 f"  - Time: {t['sell_date']} {t['sell_time']}",
+ 812:                 f"  - Price: {t['sell_price']:.3f}",
+ 813:                 f"  - Amount: {t['sell_amount']:.2f}",
+ 814:                 f"  - Fee: {t['sell_fee']:.2f}",
+ 815:                 f"  - Reason: {t['sell_reason']}",
+ 816:                 "- Result:",
+ 817:                 f"  - Total fee: {t['total_fee']:.2f}",
+ 818:                 f"  - PnL: {t['pnl']:.2f}",
+ 819:                 f"  - Return: {_fmt_pct(t['pnl_pct'])}",
+ 820:                 f"  - Equity after trade: {t['equity_after']:.2f}",
+ 821:             ]
+ 822:         )
+ 823:     return "\n".join(lines) + "\n"
+ 824: 
+ 825: 
+ 826: def main(argv: Optional[Sequence[str]] = None) -> int:
+ 827:     args = parse_args(argv)
+ 828:     start_date = _to_iso(args.start_date)
+ 829:     thresholds = [float(x.strip()) for x in str(args.thresholds).split(",") if str(x).strip()]
+ 830:     thresholds = [max(0.50, min(0.99, t)) for t in thresholds]
+ 831:     thresholds = sorted(set(thresholds))
+ 832:     initial_capital = float(args.initial_capital)
+ 833:     rules = _load_execution_rules(args.rules_file)
+ 834: 
+ 835:     ns = argparse.Namespace(config=args.config, db_url=args.db_url, db=args.db)
+ 836:     engine = relay_model.make_engine(relay_model.resolve_db_target(ns))
+ 837:     trade_dates = _load_trade_dates(engine, start_date)
+ 838:     if not trade_dates:
+ 839:         raise SystemExit(f"No trade dates from {start_date}.")
+ 840:     end_date = trade_dates[-1]
+ 841: 
+ 842:     train_start = "2020-01-01"
+ 843:     train_start_dt = dt.datetime.strptime(train_start, "%Y-%m-%d").date()
+ 844:     load_start = (train_start_dt - dt.timedelta(days=60)).strftime("%Y-%m-%d")
+ 845: 
+ 846:     base_raw = relay_model.load_base_frame(engine, load_start, end_date)
+ 847:     if base_raw.empty:
+ 848:         raise SystemExit(f"No stock_daily data in range: {load_start}~{end_date}.")
+ 849:     full = relay_model.compute_flags_and_stock_features(base_raw)
+ 850:     market = relay_model.compute_market_features(full)
+ 851:     full_pool, _, _ = relay_model.build_sample_frames(
+ 852:         full_df=full,
+ 853:         market_df=market,
+ 854:         start_iso=train_start,
+ 855:         end_iso=end_date,
+ 856:         tp=0.02,
+ 857:         sl=-0.01,
+ 858:     )
+ 859:     if full_pool.empty:
+ 860:         raise SystemExit("No relay candidate rows after sample build.")
+ 861: 
+ 862:     full_pool["date"] = full_pool["date"].astype(str)
+ 863:     full_pool["stock_code"] = full_pool["stock_code"].astype(str)
+ 864:     full_pool = _attach_future_fields(engine, full_pool, train_start)
+ 865:     full_pool["tomorrow_stage"] = "N/A"
+ 866:     full_pool["tomorrow_prob"] = np.nan
+ 867: 
+ 868:     base = full_pool[full_pool["date"] >= start_date].copy()
+ 869:     if base.empty:
+ 870:         raise SystemExit(f"No candidate rows from {start_date}.")
+ 871: 
+ 872:     train_df = full_pool.copy()
+ 873:     train_df = train_df[(train_df["next_open"].notna()) & (train_df["next2_close"].notna())].copy()
+ 874:     train_df["next_open"] = pd.to_numeric(train_df["next_open"], errors="coerce")
+ 875:     train_df["next2_close"] = pd.to_numeric(train_df["next2_close"], errors="coerce")
+ 876:     train_df = train_df[(train_df["next_open"] > 0) & (train_df["next2_close"] > 0)].copy()
+ 877:     train_df["t1_hold_ret"] = train_df["next2_close"] / train_df["next_open"] - 1.0
+ 878:     if train_df.empty:
+ 879:         raise SystemExit("No train samples after T+1 buy / T+2 sell target.")
+ 880: 
+ 881:     feat_cols = _feature_cols()
+ 882:     x_train_raw = train_df[feat_cols].to_numpy(dtype=float)
+ 883:     x_all_raw = full_pool[feat_cols].to_numpy(dtype=float)
+ 884:     x_train, x_all, _, _ = relay_model.fill_and_scale(x_train_raw, x_all_raw)
+ 885: 
+ 886:     variants = [
+ 887:         ModelVariant("mlp_h48_e300_gt0", hidden=48, epochs=300, lr=0.030, weight_decay=1e-4, target_gt=0.00, seed=31),
+ 888:         ModelVariant("mlp_h56_e320_gt1", hidden=56, epochs=320, lr=0.030, weight_decay=1e-4, target_gt=0.01, seed=32),
+ 889:         ModelVariant("mlp_h64_e360_gt2", hidden=64, epochs=360, lr=0.028, weight_decay=1e-4, target_gt=0.02, seed=33),
+ 890:     ]
+ 891:     alphas = [2, 5, 10, 20]
+ 892:     sell_rules = ["t2_close", "weak_hold_t3", "strong_hold_t3"]
+ 893:     top_ks = [1, 3]
+ 894:     gap_windows: List[Tuple[Optional[float], Optional[float]]] = [
+ 895:         (None, None),
+ 896:         (-0.02, 0.05),
+ 897:     ]
+ 898:     board_caps: List[Optional[int]] = [None, 4]
+ 899: 
+ 900:     date_set = set(trade_dates)
+ 901:     search_logs: List[SearchResult] = []
+ 902:     variant_map: Dict[str, ModelVariant] = {v.name: v for v in variants}
+ 903:     variant_base_prob: Dict[str, np.ndarray] = {}
+ 904: 
+ 905:     for mv in variants:
+ 906:         print(f"[mock-backtest] train {mv.name} ...", flush=True)
+ 907:         y = (train_df["t1_hold_ret"] > float(mv.target_gt)).astype(np.int8).to_numpy(np.int8)
+ 908:         w1, b1, w2, b2 = relay_model.train_binary_mlp(
+ 909:             x=x_train,
+ 910:             y=y,
+ 911:             hidden_size=int(mv.hidden),
+ 912:             epochs=int(mv.epochs),
+ 913:             learning_rate=float(mv.lr),
+ 914:             weight_decay=float(mv.weight_decay),
+ 915:             seed=int(mv.seed),
+ 916:         )
+ 917:         train_pred, _ = relay_model.predict_binary_mlp(x_train, w1, b1, w2, b2)
+ 918:         _, all_prob = relay_model.predict_binary_mlp(x_all, w1, b1, w2, b2)
+ 919:         train_acc = float((train_pred == y).mean()) if len(y) else 0.0
+ 920:         print(f"[mock-backtest] train {mv.name} acc={train_acc*100:.2f}%", flush=True)
+ 921: 
+ 922:         prob_full = pd.Series(all_prob, index=full_pool.index)
+ 923:         base_prob = prob_full.reindex(base.index).to_numpy(dtype=float)
+ 924:         variant_base_prob[mv.name] = base_prob
+ 925: 
+ 926:         for alpha in alphas:
+ 927:             score = _score_from_raw_prob(base_prob, alpha=alpha)
+ 928:             scored = base.copy()
+ 929:             scored["raw_prob"] = base_prob
+ 930:             scored["score"] = score
+ 931:             scored = scored[scored["date"].isin(date_set)].copy()
+ 932:             ranked = _build_ranked_by_date(scored)
+ 933: 
+ 934:             for rule in sell_rules:
+ 935:                 for top_k in top_ks:
+ 936:                     for gap_min, gap_max in gap_windows:
+ 937:                         for max_board in board_caps:
+ 938:                             metrics: Dict[float, Dict[str, float]] = {}
+ 939:                             rets: List[float] = []
+ 940:                             for th in thresholds:
+ 941:                                 m = _simulate_fast(
+ 942:                                     trade_dates=trade_dates,
+ 943:                                     ranked_by_date=ranked,
+ 944:                                     threshold=float(th),
+ 945:                                     initial_capital=initial_capital,
+ 946:                                     sell_rule=rule,
+ 947:                                     top_k=top_k,
+ 948:                                     max_board=max_board,
+ 949:                                     gap_min=gap_min,
+ 950:                                     gap_max=gap_max,
+ 951:                                     rules=rules,
+ 952:                                 )
+ 953:                                 metrics[float(th)] = m
+ 954:                                 rets.append(float(m["ret"]))
+ 955: 
+ 956:                             min_ret = min(rets) if rets else float("-inf")
+ 957:                             avg_ret = (sum(rets) / len(rets)) if rets else float("-inf")
+ 958:                             objective = min_ret + 0.35 * avg_ret
+ 959:                             search_logs.append(
+ 960:                                 SearchResult(
+ 961:                                     variant=mv.name,
+ 962:                                     alpha=alpha,
+ 963:                                     sell_rule=rule,
+ 964:                                     top_k=top_k,
+ 965:                                     gap_min=gap_min,
+ 966:                                     gap_max=gap_max,
+ 967:                                     max_board=max_board,
+ 968:                                     train_acc=train_acc,
+ 969:                                     threshold_metrics=metrics,
+ 970:                                     min_ret=min_ret,
+ 971:                                     avg_ret=avg_ret,
+ 972:                                     objective=objective,
+ 973:                                 )
+ 974:                             )
+ 975: 
+ 976:     if not search_logs:
+ 977:         raise SystemExit("No strategy candidate generated.")
+ 978: 
+ 979:     for th in thresholds:
+ 980:         ranked_for_th = sorted(search_logs, key=lambda r: _sort_key_for_threshold(r, th), reverse=True)
+ 981:         chosen = ranked_for_th[0]
+ 982:         mv = variant_map[chosen.variant]
+ 983:         base_prob = variant_base_prob[chosen.variant]
+ 984: 
+ 985:         scored = base.copy()
+ 986:         scored["raw_prob"] = base_prob
+ 987:         scored["score"] = _score_from_raw_prob(base_prob, alpha=chosen.alpha)
+ 988:         scored = scored[scored["date"].isin(date_set)].copy()
+ 989:         ranked = _build_ranked_by_date(scored)
+ 990: 
+ 991:         detail = _simulate_detailed(
+ 992:             trade_dates=trade_dates,
+ 993:             ranked_by_date=ranked,
+ 994:             threshold=float(th),
+ 995:             initial_capital=initial_capital,
+ 996:             sell_rule=chosen.sell_rule,
+ 997:             variant_name=mv.name,
+ 998:             alpha=int(chosen.alpha),
+ 999:             top_k=int(chosen.top_k),
+1000:             max_board=chosen.max_board,
+1001:             gap_min=chosen.gap_min,
+1002:             gap_max=chosen.gap_max,
+1003:             rules=rules,
+1004:         )
+1005:         report = _render_report(
+1006:             threshold=float(th),
+1007:             start_date=start_date,
+1008:             end_date=end_date,
+1009:             variant=mv,
+1010:             selected=chosen,
+1011:             detail=detail,
+1012:             rules=rules,
+1013:             search_top=ranked_for_th[:8],
+1014:         )
+1015:         out = Path(f"mockReport_{_threshold_tag(float(th))}.md")
+1016:         out.write_text(report, encoding="utf-8")
+1017:         print(
+1018:             f"[mock-backtest] th={th:.2f} final={detail['final_capital']:.2f} "
+1019:             f"ret={detail['total_ret']*100:.2f}% fee={detail['total_fee']:.2f} trades={detail['trade_n']} "
+1020:             f"cfg={chosen.variant}/a{chosen.alpha}/{chosen.sell_rule}/k{chosen.top_k}/"
+1021:             f"gap[{chosen.gap_min},{chosen.gap_max}]/board<={chosen.max_board}"
+1022:         )
+1023:     return 0
+1024: 
+1025: 
+1026: if __name__ == "__main__":
+1027:     raise SystemExit(main())

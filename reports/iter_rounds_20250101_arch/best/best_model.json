@@ -1,0 +1,44 @@
+{
+  "best_round": 1,
+  "best_indicator": 88.25223449001052,
+  "best_avg_ret_pct": 2238.076666666667,
+  "best_avg_dd_pct": 25.36,
+  "metric_mode": "ret_over_dd",
+  "dd_penalty": 1.0,
+  "seed_offset": 0,
+  "retain_ratio": 0.8,
+  "thresholds": [
+    0.5,
+    0.75,
+    0.99
+  ],
+  "metrics_by_threshold": {
+    "0.5": {
+      "final": 325977.15,
+      "ret_pct": 3159.77,
+      "dd_pct": 26.53,
+      "fee": 5898.06,
+      "trades": 82,
+      "cfg": "mlp_h40_e280_gt5/a10/weak_hold_t3/k3/gap[None,None]/board<=2/risk=off/alloc=1.00"
+    },
+    "0.75": {
+      "final": 236355.26,
+      "ret_pct": 2263.55,
+      "dd_pct": 26.4,
+      "fee": 4304.38,
+      "trades": 81,
+      "cfg": "mlp_h40_e280_gt5/a10/weak_hold_t3/k3/gap[None,None]/board<=2/risk=off/alloc=1.00"
+    },
+    "0.99": {
+      "final": 139091.25,
+      "ret_pct": 1290.91,
+      "dd_pct": 23.15,
+      "fee": 3159.97,
+      "trades": 78,
+      "cfg": "mlp_h40_e280_gt5/a10/loss_rebound_t3/k2/gap[None,None]/board<=2/risk=off/alloc=1.00"
+    }
+  },
+  "rules_file": "rules.txt",
+  "start_date": "20250101",
+  "variant_profile": "expanded"
+}

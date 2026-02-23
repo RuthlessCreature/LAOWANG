@@ -287,6 +287,83 @@ DDL_STATEMENTS = [
         PRIMARY KEY (trade_date, stock_code)
     )
     """,
+    """
+    CREATE TABLE IF NOT EXISTS daily_review_akshare_pool (
+        trade_date VARCHAR(10) NOT NULL,
+        pool_type VARCHAR(16) NOT NULL,
+        stock_code VARCHAR(16) NOT NULL,
+        stock_name VARCHAR(255) NULL,
+        reason VARCHAR(255) NULL,
+        board_count INT NULL,
+        is_st INT NULL,
+        raw_json TEXT NULL,
+        updated_at VARCHAR(19) NULL,
+        PRIMARY KEY (trade_date, pool_type, stock_code)
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS daily_review_xgb_limit_up (
+        trade_date VARCHAR(10) NOT NULL,
+        stock_code VARCHAR(16) NOT NULL,
+        stock_name VARCHAR(255) NULL,
+        limit_up_days INT NULL,
+        change_percent DOUBLE NULL,
+        reason VARCHAR(255) NULL,
+        plates TEXT NULL,
+        is_st INT NULL,
+        raw_json TEXT NULL,
+        updated_at VARCHAR(19) NULL,
+        PRIMARY KEY (trade_date, stock_code)
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS model_relay_pool (
+        trade_date VARCHAR(10) NOT NULL,
+        rank_no INT NULL,
+        stock_code VARCHAR(16) NOT NULL,
+        stock_name VARCHAR(255) NULL,
+        model_prob DOUBLE NULL,
+        model_score DOUBLE NULL,
+        board_count INT NULL,
+        ret1 DOUBLE NULL,
+        close DOUBLE NULL,
+        next_trade_date VARCHAR(10) NULL,
+        next_open DOUBLE NULL,
+        is_st INT NULL,
+        broken_rate DOUBLE NULL,
+        red_rate DOUBLE NULL,
+        limit_down_count INT NULL,
+        pullback DOUBLE NULL,
+        limit_up_count INT NULL,
+        max_board INT NULL,
+        broken_count INT NULL,
+        amount_change5 DOUBLE NULL,
+        one_word_flag INT NULL,
+        model_version VARCHAR(64) NULL,
+        alpha INT NULL,
+        default_threshold DOUBLE NULL,
+        top_k INT NULL,
+        max_board_filter INT NULL,
+        gap_min DOUBLE NULL,
+        gap_max DOUBLE NULL,
+        max_broken_rate_filter DOUBLE NULL,
+        min_red_rate_filter DOUBLE NULL,
+        max_limit_down_filter INT NULL,
+        max_pullback_filter DOUBLE NULL,
+        risk_profile VARCHAR(32) NULL,
+        updated_at VARCHAR(19) NULL,
+        PRIMARY KEY (trade_date, stock_code)
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS model_relay_registry (
+        model_version VARCHAR(64) PRIMARY KEY,
+        model_file VARCHAR(255) NULL,
+        model_sha256 VARCHAR(64) NULL,
+        model_meta TEXT NULL,
+        updated_at VARCHAR(19) NULL
+    )
+    """,
 ]
 
 

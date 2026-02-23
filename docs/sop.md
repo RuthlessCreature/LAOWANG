@@ -43,20 +43,28 @@ python everyday.py --config config.ini --initial-start-date 2026-01-01
 
 ### 4.1 拉取 K 线（BaoStock）
 ```bash
-python getDataBaoStock.py --config config.ini --start-date 20250101 --end-date 20260123 --workers 1
+python getDataBaoStock.py --config config.ini --start-date 20200101 --end-date 20250101 --workers 4
+# 频率仅支持 d/5/15/30/60（BaoStock 不支持 1 分钟）
+# 网络不稳可降低 workers 或增加重试：--minute-retries 5 --minute-retry-sleep 1.5
+# 只拉分钟线（不会拉日线）
+python getDataBaoStock.py --config config.ini --frequency 5 --start-date 20200201 --end-date 20250101
+# 分钟线回测范围控制（最近 N 天）
+python getDataBaoStock.py --config config.ini --frequency 5 --end-date 20200101 --minute-lookback-days 20
+# 分钟线增量回补窗口（默认 3 天；0=严格增量）
+python getDataBaoStock.py --config config.ini --frequency 5 --minute-backfill-days 0 --start-date 20260201 --end-date 20260212
 ```
 
 ### 4.2 计算模型
 ```bash
-python scoring_laowang.py --config config.ini --start-date 2026-01-01 --end-date 2026-01-23 --workers 32 --top 200 --min-score 60
-python scoring_ywcx.py    --config config.ini --start-date 2026-01-01 --end-date 2026-01-23 --workers 32 --top 120 --min-score 40
-python scoring_stwg.py    --config config.ini --start-date 2026-01-01 --end-date 2026-01-23 --workers 32 --top 150 --min-score 55
-python scoring_fhkq.py    --config config.ini --start-date 2026-01-01 --end-date 2026-01-23 --workers 16
+python scoring_laowang.py --config config.ini --start-date 2026-01-01 --end-date 2026-01-28 --workers 32 --top 200 --min-score 60
+python scoring_ywcx.py    --config config.ini --start-date 2026-01-01 --end-date 2026-01-28 --workers 32 --top 120 --min-score 40
+python scoring_stwg.py    --config config.ini --start-date 2026-01-01 --end-date 2026-01-28 --workers 32 --top 150 --min-score 55
+python scoring_fhkq.py    --config config.ini --start-date 2026-01-01 --end-date 2026-01-28 --workers 16
 ```
 
 ### 4.3 启动 UI
 ```bash
-python ui.py --config config.ini --start-date 20260101 --port 80 --host 0.0.0.0
+python ui.py --config config.ini --start-date 20250101 --port 80 --host 0.0.0.0
 # http://127.0.0.1:8000
 ```
 
@@ -97,3 +105,74 @@ python ui.py --config config.ini --start-date 20260101 --port 80 --host 0.0.0.0
   - 确认当前时间是否已过 17:35（以服务器本地时间为准）
   - 检查是否启用了 `--disable-auto-update`
   - 查看 UI 启动日志中是否打印 “自动任务每个交易日 17:35 运行”
+
+## 8. 次日接力流程（dailyReview）
+
+### 8.1 首次初始化（建议全量）
+
+1) 初始化新表（若已存在会跳过）
+
+```bash
+python init.py --config config.ini
+```
+
+2) 训练并导出单文件模型
+
+```bash
+python fit_relay_model_file.py --config config.ini --model-file models/relay_model_active.npz
+```
+
+3) 拉取池子数据（Xuangubao/涨停宝）
+
+```bash
+python getDataDailyReview.py --config config.ini --start-date 20200101 --end-date 20260213
+```
+
+4) 计算接力结果并覆盖旧结果
+
+```bash
+python scoring_relay.py --config config.ini --start-date 20250101 --end-date 20260213 --model-file models/relay_model_active.npz --full-rebuild
+```
+
+### 8.2 日常增量
+
+```bash
+python everydayReview.py --config config.ini
+```
+
+说明：该命令会自动执行 `getDataDailyReview.py` + `scoring_relay.py`，只跑增量区间并覆盖区间旧值。
+
+### 8.3 UI 夜间自动任务
+
+- `everyday.py` 默认每个交易日 `17:35`
+- `everydayReview.py` 默认每个交易日 `21:00`
+
+可选参数：
+
+```bash
+python ui.py --config config.ini \
+  --auto-time 17:35 \
+  --auto-review-time 21:00 \
+  --auto-review-model-file models/relay_model_active.npz
+```
+
+禁用任一任务：
+
+- `--disable-auto-update`
+- `--disable-auto-review-update`
+
+### 8.4 快速校验 SQL
+
+```sql
+SELECT COUNT(*) FROM daily_review_akshare_pool WHERE trade_date='2026-02-13';
+SELECT COUNT(*) FROM daily_review_xgb_limit_up WHERE trade_date='2026-02-13';
+SELECT COUNT(*) FROM model_relay_pool WHERE trade_date='2026-02-13';
+SELECT model_version, updated_at FROM model_relay_registry ORDER BY updated_at DESC LIMIT 5;
+```
+
+### 8.5 模型替换规范
+
+- 线上读取模型文件路径：`models/relay_model_active.npz`
+- 替换方式：直接覆盖该文件，然后重新跑 `scoring_relay.py`（增量或全量）
+- UI 不在页面内训练模型，只读取 `model_relay_pool` 进行“次日接力方案”展示。
+

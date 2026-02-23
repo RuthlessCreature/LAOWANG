@@ -1,0 +1,61 @@
+{
+  "model_file": "models\\relay_model_active.npz",
+  "model_version": "mlp_h56_e320_gt1-2026-02-23T001849",
+  "variant": "mlp_h56_e320_gt1",
+  "alpha": 10,
+  "rules_file": "rules.txt",
+  "rule_buy_delay_t": 1,
+  "rule_block_limit_up_buy": true,
+  "rule_fee_rate": 0.00025,
+  "rule_min_fee": 5.0,
+  "date_range": {
+    "start": "2025-01-01",
+    "end": "2026-02-13",
+    "trade_days": 272
+  },
+  "sell_rule": "strong_hold_t3",
+  "exports": {
+    "top1_csv": "reports/relay_backtest_exports/relay_top1_trades_20260223_121814.csv",
+    "selected_csv": "reports/relay_backtest_exports/relay_selected_trades_20260223_121814.csv"
+  },
+  "results": {
+    "score_top1": {
+      "final_capital": 81059.23052200003,
+      "total_ret": 7.105923052200003,
+      "trade_n": 77,
+      "total_fee": 892.5877500000004,
+      "max_dd": 0.5601879447999997,
+      "skip_counts": {
+        "no_candidate": 0,
+        "threshold_blocked": 0,
+        "board_blocked": 0,
+        "risk_blocked": 0,
+        "gap_blocked": 0,
+        "rule_blocked": 14,
+        "bad_buy_quote": 0,
+        "calendar_miss": 0,
+        "insufficient_cash": 1,
+        "bad_exit": 0
+      }
+    },
+    "selected_stock": {
+      "final_capital": 214468.73803799998,
+      "total_ret": 20.4468738038,
+      "trade_n": 74,
+      "total_fee": 1944.4207500000002,
+      "max_dd": 0.47010805500000036,
+      "skip_counts": {
+        "no_candidate": 0,
+        "threshold_blocked": 1,
+        "board_blocked": 1,
+        "risk_blocked": 18,
+        "gap_blocked": 0,
+        "rule_blocked": 1,
+        "bad_buy_quote": 1,
+        "calendar_miss": 0,
+        "insufficient_cash": 0,
+        "bad_exit": 0
+      }
+    }
+  }
+}
