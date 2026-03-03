@@ -1,0 +1,24 @@
+latest_best_ret_pct=3055.384797
+latest_best_dd_pct=16.019106
+latest_best_trades=64
+latest_best_cfg=variant=mlp_h88_e500_gt1_wd2e4 seed=440 alpha=15 sell_rule=loss_rebound_t3 top_k=3 max_board=None gap_min=-0.0010 gap_max=0.0255 max_broken_rate=0.412 min_red_rate=0.287 max_limit_down=10 max_pullback=0.065 threshold=0.6000 alloc=0.9998
+
+new_search_files:
+- reports/search_1613_lossreb_ultrafine_anchor.csv (101101 rows)
+- reports/search_1613_lossreb_structural_refine.csv (314496 rows)
+- reports/search_1613_sellrule_probe.csv (72900 rows)
+- reports/search_1613_risk_ultra_at3055.csv (359712 rows)
+- reports/search_1613_variant_probe_after3055.csv (5184 rows)
+- reports/search_1613_seed_scan_300_600_step5.csv (488 rows)
+- reports/search_1613_seed_420_460_step1.csv (123 rows)
+- reports/search_1613_ultra_random_after3055.csv (406250 rows)
+
+best_backtest_csv:
+- reports/manual_1613_best_v6/mockOperations_best_3055.csv
+- reports/manual_1613_best_v6/summary_best_3055.txt
+
+model_seed_adaptive_search:
+- reports/search_1613_modelseed_adaptive_candidates.csv (26160 rows)
+- reports/search_1613_modelseed_adaptive.txt
+- best unchanged: ret=3055.384797 dd=16.019106 trades=64
+- reports/search_1613_seed_wide_h88_step25.csv (530 rows, coarse lattice had no feasible dd<=16.13 point; note seed 440 not in step-25 lattice)

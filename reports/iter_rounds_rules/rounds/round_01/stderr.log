@@ -1,0 +1,18 @@
+/Users/cengcheng/Documents/GitHub/LAOWANG/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+/Users/cengcheng/Documents/GitHub/LAOWANG/relay_strategy_model.py:171: FutureWarning: Downcasting object dtype arrays on .fillna, .ffill, .bfill is deprecated and will change in a future version. Call result.infer_objects(copy=False) instead. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+  out[f"lu_lag{lag}"] = grp["is_limit_up"].shift(lag).fillna(False).astype(np.int8)
+/Users/cengcheng/Documents/GitHub/LAOWANG/relay_strategy_model.py:172: FutureWarning: Downcasting object dtype arrays on .fillna, .ffill, .bfill is deprecated and will change in a future version. Call result.infer_objects(copy=False) instead. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+  out[f"broken_lag{lag}"] = grp["broken"].shift(lag).fillna(False).astype(np.int8)
+/Users/cengcheng/Documents/GitHub/LAOWANG/relay_strategy_model.py:171: FutureWarning: Downcasting object dtype arrays on .fillna, .ffill, .bfill is deprecated and will change in a future version. Call result.infer_objects(copy=False) instead. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+  out[f"lu_lag{lag}"] = grp["is_limit_up"].shift(lag).fillna(False).astype(np.int8)
+/Users/cengcheng/Documents/GitHub/LAOWANG/relay_strategy_model.py:172: FutureWarning: Downcasting object dtype arrays on .fillna, .ffill, .bfill is deprecated and will change in a future version. Call result.infer_objects(copy=False) instead. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+  out[f"broken_lag{lag}"] = grp["broken"].shift(lag).fillna(False).astype(np.int8)
+/Users/cengcheng/Documents/GitHub/LAOWANG/relay_strategy_model.py:171: FutureWarning: Downcasting object dtype arrays on .fillna, .ffill, .bfill is deprecated and will change in a future version. Call result.infer_objects(copy=False) instead. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+  out[f"lu_lag{lag}"] = grp["is_limit_up"].shift(lag).fillna(False).astype(np.int8)
+/Users/cengcheng/Documents/GitHub/LAOWANG/relay_strategy_model.py:172: FutureWarning: Downcasting object dtype arrays on .fillna, .ffill, .bfill is deprecated and will change in a future version. Call result.infer_objects(copy=False) instead. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+  out[f"broken_lag{lag}"] = grp["broken"].shift(lag).fillna(False).astype(np.int8)
+/Users/cengcheng/Documents/GitHub/LAOWANG/relay_strategy_model.py:187: FutureWarning: Downcasting object dtype arrays on .fillna, .ffill, .bfill is deprecated and will change in a future version. Call result.infer_objects(copy=False) instead. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+  mk["prev_is_limit_up"] = grp["is_limit_up"].shift(1).fillna(False)
+/Users/cengcheng/Documents/GitHub/LAOWANG/relay_strategy_model.py:188: FutureWarning: Downcasting object dtype arrays on .fillna, .ffill, .bfill is deprecated and will change in a future version. Call result.infer_objects(copy=False) instead. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+  mk["prev_is_broken"] = grp["broken"].shift(1).fillna(False)

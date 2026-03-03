@@ -1,0 +1,86 @@
+{
+  "best_round": 2,
+  "best_indicator": 587.66,
+  "best_avg_ret_pct": 694.76,
+  "best_avg_dd_pct": 17.85,
+  "metric_mode": "ret_minus_dd",
+  "dd_penalty": 6.0,
+  "seed_offset": 97,
+  "retain_ratio": 0.39999999999999997,
+  "min_return_floor": 0.0,
+  "adapt_cycle": 0,
+  "thresholds": [
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8,
+    0.85,
+    0.9
+  ],
+  "metrics_by_threshold": {
+    "0.6": {
+      "final": 79475.64,
+      "ret_pct": 694.76,
+      "dd_pct": 17.85,
+      "fee": 1029.96,
+      "trades": 57,
+      "cfg": "mlp_h40_e280_gt5/a10/strong_hold_t3/k1/gap[-0.02,0.04]/board<=3/risk=off/alloc=0.90 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.65": {
+      "final": 79475.64,
+      "ret_pct": 694.76,
+      "dd_pct": 17.85,
+      "fee": 1029.96,
+      "trades": 57,
+      "cfg": "mlp_h40_e280_gt5/a10/strong_hold_t3/k1/gap[-0.02,0.04]/board<=3/risk=off/alloc=0.90 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.7": {
+      "final": 79475.64,
+      "ret_pct": 694.76,
+      "dd_pct": 17.85,
+      "fee": 1029.96,
+      "trades": 57,
+      "cfg": "mlp_h40_e280_gt5/a10/strong_hold_t3/k1/gap[-0.02,0.04]/board<=3/risk=off/alloc=0.90 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.75": {
+      "final": 79475.64,
+      "ret_pct": 694.76,
+      "dd_pct": 17.85,
+      "fee": 1029.96,
+      "trades": 57,
+      "cfg": "mlp_h40_e280_gt5/a10/strong_hold_t3/k1/gap[-0.02,0.04]/board<=3/risk=off/alloc=0.90 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.8": {
+      "final": 79475.64,
+      "ret_pct": 694.76,
+      "dd_pct": 17.85,
+      "fee": 1029.96,
+      "trades": 57,
+      "cfg": "mlp_h40_e280_gt5/a10/strong_hold_t3/k1/gap[-0.02,0.04]/board<=3/risk=off/alloc=0.90 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.85": {
+      "final": 79475.64,
+      "ret_pct": 694.76,
+      "dd_pct": 17.85,
+      "fee": 1029.96,
+      "trades": 57,
+      "cfg": "mlp_h40_e280_gt5/a10/strong_hold_t3/k1/gap[-0.02,0.04]/board<=3/risk=off/alloc=0.90 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.9": {
+      "final": 79475.64,
+      "ret_pct": 694.76,
+      "dd_pct": 17.85,
+      "fee": 1029.96,
+      "trades": 57,
+      "cfg": "mlp_h40_e280_gt5/a10/strong_hold_t3/k1/gap[-0.02,0.04]/board<=3/risk=off/alloc=0.90 rules[ret_target=FAIL, dd_target=FAIL]"
+    }
+  },
+  "rules_file": "rules.txt",
+  "start_date": null,
+  "end_date": null,
+  "train_start_date": null,
+  "train_end_date": null,
+  "variant_profile": "aggressive",
+  "infinite_mode": false
+}

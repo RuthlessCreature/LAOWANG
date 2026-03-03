@@ -1,0 +1,72 @@
+{
+  "round": 4,
+  "adapt_cycle": 0,
+  "seed_offset": 291,
+  "variant_profile": "aggressive",
+  "retain_ratio": 0.5,
+  "min_return_floor": 0.0,
+  "metric_mode": "ret_minus_dd",
+  "dd_penalty": 6.0,
+  "avg_ret_pct": 680.9914285714286,
+  "avg_dd_pct": 18.095714285714283,
+  "indicator": 572.417142857143,
+  "improved": false,
+  "metrics_by_threshold": {
+    "0.6": {
+      "final": 61054.89,
+      "ret_pct": 510.55,
+      "dd_pct": 16.47,
+      "fee": 1224.77,
+      "trades": 78,
+      "cfg": "mlp_h128_e560_gt25/a15/t2_close/k2/gap[None,None]/board<=2/risk=strict/alloc=0.80 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.65": {
+      "final": 61054.89,
+      "ret_pct": 510.55,
+      "dd_pct": 16.47,
+      "fee": 1224.77,
+      "trades": 78,
+      "cfg": "mlp_h128_e560_gt25/a15/t2_close/k2/gap[None,None]/board<=2/risk=strict/alloc=0.80 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.7": {
+      "final": 61054.89,
+      "ret_pct": 510.55,
+      "dd_pct": 16.47,
+      "fee": 1224.77,
+      "trades": 78,
+      "cfg": "mlp_h128_e560_gt25/a15/t2_close/k2/gap[None,None]/board<=2/risk=strict/alloc=0.80 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.75": {
+      "final": 61054.89,
+      "ret_pct": 510.55,
+      "dd_pct": 16.47,
+      "fee": 1224.77,
+      "trades": 78,
+      "cfg": "mlp_h128_e560_gt25/a15/t2_close/k2/gap[None,None]/board<=2/risk=strict/alloc=0.80 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.8": {
+      "final": 80983.83,
+      "ret_pct": 709.84,
+      "dd_pct": 19.47,
+      "fee": 1703.58,
+      "trades": 78,
+      "cfg": "mlp_h128_e560_gt25/a15/t2_close/k2/gap[None,None]/board<=2/risk=strict/alloc=0.90 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.85": {
+      "final": 93063.64,
+      "ret_pct": 830.64,
+      "dd_pct": 20.57,
+      "fee": 1648.21,
+      "trades": 72,
+      "cfg": "mlp_h96_e460_gt15/a2/weak_hold_t3/k2/gap[None,None]/board<=2/risk=balanced/alloc=0.80 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.9": {
+      "final": 128426.06,
+      "ret_pct": 1184.26,
+      "dd_pct": 20.75,
+      "fee": 2353.62,
+      "trades": 72,
+      "cfg": "mlp_h96_e460_gt15/a2/weak_hold_t3/k2/gap[None,None]/board<=2/risk=balanced/alloc=0.90 rules[ret_target=OK, dd_target=FAIL]"
+    }
+  }
+}

@@ -394,6 +394,7 @@ HTML_PAGE = r"""<!doctype html>
         color: var(--muted);
       }
       .footer .status-line { margin-bottom: 6px; }
+      .footer .disclaimer { margin-top: 6px; opacity: 0.9; }
       .status-busy { color: var(--warn); }
       .status-ok { color: var(--ok); }
       .status-fail { color: var(--err); }
@@ -472,7 +473,7 @@ HTML_PAGE = r"""<!doctype html>
 
       <div class="panel">
         <div class="panel-header">
-          <div>精海狂蛆 连板博弈</div>
+          <div>粪海狂蛆 连板博弈</div>
           <div id="metaFhkq"></div>
         </div>
         <div class="table-wrap">
@@ -518,6 +519,7 @@ HTML_PAGE = r"""<!doctype html>
         <div id="autoStatusMain" class="status-line status-busy">everyday: waiting...</div>
         <div id="autoStatusReview" class="status-line status-busy">everydayReview: waiting...</div>
         <div>Georgij Xe & his boys</div>
+        <div class="disclaimer">免责声明：本页面内容仅供学习交流，不构成任何投资建议，盈亏自负。</div>
       </div>
     </div>
 
@@ -648,7 +650,7 @@ HTML_PAGE = r"""<!doctype html>
         const ok = st.laowang_rows > 0 || st.ywcx_rows > 0 || st.fhkq_rows > 0 || st.stwg_rows > 0;
         setStatus(
           ok ? "ok" : "warn",
-          `老王:${st.laowang_rows} 阳痿次新:${st.ywcx_rows} 精海狂蛆:${st.fhkq_rows} 缩头乌龟:${st.stwg_rows}`
+          `老王:${st.laowang_rows} 阳痿次新:${st.ywcx_rows} 粪海狂蛆:${st.fhkq_rows} 缩头乌龟:${st.stwg_rows}`
         );
 
         const relayMinProb = currentRelayMinProb();
@@ -1024,6 +1026,7 @@ class AppContext:
         self.relay_max_per_day = max(1, int(relay_max_per_day))
         self._relay_lock = threading.Lock()
         self._relay_cache: Optional[Dict[str, Any]] = None
+        self._market_snapshot_cache: Dict[str, Dict[str, Any]] = {}
 
     def _latest_trade_date(self) -> Optional[str]:
         with self.engine.connect() as conn:
@@ -1502,6 +1505,69 @@ class AppContext:
         except Exception:
             return "N/A"
 
+    def _market_snapshot_from_stock_daily(self, trade_date: str) -> Optional[Dict[str, Any]]:
+        cached = self._market_snapshot_cache.get(trade_date)
+        if cached is not None:
+            return dict(cached)
+
+        try:
+            d = dt.datetime.strptime(str(trade_date), "%Y-%m-%d").date()
+        except Exception:
+            return None
+
+        lookback_start = (d - dt.timedelta(days=90)).strftime("%Y-%m-%d")
+        try:
+            base = relay_model.load_base_frame(self.engine, lookback_start, trade_date)
+            if base is None or base.empty:
+                return None
+            full = relay_model.compute_flags_and_stock_features(base)
+            market = relay_model.compute_market_features(full)
+            if market is None or market.empty:
+                return None
+            market = market.copy()
+            market["date"] = market["date"].astype(str)
+            sub = market[market["date"] == trade_date]
+            if sub.empty:
+                return None
+            row = sub.iloc[0]
+        except Exception:
+            return None
+
+        limit_up_count = int(float(row.get("limit_up_count", 0.0) or 0.0))
+        limit_down_count = int(float(row.get("limit_down_count", 0.0) or 0.0))
+        broken_count = int(float(row.get("broken_count", 0.0) or 0.0))
+        max_board = int(float(row.get("max_board", 0.0) or 0.0))
+        broken_rate = float(row.get("broken_rate", np.nan))
+        red_rate = float(row.get("red_rate", np.nan))
+        broken_red_rate = float(row.get("broken_red_rate", np.nan))
+        amount_change5 = float(row.get("amount_change5", np.nan))
+
+        stage_row = pd.Series(
+            {
+                "limit_up_count": limit_up_count,
+                "broken_rate": broken_rate,
+                "max_board": max_board,
+            }
+        )
+        stage_label = _market_stage_label(stage_row)
+        stage_text, position, focus = _market_stage_from_label(stage_label)
+
+        out = {
+            "market_stage": stage_text,
+            "position": position,
+            "focus": focus,
+            "limit_up_count": limit_up_count,
+            "limit_down_count": limit_down_count,
+            "broken_count": broken_count,
+            "broken_rate": self._fmt_pct(broken_rate),
+            "max_board": max_board,
+            "red_rate": self._fmt_pct(red_rate),
+            "broken_red_rate": self._fmt_pct(broken_red_rate),
+            "amount_change5": self._fmt_pct(amount_change5),
+        }
+        self._market_snapshot_cache[trade_date] = dict(out)
+        return out
+
     def _stage_from_day(self, day_df) -> Tuple[str, str, str]:
         if day_df is None or day_df.empty:
             return "N/A", "N/A", "N/A"
@@ -1822,6 +1888,12 @@ class AppContext:
         limit_up_count = int(cnt.get("limit_up", 0))
         limit_down_count = int(cnt.get("limit_down", 0))
         broken_count = int(cnt.get("broken", 0))
+
+        if not rows and max_board <= 0 and limit_up_count == 0 and limit_down_count == 0 and broken_count == 0:
+            fallback = self._market_snapshot_from_stock_daily(trade_date)
+            if fallback is not None:
+                return fallback
+
         broken_rate = float("nan")
         denom = limit_up_count + broken_count
         if denom > 0:
@@ -2115,6 +2187,8 @@ class DailyJobRunner:
         ywcx_min_score: float,
         stwg_top: int,
         stwg_min_score: float,
+        review_job_runner: Optional["ReviewJobRunner"] = None,
+        run_review_after_everyday: bool = True,
     ) -> None:
         self.config = config
         self.db_url = db_url
@@ -2131,6 +2205,8 @@ class DailyJobRunner:
         self.ywcx_min_score = float(ywcx_min_score)
         self.stwg_top = int(stwg_top)
         self.stwg_min_score = float(stwg_min_score)
+        self.review_job_runner = review_job_runner
+        self.run_review_after_everyday = bool(run_review_after_everyday)
         self.hour, self.minute = self._parse_time(auto_time)
         now = dt.datetime.now()
         target = now.replace(hour=self.hour, minute=self.minute, second=0, microsecond=0)
@@ -2139,6 +2215,9 @@ class DailyJobRunner:
         self.message = "等待自动更新…"
         self.thread = threading.Thread(target=self._loop, name="DailyJobRunner", daemon=True)
         self.thread.start()
+
+    def bind_review_runner(self, review_job_runner: Optional["ReviewJobRunner"]) -> None:
+        self.review_job_runner = review_job_runner
 
     def _parse_time(self, s: str) -> Tuple[int, int]:
         try:
@@ -2177,6 +2256,13 @@ class DailyJobRunner:
             logging.info("[auto] everyday finished")
             self.state = "ok"
             self.message = f"{dt.date.today().strftime('%Y%m%d')} 数据更新完毕"
+            if self.run_review_after_everyday and self.review_job_runner is not None:
+                logging.info("[auto] chain trigger everydayReview after everyday")
+                review_ok = self.review_job_runner.run_now(trigger_date=dt.date.today(), source="after_everyday")
+                if review_ok:
+                    self.message = f"{dt.date.today().strftime('%Y%m%d')} 数据更新完毕，relay 同步完成"
+                else:
+                    self.message = f"{dt.date.today().strftime('%Y%m%d')} 数据更新完毕，relay 同步失败"
         except Exception:
             logging.exception("[auto] everyday failed")
             self.state = "fail"
@@ -2229,6 +2315,7 @@ class ReviewJobRunner:
         self.last_run_date: Optional[dt.date] = now.date() if now >= target else None
         self.state = "idle"
         self.message = "等待 nightly relay 更新…"
+        self._run_lock = threading.Lock()
         self.thread = threading.Thread(target=self._loop, name="ReviewJobRunner", daemon=True)
         self.thread.start()
 
@@ -2244,7 +2331,7 @@ class ReviewJobRunner:
     def _is_trading_day(self, day: dt.date) -> bool:
         return day.weekday() < 5
 
-    def _run_job(self) -> None:
+    def _run_job(self) -> bool:
         self.state = "running"
         self.message = f"{dt.date.today().strftime('%Y%m%d')} relay 更新中…"
         logging.info("[auto] everydayReview start")
@@ -2262,10 +2349,22 @@ class ReviewJobRunner:
             logging.info("[auto] everydayReview finished")
             self.state = "ok"
             self.message = f"{dt.date.today().strftime('%Y%m%d')} relay 更新完成"
+            return True
         except Exception:
             logging.exception("[auto] everydayReview failed")
             self.state = "fail"
             self.message = f"{dt.date.today().strftime('%Y%m%d')} relay 更新失败"
+            return False
+
+    def run_now(self, *, trigger_date: Optional[dt.date] = None, source: str = "manual") -> bool:
+        with self._run_lock:
+            if self.state == "running":
+                logging.info("[auto] everydayReview already running, skip source=%s", source)
+                return False
+            ok = self._run_job()
+            if trigger_date is not None:
+                self.last_run_date = trigger_date
+            return ok
 
     def _loop(self) -> None:
         while True:
@@ -2275,11 +2374,11 @@ class ReviewJobRunner:
                 today = now.date()
                 if self.last_run_date != today:
                     if self._is_trading_day(today):
-                        self._run_job()
+                        self.run_now(trigger_date=today, source="schedule")
                     else:
                         self.state = "idle"
                         self.message = f"{today.strftime('%Y%m%d')} 非交易日，relay 任务跳过"
-                    self.last_run_date = today
+                        self.last_run_date = today
                 target = target + dt.timedelta(days=1)
             sleep_sec = max(30.0, min(300.0, (target - now).total_seconds()))
             time.sleep(sleep_sec)
@@ -2349,6 +2448,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             ywcx_min_score=float(args.auto_ywcx_min_score),
             stwg_top=int(args.auto_stwg_top),
             stwg_min_score=float(args.auto_stwg_min_score),
+            review_job_runner=None,
+            run_review_after_everyday=True,
         )
     if not args.disable_auto_review_update:
         review_scheduler = ReviewJobRunner(
@@ -2361,6 +2462,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             data_workers=int(args.auto_review_data_workers),
             xgb_timeout=int(args.auto_review_xgb_timeout),
         )
+    if scheduler and review_scheduler:
+        scheduler.bind_review_runner(review_scheduler)
 
     min_date_iso = _normalize_iso_date(args.start_date)
     app = AppContext(

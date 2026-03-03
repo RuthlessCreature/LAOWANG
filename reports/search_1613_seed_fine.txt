@@ -1,0 +1,29 @@
+train=2020-01-01~2024-12-31 backtest=2025-01-01~2026-02-27
+seed_offsets=[0, 97, 194, 291, 388, 485, 582, 679]
+thresholds=76 allocs=31
+[train] seed=52
+[seed-done] seed=52 local_best_ret=52.2484% local_best_dd=39.5634% checked=2356
+[train] seed=149
+[seed-done] seed=149 local_best_ret=129.6762% local_best_dd=36.0206% checked=4712
+[train] seed=246
+[seed-done] seed=246 local_best_ret=-19.6395% local_best_dd=59.6869% checked=7068
+[train] seed=343
+[seed-done] seed=343 local_best_ret=-14.5090% local_best_dd=52.7670% checked=9424
+[train] seed=440
+[best<=16.13] ret=1068.656142% dd=15.980381% seed=440 th=0.5500 alloc=0.9400 trades=76
+[best<=16.13] ret=1113.261425% dd=15.964875% seed=440 th=0.5500 alloc=0.9460 trades=76
+[best<=16.13] ret=1114.004333% dd=15.983208% seed=440 th=0.5500 alloc=0.9480 trades=76
+[best<=16.13] ret=1118.064703% dd=15.983749% seed=440 th=0.5500 alloc=0.9500 trades=76
+[best<=16.13] ret=1145.602794% dd=16.127809% seed=440 th=0.5500 alloc=0.9600 trades=76
+[best<=16.13] ret=1149.750969% dd=16.127809% seed=440 th=0.5500 alloc=0.9640 trades=76
+[best<=16.13] ret=1151.521079% dd=16.127809% seed=440 th=0.5500 alloc=0.9660 trades=76
+[seed-done] seed=440 local_best_ret=1270.1613% local_best_dd=16.4015% checked=11780
+[train] seed=537
+[seed-done] seed=537 local_best_ret=-2.0128% local_best_dd=43.2574% checked=14136
+[train] seed=634
+[seed-done] seed=634 local_best_ret=-46.9512% local_best_dd=55.7718% checked=16492
+[train] seed=731
+[seed-done] seed=731 local_best_ret=256.0343% local_best_dd=32.2084% checked=18848
+checked=18848
+best=(1151.5210785898628, 16.127809410280413, {'seed': 440, 'seed_offset': 388, 'threshold': np.float64(0.55), 'alloc': np.float64(0.966), 'ret_pct': 1151.5210785898628, 'dd_pct': 16.127809410280413, 'trades': 76})
+saved=reports/search_1613_seed_fine_candidates.csv

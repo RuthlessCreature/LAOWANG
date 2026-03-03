@@ -1,0 +1,4 @@
+grid thresholds=101 allocs=81
+[best<=16.13] ret=1215.901069% dd=16.087074% th=0.5900 alloc=0.97645 trades=76
+[best<=16.13] ret=1215.913396% dd=16.105007% th=0.5900 alloc=0.97855 trades=76
+best=(1215.9133961160746, 16.105007306170315, {'threshold': np.float64(0.59), 'alloc': np.float64(0.97855), 'ret_pct': 1215.9133961160746, 'dd_pct': 16.105007306170315, 'trades': 76})

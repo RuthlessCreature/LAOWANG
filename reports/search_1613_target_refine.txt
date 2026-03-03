@@ -1,0 +1,32 @@
+refine_configs=12
+train=2020-01-01~2024-12-31 backtest=2025-01-01~2026-02-28
+variant=mlp_h88_e500_gt1_wd2e4 seed=440
+prepared_alphas=[13, 14, 15, 16]
+grid thresholds=151 allocs=101
+[best<=16.13] ret=1118.064703% dd=15.983749% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.45, 'min_red_rate': 0.24, 'max_limit_down': 20, 'max_pullback': 0.09, 'threshold': 0.55, 'alloc': 0.95, 'ret_pct': 1118.0647034360777, 'dd_pct': 15.983748783111901, 'trades': 76}
+[best<=16.13] ret=1145.927314% dd=16.127809% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.45, 'min_red_rate': 0.24, 'max_limit_down': 20, 'max_pullback': 0.09, 'threshold': 0.55, 'alloc': 0.9595, 'ret_pct': 1145.9273135643214, 'dd_pct': 16.127809410280413, 'trades': 76}
+[best<=16.13] ret=1149.380836% dd=16.127809% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.45, 'min_red_rate': 0.24, 'max_limit_down': 20, 'max_pullback': 0.09, 'threshold': 0.55, 'alloc': 0.9625, 'ret_pct': 1149.3808360643204, 'dd_pct': 16.127809410280413, 'trades': 76}
+[best<=16.13] ret=1149.586416% dd=16.127809% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.45, 'min_red_rate': 0.24, 'max_limit_down': 20, 'max_pullback': 0.09, 'threshold': 0.55, 'alloc': 0.9635, 'ret_pct': 1149.5864160643207, 'dd_pct': 16.127809410280413, 'trades': 76}
+[best<=16.13] ret=1149.750969% dd=16.127809% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.45, 'min_red_rate': 0.24, 'max_limit_down': 20, 'max_pullback': 0.09, 'threshold': 0.55, 'alloc': 0.964, 'ret_pct': 1149.750968589863, 'dd_pct': 16.127809410280413, 'trades': 76}
+[best<=16.13] ret=1149.946679% dd=16.127809% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.45, 'min_red_rate': 0.24, 'max_limit_down': 20, 'max_pullback': 0.09, 'threshold': 0.55, 'alloc': 0.965, 'ret_pct': 1149.946678589863, 'dd_pct': 16.127809410280413, 'trades': 76}
+[best<=16.13] ret=1150.369996% dd=16.127809% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.45, 'min_red_rate': 0.24, 'max_limit_down': 20, 'max_pullback': 0.09, 'threshold': 0.55, 'alloc': 0.9655, 'ret_pct': 1150.3699960898632, 'dd_pct': 16.127809410280413, 'trades': 76}
+[best<=16.13] ret=1151.521079% dd=16.127809% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.45, 'min_red_rate': 0.24, 'max_limit_down': 20, 'max_pullback': 0.09, 'threshold': 0.55, 'alloc': 0.966, 'ret_pct': 1151.5210785898628, 'dd_pct': 16.127809410280413, 'trades': 76}
+[best<=16.13] ret=1172.713577% dd=15.991261% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.45, 'min_red_rate': 0.24, 'max_limit_down': 20, 'max_pullback': 0.09, 'threshold': 0.55, 'alloc': 0.9665, 'ret_pct': 1172.7135771880428, 'dd_pct': 15.991261288632206, 'trades': 76}
+[best<=16.13] ret=1215.901069% dd=16.087074% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.45, 'min_red_rate': 0.24, 'max_limit_down': 20, 'max_pullback': 0.09, 'threshold': 0.55, 'alloc': 0.9765, 'ret_pct': 1215.9010685560747, 'dd_pct': 16.087074077311314, 'trades': 76}
+[cfg-done] 1/12 checked=15251
+[cfg-done] 2/12 checked=30502
+[cfg-done] 3/12 checked=45753
+[cfg-done] 4/12 checked=61004
+[cfg-done] 5/12 checked=76255
+[cfg-done] 6/12 checked=91506
+[cfg-done] 7/12 checked=106757
+[cfg-done] 8/12 checked=122008
+[cfg-done] 9/12 checked=137259
+[cfg-done] 10/12 checked=152510
+[cfg-done] 11/12 checked=167761
+[cfg-done] 12/12 checked=183012
+ultra thresholds=121 allocs=201
+[ultra best<=16.13] ret=1215.913396% dd=16.105007% cfg={'stage': 'ultra', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.45, 'min_red_rate': 0.24, 'max_limit_down': 20, 'max_pullback': 0.09, 'threshold': 0.52, 'alloc': 0.9787, 'ret_pct': 1215.9133961160746, 'dd_pct': 16.105007306170315, 'trades': 76}
+checked=207333
+best=(1215.9133961160746, 16.105007306170315, {'stage': 'ultra', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.45, 'min_red_rate': 0.24, 'max_limit_down': 20, 'max_pullback': 0.09, 'threshold': 0.52, 'alloc': 0.9787, 'ret_pct': 1215.9133961160746, 'dd_pct': 16.105007306170315, 'trades': 76})
+saved=reports/search_1613_target_refine_candidates.csv

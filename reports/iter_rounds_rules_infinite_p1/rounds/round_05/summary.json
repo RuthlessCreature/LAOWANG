@@ -1,0 +1,40 @@
+{
+  "round": 5,
+  "adapt_cycle": 2,
+  "seed_offset": 388,
+  "variant_profile": "aggressive",
+  "retain_ratio": 0.52,
+  "min_return_floor": 0.0,
+  "metric_mode": "ret_minus_dd",
+  "dd_penalty": 6.6,
+  "avg_ret_pct": 1269.41,
+  "avg_dd_pct": 16.45,
+  "indicator": 1160.8400000000001,
+  "improved": true,
+  "metrics_by_threshold": {
+    "0.65": {
+      "final": 136940.93,
+      "ret_pct": 1269.41,
+      "dd_pct": 16.45,
+      "fee": 2846.24,
+      "trades": 76,
+      "cfg": "mlp_h88_e500_gt1_wd2e4/a15/t2_close/k3/gap[-0.005,0.025]/board<=None/risk=balanced/alloc=1.00 rules[ret_target=OK, dd_target=FAIL]"
+    },
+    "0.75": {
+      "final": 136940.93,
+      "ret_pct": 1269.41,
+      "dd_pct": 16.45,
+      "fee": 2846.24,
+      "trades": 76,
+      "cfg": "mlp_h88_e500_gt1_wd2e4/a15/t2_close/k3/gap[-0.005,0.025]/board<=None/risk=balanced/alloc=1.00 rules[ret_target=OK, dd_target=FAIL]"
+    },
+    "0.85": {
+      "final": 136940.93,
+      "ret_pct": 1269.41,
+      "dd_pct": 16.45,
+      "fee": 2846.24,
+      "trades": 76,
+      "cfg": "mlp_h88_e500_gt1_wd2e4/a15/t2_close/k3/gap[-0.005,0.025]/board<=None/risk=balanced/alloc=1.00 rules[ret_target=OK, dd_target=FAIL]"
+    }
+  }
+}

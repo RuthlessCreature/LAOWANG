@@ -1,0 +1,48 @@
+alphas=17 thresholds=31 allocs=51
+[alpha-done] a=8 local_best_ret=411.3132% local_best_dd=26.1620% checked=1581
+[alpha-done] a=9 local_best_ret=417.4290% local_best_dd=26.6235% checked=3162
+[alpha-done] a=10 local_best_ret=408.6596% local_best_dd=25.7823% checked=4743
+[alpha-done] a=11 local_best_ret=351.5771% local_best_dd=26.3005% checked=6324
+[alpha-done] a=12 local_best_ret=575.7911% local_best_dd=19.5982% checked=7905
+[best<=16.13] ret=903.142960% dd=15.438604% alpha=13 th=0.550 alloc=0.940 trades=77
+[best<=16.13] ret=903.553385% dd=15.465067% alpha=13 th=0.550 alloc=0.941 trades=77
+[best<=16.13] ret=904.665865% dd=15.513815% alpha=13 th=0.550 alloc=0.943 trades=77
+[best<=16.13] ret=934.447491% dd=15.534214% alpha=13 th=0.550 alloc=0.945 trades=77
+[best<=16.13] ret=934.813911% dd=15.590889% alpha=13 th=0.550 alloc=0.948 trades=77
+[best<=16.13] ret=935.275809% dd=15.585221% alpha=13 th=0.550 alloc=0.949 trades=77
+[best<=16.13] ret=938.990326% dd=15.629403% alpha=13 th=0.550 alloc=0.950 trades=77
+[best<=16.13] ret=939.077172% dd=15.658900% alpha=13 th=0.550 alloc=0.953 trades=77
+[best<=16.13] ret=948.788424% dd=15.717350% alpha=13 th=0.550 alloc=0.957 trades=77
+[best<=16.13] ret=972.546895% dd=15.776429% alpha=13 th=0.550 alloc=0.959 trades=77
+[best<=16.13] ret=975.643290% dd=15.796927% alpha=13 th=0.550 alloc=0.961 trades=77
+[best<=16.13] ret=989.285621% dd=15.890536% alpha=13 th=0.550 alloc=0.967 trades=77
+[best<=16.13] ret=995.170506% dd=15.933371% alpha=13 th=0.550 alloc=0.970 trades=77
+[best<=16.13] ret=996.791517% dd=15.999606% alpha=13 th=0.550 alloc=0.973 trades=77
+[best<=16.13] ret=999.114697% dd=16.028214% alpha=13 th=0.550 alloc=0.974 trades=77
+[best<=16.13] ret=1000.494780% dd=16.039889% alpha=13 th=0.550 alloc=0.976 trades=77
+[best<=16.13] ret=1021.905613% dd=16.089610% alpha=13 th=0.550 alloc=0.979 trades=77
+[best<=16.13] ret=1023.828968% dd=16.122169% alpha=13 th=0.550 alloc=0.980 trades=77
+[alpha-done] a=13 local_best_ret=1033.9896% local_best_dd=16.2489% checked=9486
+[alpha-done] a=14 local_best_ret=1033.9896% local_best_dd=16.2489% checked=11067
+[best<=16.13] ret=1068.656142% dd=15.980381% alpha=15 th=0.550 alloc=0.940 trades=76
+[best<=16.13] ret=1068.754962% dd=15.980381% alpha=15 th=0.550 alloc=0.941 trades=76
+[best<=16.13] ret=1113.281947% dd=15.964875% alpha=15 th=0.550 alloc=0.945 trades=76
+[best<=16.13] ret=1114.579090% dd=15.983208% alpha=15 th=0.550 alloc=0.947 trades=76
+[best<=16.13] ret=1118.064703% dd=15.983749% alpha=15 th=0.550 alloc=0.950 trades=76
+[best<=16.13] ret=1145.602794% dd=16.127809% alpha=15 th=0.550 alloc=0.960 trades=76
+[best<=16.13] ret=1149.750969% dd=16.127809% alpha=15 th=0.550 alloc=0.964 trades=76
+[best<=16.13] ret=1149.946679% dd=16.127809% alpha=15 th=0.550 alloc=0.965 trades=76
+[best<=16.13] ret=1151.521079% dd=16.127809% alpha=15 th=0.550 alloc=0.966 trades=76
+[best<=16.13] ret=1215.510746% dd=16.105007% alpha=15 th=0.550 alloc=0.979 trades=76
+[alpha-done] a=15 local_best_ret=1241.6870% local_best_dd=16.4023% checked=12648
+[alpha-done] a=16 local_best_ret=767.2576% local_best_dd=37.9507% checked=14229
+[alpha-done] a=17 local_best_ret=674.3780% local_best_dd=36.6308% checked=15810
+[alpha-done] a=18 local_best_ret=453.0552% local_best_dd=44.6879% checked=17391
+[alpha-done] a=19 local_best_ret=528.0306% local_best_dd=39.8492% checked=18972
+[alpha-done] a=20 local_best_ret=550.7226% local_best_dd=37.8475% checked=20553
+[alpha-done] a=21 local_best_ret=740.5104% local_best_dd=28.7440% checked=22134
+[alpha-done] a=22 local_best_ret=1163.4045% local_best_dd=28.6201% checked=23715
+[alpha-done] a=23 local_best_ret=360.9424% local_best_dd=31.6334% checked=25296
+[alpha-done] a=24 local_best_ret=440.1770% local_best_dd=36.0868% checked=26877
+checked=26877
+best=(1215.5107461160744, 16.105007306170315, {'alpha': 15, 'threshold': np.float64(0.55), 'alloc': np.float64(0.979), 'ret_pct': 1215.5107461160744, 'dd_pct': 16.105007306170315, 'trades': 76})

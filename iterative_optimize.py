@@ -26,7 +26,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--db-url", default=None)
     p.add_argument("--db", default=None)
     p.add_argument("--rules-file", default="rules.txt")
-    p.add_argument("--start-date", default="2025-01-01")
+    p.add_argument("--start-date", default=None, help="Backtest start date (default follows rules file).")
+    p.add_argument("--end-date", default=None, help="Backtest end date (default follows rules file).")
+    p.add_argument("--train-start-date", default=None, help="Train start date (default follows rules file).")
+    p.add_argument("--train-end-date", default=None, help="Train end date (default follows rules file).")
     p.add_argument("--thresholds", default="0.5,0.75,0.99")
     p.add_argument("--initial-capital", type=float, default=10000.0)
     p.add_argument(
@@ -36,6 +39,7 @@ def parse_args() -> argparse.Namespace:
         help="Pass-through model-structure search profile for mock_backtest.",
     )
     p.add_argument("--max-rounds", type=int, default=20)
+    p.add_argument("--infinite", action="store_true", help="Do not stop on max-rounds/patience; keep adaptive iterations.")
     p.add_argument("--patience", type=int, default=10)
     p.add_argument(
         "--metric-mode",
@@ -54,6 +58,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--retain-cycle", type=int, default=5)
     p.add_argument("--min-return-floor", type=float, default=4.0)
     p.add_argument("--seed-step", type=int, default=97)
+    p.add_argument("--adaptive-retain-drop", type=float, default=0.03, help="Plateau trigger: reduce base retain ratio by this step.")
+    p.add_argument("--adaptive-floor-decay", type=float, default=0.90, help="Plateau trigger: multiply min-return-floor by this factor.")
+    p.add_argument("--adaptive-penalty-step", type=float, default=0.25, help="Plateau trigger: increase dd-penalty by this step.")
     p.add_argument("--report-dir", default="reports/iter_rounds")
     return p.parse_args()
 
@@ -99,6 +106,19 @@ def calc_indicator(
     return ret_v / denom
 
 
+PROFILE_ORDER = ["base", "expanded", "aggressive"]
+
+
+def _next_variant_profile(current: str) -> str:
+    key = str(current or "base").strip().lower()
+    if key not in PROFILE_ORDER:
+        return "aggressive"
+    idx = PROFILE_ORDER.index(key)
+    if idx >= len(PROFILE_ORDER) - 1:
+        return PROFILE_ORDER[-1]
+    return PROFILE_ORDER[idx + 1]
+
+
 def run_one_round(
     *,
     round_idx: int,
@@ -106,6 +126,8 @@ def run_one_round(
     thresholds: List[float],
     seed_offset: int,
     retain_ratio: float,
+    variant_profile: str,
+    min_return_floor: float,
 ) -> Tuple[Dict[float, Dict[str, object]], str, str]:
     cmd = [
         sys.executable,
@@ -115,21 +137,27 @@ def run_one_round(
         str(args.config),
         "--rules-file",
         str(args.rules_file),
-        "--start-date",
-        str(args.start_date),
         "--thresholds",
         str(args.thresholds),
         "--initial-capital",
         str(float(args.initial_capital)),
         "--variant-profile",
-        str(args.variant_profile),
+        str(variant_profile),
         "--seed-offset",
         str(int(seed_offset)),
         "--retain-ratio",
         f"{float(retain_ratio):.4f}",
         "--min-return-floor",
-        str(float(args.min_return_floor)),
+        str(float(min_return_floor)),
     ]
+    if args.start_date:
+        cmd.extend(["--start-date", str(args.start_date)])
+    if args.end_date:
+        cmd.extend(["--end-date", str(args.end_date)])
+    if args.train_start_date:
+        cmd.extend(["--train-start-date", str(args.train_start_date)])
+    if args.train_end_date:
+        cmd.extend(["--train-end-date", str(args.train_end_date)])
     if args.db_url:
         cmd.extend(["--db-url", str(args.db_url)])
     if args.db:
@@ -160,8 +188,22 @@ def write_history_md(
     metric_mode: str,
     dd_penalty: float,
     variant_profile: str,
+    infinite: bool,
 ) -> None:
-    headers = ["Round", "SeedOffset", "RetainRatio", "AvgRet", "AvgDD", "Indicator", "Improved"]
+    headers = [
+        "Round",
+        "AdaptCycle",
+        "SeedOffset",
+        "Variant",
+        "RetainRatio",
+        "MinFloor",
+        "Metric",
+        "DDPenalty",
+        "AvgRet",
+        "AvgDD",
+        "Indicator",
+        "Improved",
+    ]
     for th in thresholds:
         tag = threshold_tag(th)
         headers.extend([f"R@{tag}", f"DD@{tag}"])
@@ -171,9 +213,10 @@ def write_history_md(
         "",
         (
             f"- Stop rule: consecutive {int(patience)} rounds without indicator improvement "
-            f"(metric={metric_mode}, dd_penalty={float(dd_penalty):.2f})"
+            f"(initial metric={metric_mode}, initial dd_penalty={float(dd_penalty):.2f})"
         ),
-        f"- Variant profile: {variant_profile}",
+        f"- Variant profile (initial): {variant_profile}",
+        f"- Infinite adaptive mode: {'on' if infinite else 'off'}",
         f"- Best round: {best_round}",
         "",
         "| " + " | ".join(headers) + " |",
@@ -183,8 +226,13 @@ def write_history_md(
     for row in rows:
         cols = [
             str(row["round"]),
+            str(row.get("adapt_cycle", 0)),
             str(row["seed_offset"]),
+            str(row.get("variant_profile", "N/A")),
             f"{float(row['retain_ratio']):.2f}",
+            f"{float(row.get('min_return_floor', 0.0)):.2f}",
+            str(row.get("metric_mode", "")),
+            f"{float(row.get('dd_penalty', 0.0)):.2f}",
             f"{float(row['avg_ret_pct']):.2f}%",
             f"{float(row['avg_dd_pct']):.2f}%",
             f"{float(row['indicator']):.6f}",
@@ -212,27 +260,49 @@ def main() -> int:
     best_dir.mkdir(parents=True, exist_ok=True)
 
     history_rows: List[Dict[str, object]] = []
-    metric_mode = str(args.metric_mode)
-    dd_penalty = float(args.dd_penalty)
+
+    initial_metric_mode = str(args.metric_mode)
+    initial_dd_penalty = float(args.dd_penalty)
+    metric_mode = initial_metric_mode
+    dd_penalty = initial_dd_penalty
+
+    variant_profile = str(args.variant_profile)
+    min_return_floor = float(args.min_return_floor)
+    base_retain_ratio = float(args.base_retain_ratio)
+    retain_step = float(args.retain_step)
+    retain_cycle = max(1, int(args.retain_cycle))
+
+    seed_step = int(args.seed_step)
+    max_rounds = max(1, int(args.max_rounds))
+    patience = max(1, int(args.patience))
+    infinite = bool(args.infinite)
 
     best_score = float("-inf")
     best_avg_ret_pct = float("-inf")
     best_avg_dd_pct = float("inf")
     best_round = 0
     no_improve = 0
+    adapt_cycle = 0
+    rnd = 1
 
-    for rnd in range(1, max(1, int(args.max_rounds)) + 1):
+    while True:
+        if (not infinite) and rnd > max_rounds:
+            print(f"[iter] stop: reached max-rounds={max_rounds}", flush=True)
+            break
+
         retain_ratio = min(
             1.0,
-            max(0.01, float(args.base_retain_ratio) + float(args.retain_step) * ((rnd - 1) % max(1, int(args.retain_cycle)))),
+            max(0.01, float(base_retain_ratio) + float(retain_step) * ((rnd - 1) % retain_cycle)),
         )
-        seed_offset = int((rnd - 1) * int(args.seed_step))
+        seed_offset = int((rnd - 1) * seed_step)
         metrics, stdout_text, stderr_text = run_one_round(
             round_idx=rnd,
             args=args,
             thresholds=thresholds,
             seed_offset=seed_offset,
             retain_ratio=retain_ratio,
+            variant_profile=variant_profile,
+            min_return_floor=min_return_floor,
         )
 
         round_dir = rounds_dir / f"round_{rnd:02d}"
@@ -242,9 +312,12 @@ def main() -> int:
 
         for th in thresholds:
             tag = threshold_tag(th)
-            src = Path(f"mockReport_{tag}.md")
-            if src.exists():
-                shutil.copy2(src, round_dir / src.name)
+            report_src = Path(f"mockReport_{tag}.md")
+            if report_src.exists():
+                shutil.copy2(report_src, round_dir / report_src.name)
+            ops_src = Path(f"mockOperations_{tag}.csv")
+            if ops_src.exists():
+                shutil.copy2(ops_src, round_dir / ops_src.name)
 
         ret_values = [float(metrics[round(float(th), 2)]["ret_pct"]) for th in thresholds]
         dd_values = [float(metrics[round(float(th), 2)]["dd_pct"]) for th in thresholds]
@@ -266,9 +339,12 @@ def main() -> int:
             no_improve = 0
             for th in thresholds:
                 tag = threshold_tag(th)
-                src = round_dir / f"mockReport_{tag}.md"
-                if src.exists():
-                    shutil.copy2(src, best_dir / src.name)
+                report_src = round_dir / f"mockReport_{tag}.md"
+                if report_src.exists():
+                    shutil.copy2(report_src, best_dir / report_src.name)
+                ops_src = round_dir / f"mockOperations_{tag}.csv"
+                if ops_src.exists():
+                    shutil.copy2(ops_src, best_dir / ops_src.name)
             best_payload = {
                 "best_round": best_round,
                 "best_indicator": best_score,
@@ -278,11 +354,17 @@ def main() -> int:
                 "dd_penalty": dd_penalty,
                 "seed_offset": seed_offset,
                 "retain_ratio": retain_ratio,
+                "min_return_floor": min_return_floor,
+                "adapt_cycle": adapt_cycle,
                 "thresholds": thresholds,
                 "metrics_by_threshold": metrics,
                 "rules_file": args.rules_file,
                 "start_date": args.start_date,
-                "variant_profile": args.variant_profile,
+                "end_date": args.end_date,
+                "train_start_date": args.train_start_date,
+                "train_end_date": args.train_end_date,
+                "variant_profile": variant_profile,
+                "infinite_mode": infinite,
             }
             (best_dir / "best_model.json").write_text(
                 json.dumps(best_payload, ensure_ascii=False, indent=2),
@@ -293,8 +375,13 @@ def main() -> int:
 
         row = {
             "round": rnd,
+            "adapt_cycle": adapt_cycle,
             "seed_offset": seed_offset,
+            "variant_profile": variant_profile,
             "retain_ratio": retain_ratio,
+            "min_return_floor": min_return_floor,
+            "metric_mode": metric_mode,
+            "dd_penalty": dd_penalty,
             "avg_ret_pct": avg_ret_pct,
             "avg_dd_pct": avg_dd_pct,
             "indicator": indicator,
@@ -305,15 +392,36 @@ def main() -> int:
         (round_dir / "summary.json").write_text(json.dumps(row, ensure_ascii=False, indent=2), encoding="utf-8")
 
         print(
-            f"[iter] round={rnd} seed={seed_offset} retain={retain_ratio:.2f} "
-            f"avg_ret={avg_ret_pct:.2f}% avg_dd={avg_dd_pct:.2f}% "
-            f"indicator={indicator:.6f} "
+            f"[iter] round={rnd} cycle={adapt_cycle} seed={seed_offset} "
+            f"variant={variant_profile} retain={retain_ratio:.2f} floor={min_return_floor:.2f} "
+            f"metric={metric_mode}(dd_penalty={dd_penalty:.2f}) "
+            f"avg_ret={avg_ret_pct:.2f}% avg_dd={avg_dd_pct:.2f}% indicator={indicator:.6f} "
             f"{'IMPROVED' if improved else f'no_improve={no_improve}'}",
             flush=True,
         )
-        if no_improve >= int(args.patience):
-            print(f"[iter] stop: reached patience={int(args.patience)} at round={rnd}", flush=True)
-            break
+
+        if no_improve >= patience:
+            if not infinite:
+                print(f"[iter] stop: reached patience={patience} at round={rnd}", flush=True)
+                break
+
+            adapt_cycle += 1
+            no_improve = 0
+            old_variant = variant_profile
+            variant_profile = _next_variant_profile(variant_profile)
+            base_retain_ratio = max(0.50, min(1.0, base_retain_ratio - float(args.adaptive_retain_drop)))
+            floor_decay = max(0.10, min(0.99, float(args.adaptive_floor_decay)))
+            min_return_floor = max(0.0, min_return_floor * floor_decay)
+            dd_penalty = min(20.0, dd_penalty + float(args.adaptive_penalty_step))
+            metric_mode = "ret_minus_dd" if metric_mode == "ret_over_dd" else "ret_over_dd"
+            print(
+                "[iter][adaptive] plateau detected -> "
+                f"cycle={adapt_cycle} variant={old_variant}->{variant_profile} "
+                f"base_retain={base_retain_ratio:.2f} floor={min_return_floor:.2f} "
+                f"metric={metric_mode} dd_penalty={dd_penalty:.2f}",
+                flush=True,
+            )
+        rnd += 1
 
     if best_round <= 0:
         raise SystemExit("No valid round produced.")
@@ -323,16 +431,20 @@ def main() -> int:
         src = best_dir / f"mockReport_{tag}.md"
         if src.exists():
             shutil.copy2(src, Path(f"mockReport_{tag}.md"))
+        ops_src = best_dir / f"mockOperations_{tag}.csv"
+        if ops_src.exists():
+            shutil.copy2(ops_src, Path(f"mockOperations_{tag}.csv"))
 
     write_history_md(
         report_dir / "iteration_history.md",
         history_rows,
         thresholds,
         best_round,
-        patience=int(args.patience),
-        metric_mode=metric_mode,
-        dd_penalty=dd_penalty,
+        patience=patience,
+        metric_mode=initial_metric_mode,
+        dd_penalty=initial_dd_penalty,
         variant_profile=str(args.variant_profile),
+        infinite=infinite,
     )
     print(
         f"[iter] best_round={best_round} best_indicator={best_score:.6f} "

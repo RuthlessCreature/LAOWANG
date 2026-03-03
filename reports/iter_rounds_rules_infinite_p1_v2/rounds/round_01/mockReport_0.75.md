@@ -1,0 +1,822 @@
+# Mock Backtest Report (threshold 0.75)
+
+- Range: 2025-01-01 ~ 2026-02-27
+- Initial capital: 10000.00
+- Final strategy: model=mlp_h48_e300_gt0 (hidden=48, epochs=300, lr=0.03, target=T+1 open -> T+2 close > 0.00%)
+- Score mapping: score = 1 - (1 - CDF(raw_prob))^10
+- Sell rule: strong_hold_t3
+- Filters: TopK=2, gap=[-0.50%, 1.50%], max_board=None, risk=ultra, broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%, capital_use=95%
+- Model train acc: 56.84%
+
+## Rules (rules.txt)
+- Rules file: rules.txt
+- Buy: T signal then T+1 open (current run uses T+1)
+- Limit-up open unfilled: yes
+- Fee: 0.0250% per side, min 5.00 CNY/order
+- Slippage: ignored
+- Execution: buy at T+1 open, sell at rule close, no intraday-high optimization
+- Selection policy: keep candidates above max(30% of best return, 0.00%), then minimize drawdown
+- Rule targets: return>=1000.0%, max_dd<=15.0%; if feasible candidates exist, prioritize rule-feasible set first
+
+## Search Top 8 (current threshold)
+- 1. mlp_h88_e500_gt1_wd2e4, alpha=2, rule=strong_hold_t3, topk=3, gap=[None,None], board<=3, risk=defensive, alloc=100%, train_acc=61.83%, R@0.75=1277.11%, DD@0.75=19.78%, trades=51, minR=1277.11%
+- 2. mlp_h64_e360_gt2, alpha=10, rule=weak_hold_t3, topk=3, gap=[None,None], board<=None, risk=off, alloc=100%, train_acc=66.38%, R@0.75=1265.68%, DD@0.75=34.35%, trades=84, minR=1265.68%
+- 3. mlp_h88_e500_gt1_wd2e4, alpha=2, rule=strong_hold_t3, topk=3, gap=[None,None], board<=3, risk=ultra, alloc=100%, train_acc=61.83%, R@0.75=1174.47%, DD@0.75=42.34%, trades=64, minR=1174.47%
+- 4. mlp_h88_e500_gt1_wd2e4, alpha=10, rule=strong_hold_t3, topk=2, gap=[None,None], board<=3, risk=ultra, alloc=100%, train_acc=61.83%, R@0.75=1165.44%, DD@0.75=18.93%, trades=63, minR=1165.44%
+- 5. mlp_h64_e360_gt2, alpha=10, rule=weak_hold_t3, topk=3, gap=[None,None], board<=None, risk=off, alloc=95%, train_acc=66.38%, R@0.75=1125.25%, DD@0.75=32.82%, trades=84, minR=1125.25%
+- 6. mlp_h88_e500_gt1_wd2e4, alpha=2, rule=strong_hold_t3, topk=3, gap=[None,None], board<=3, risk=defensive, alloc=95%, train_acc=61.83%, R@0.75=1105.97%, DD@0.75=18.49%, trades=51, minR=1105.97%
+- 7. mlp_h88_e500_gt1_wd2e4, alpha=10, rule=strong_hold_t3, topk=2, gap=[None,None], board<=3, risk=ultra, alloc=95%, train_acc=61.83%, R@0.75=1066.04%, DD@0.75=18.12%, trades=63, minR=1066.04%
+- 8. mlp_h88_e500_gt1_wd2e4, alpha=5, rule=strong_hold_t3, topk=2, gap=[None,None], board<=3, risk=ultra, alloc=100%, train_acc=61.83%, R@0.75=1017.77%, DD@0.75=19.99%, trades=63, minR=1017.77%
+
+## Summary
+- Final capital: 51870.07
+- Total return: 418.70%
+- Total fees: 452.68
+- Trades: 35
+- Win rate: 62.86% (22W/13L)
+- Avg trade return: 5.66%
+- Max drawdown: 11.07%
+
+## Skip stats
+- no_candidate: 0
+- threshold_blocked: 1
+- board_blocked: 0
+- risk_blocked: 77
+- gap_blocked: 80
+- rule_blocked: 0
+- bad_buy_quote: 0
+- calendar_miss: 0
+- insufficient_cash: 0
+- bad_exit: 0
+
+## Trades
+
+### 1. 002815 崇达技术
+- Signal date: 2025-01-14
+- Pick reason: Top2 pick rank=2; score=100.00%; raw_prob=58.17%; board=1; ret1=10.03%.
+- Buy:
+  - Time: 2025-01-15 09:30:00
+  - Price: 10.685
+  - Shares: 800
+  - Amount: 8547.83
+  - Fee: 5.00
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-01-16 15:00:00
+  - Price: 10.507
+  - Amount: 8405.50
+  - Fee: 5.00
+  - Reason: T+2收盘上涨-1.67%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 10.00
+  - PnL: -152.33
+  - Return: -1.78%
+  - Equity after trade: 9847.67
+
+### 2. 605179 一鸣食品
+- Signal date: 2025-01-17
+- Pick reason: Top2 pick rank=2; score=100.00%; raw_prob=45.63%; board=1; ret1=10.02%.
+- Buy:
+  - Time: 2025-01-20 09:30:00
+  - Price: 23.796
+  - Shares: 300
+  - Amount: 7138.69
+  - Fee: 5.00
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-01-21 15:00:00
+  - Price: 23.516
+  - Amount: 7054.81
+  - Fee: 5.00
+  - Reason: T+2收盘上涨-1.17%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 10.00
+  - PnL: -93.88
+  - Return: -1.31%
+  - Equity after trade: 9753.79
+
+### 3. 601777 千里科技
+- Signal date: 2025-02-19
+- Pick reason: Top2 pick rank=2; score=100.00%; raw_prob=50.80%; board=1; ret1=10.03%.
+- Buy:
+  - Time: 2025-02-20 09:30:00
+  - Price: 8.680
+  - Shares: 1000
+  - Amount: 8680.00
+  - Fee: 5.00
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-02-21 15:00:00
+  - Price: 9.050
+  - Amount: 9050.00
+  - Fee: 5.00
+  - Reason: T+2收盘上涨4.26%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 10.00
+  - PnL: 360.00
+  - Return: 4.15%
+  - Equity after trade: 10113.79
+
+### 4. 002369 卓翼科技
+- Signal date: 2025-02-27
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=51.97%; board=1; ret1=10.02%.
+- Buy:
+  - Time: 2025-02-28 09:30:00
+  - Price: 13.730
+  - Shares: 600
+  - Amount: 8238.00
+  - Fee: 5.00
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-03-03 15:00:00
+  - Price: 11.880
+  - Amount: 7128.00
+  - Fee: 5.00
+  - Reason: T+2收盘上涨-13.47%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 10.00
+  - PnL: -1120.00
+  - Return: -13.59%
+  - Equity after trade: 8993.79
+
+### 5. 000678 襄阳轴承
+- Signal date: 2025-03-10
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=53.16%; board=1; ret1=10.05%.
+- Buy:
+  - Time: 2025-03-11 09:30:00
+  - Price: 10.520
+  - Shares: 800
+  - Amount: 8416.00
+  - Fee: 5.00
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-03-13 15:00:00
+  - Price: 13.840
+  - Amount: 11072.00
+  - Fee: 5.00
+  - Reason: T+2收盘上涨19.58%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 10.00
+  - PnL: 2646.00
+  - Return: 31.42%
+  - Equity after trade: 11639.79
+
+### 6. 600429 三元股份
+- Signal date: 2025-03-14
+- Pick reason: Top2 pick rank=2; score=99.02%; raw_prob=40.97%; board=1; ret1=9.95%.
+- Buy:
+  - Time: 2025-03-17 09:30:00
+  - Price: 4.660
+  - Shares: 2300
+  - Amount: 10717.75
+  - Fee: 5.00
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-03-18 15:00:00
+  - Price: 4.540
+  - Amount: 10442.34
+  - Fee: 5.00
+  - Reason: T+2收盘上涨-2.57%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 10.00
+  - PnL: -285.40
+  - Return: -2.66%
+  - Equity after trade: 11354.39
+
+### 7. 000016 深康佳A
+- Signal date: 2025-04-09
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=89.72%; board=1; ret1=9.90%.
+- Buy:
+  - Time: 2025-04-10 09:30:00
+  - Price: 4.260
+  - Shares: 2500
+  - Amount: 10650.00
+  - Fee: 5.00
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-04-14 15:00:00
+  - Price: 5.280
+  - Amount: 13200.00
+  - Fee: 5.00
+  - Reason: T+2收盘上涨19.72%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 10.00
+  - PnL: 2540.00
+  - Return: 23.84%
+  - Equity after trade: 13894.39
+
+### 8. 601086 国芳集团
+- Signal date: 2025-04-17
+- Pick reason: Top2 pick rank=2; score=95.76%; raw_prob=39.53%; board=1; ret1=10.01%.
+- Buy:
+  - Time: 2025-04-18 09:30:00
+  - Price: 10.440
+  - Shares: 1200
+  - Amount: 12527.59
+  - Fee: 5.00
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-04-22 15:00:00
+  - Price: 13.969
+  - Amount: 16763.11
+  - Fee: 5.00
+  - Reason: T+2收盘上涨21.62%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 10.00
+  - PnL: 4225.52
+  - Return: 33.72%
+  - Equity after trade: 18119.90
+
+### 9. 001316 润贝航科
+- Signal date: 2025-05-14
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=52.52%; board=1; ret1=10.00%.
+- Buy:
+  - Time: 2025-05-15 09:30:00
+  - Price: 35.042
+  - Shares: 400
+  - Amount: 14016.74
+  - Fee: 5.00
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-05-16 15:00:00
+  - Price: 33.605
+  - Amount: 13442.05
+  - Fee: 5.00
+  - Reason: T+2收盘上涨-4.10%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 10.00
+  - PnL: -584.69
+  - Return: -4.17%
+  - Equity after trade: 17535.22
+
+### 10. 002882 金龙羽
+- Signal date: 2025-05-20
+- Pick reason: Top2 pick rank=2; score=99.78%; raw_prob=42.12%; board=1; ret1=10.01%.
+- Buy:
+  - Time: 2025-05-21 09:30:00
+  - Price: 18.811
+  - Shares: 800
+  - Amount: 15048.41
+  - Fee: 5.00
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-05-23 15:00:00
+  - Price: 23.059
+  - Amount: 18446.95
+  - Fee: 5.00
+  - Reason: T+2收盘上涨11.45%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 10.00
+  - PnL: 3388.54
+  - Return: 22.51%
+  - Equity after trade: 20923.76
+
+### 11. 002743 富煌钢构
+- Signal date: 2025-05-29
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=47.29%; board=1; ret1=9.97%.
+- Buy:
+  - Time: 2025-05-30 09:30:00
+  - Price: 7.500
+  - Shares: 2600
+  - Amount: 19500.00
+  - Fee: 5.00
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-06-04 15:00:00
+  - Price: 8.060
+  - Amount: 20956.00
+  - Fee: 5.24
+  - Reason: T+2收盘上涨10.53%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 10.24
+  - PnL: 1445.76
+  - Return: 7.41%
+  - Equity after trade: 22369.52
+
+### 12. 301357 北方长龙
+- Signal date: 2025-06-18
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=45.23%; board=1; ret1=20.00%.
+- Buy:
+  - Time: 2025-06-19 09:30:00
+  - Price: 55.050
+  - Shares: 300
+  - Amount: 16515.00
+  - Fee: 5.00
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-06-23 15:00:00
+  - Price: 62.200
+  - Amount: 18660.00
+  - Fee: 5.00
+  - Reason: T+2收盘上涨8.99%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 10.00
+  - PnL: 2135.00
+  - Return: 12.92%
+  - Equity after trade: 24504.52
+
+### 13. 688201 信安世纪
+- Signal date: 2025-06-26
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=44.59%; board=1; ret1=20.02%.
+- Buy:
+  - Time: 2025-06-27 09:30:00
+  - Price: 13.380
+  - Shares: 1700
+  - Amount: 22746.00
+  - Fee: 5.69
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-06-30 15:00:00
+  - Price: 12.950
+  - Amount: 22015.00
+  - Fee: 5.50
+  - Reason: T+2收盘上涨-3.21%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 11.19
+  - PnL: -742.19
+  - Return: -3.26%
+  - Equity after trade: 23762.33
+
+### 14. 002623 亚玛顿
+- Signal date: 2025-07-08
+- Pick reason: Top2 pick rank=2; score=100.00%; raw_prob=46.28%; board=1; ret1=10.01%.
+- Buy:
+  - Time: 2025-07-09 09:30:00
+  - Price: 24.690
+  - Shares: 900
+  - Amount: 22221.00
+  - Fee: 5.56
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-07-10 15:00:00
+  - Price: 24.310
+  - Amount: 21879.00
+  - Fee: 5.47
+  - Reason: T+2收盘上涨-1.54%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 11.03
+  - PnL: -353.03
+  - Return: -1.59%
+  - Equity after trade: 23409.30
+
+### 15. 603093 南华期货
+- Signal date: 2025-07-16
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=54.60%; board=1; ret1=10.00%.
+- Buy:
+  - Time: 2025-07-17 09:30:00
+  - Price: 26.470
+  - Shares: 800
+  - Amount: 21176.00
+  - Fee: 5.29
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-07-18 15:00:00
+  - Price: 25.610
+  - Amount: 20488.00
+  - Fee: 5.12
+  - Reason: T+2收盘上涨-3.25%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 10.42
+  - PnL: -698.42
+  - Return: -3.30%
+  - Equity after trade: 22710.89
+
+### 16. 002205 国统股份
+- Signal date: 2025-07-24
+- Pick reason: Top2 pick rank=1; score=99.80%; raw_prob=42.16%; board=1; ret1=9.98%.
+- Buy:
+  - Time: 2025-07-25 09:30:00
+  - Price: 13.950
+  - Shares: 1500
+  - Amount: 20925.00
+  - Fee: 5.23
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-07-28 15:00:00
+  - Price: 14.630
+  - Amount: 21945.00
+  - Fee: 5.49
+  - Reason: T+2收盘上涨4.87%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 10.72
+  - PnL: 1009.28
+  - Return: 4.82%
+  - Equity after trade: 23720.17
+
+### 17. 001318 阳光乳业
+- Signal date: 2025-07-29
+- Pick reason: Top2 pick rank=2; score=100.00%; raw_prob=45.62%; board=1; ret1=9.98%.
+- Buy:
+  - Time: 2025-07-30 09:30:00
+  - Price: 14.990
+  - Shares: 1500
+  - Amount: 22485.00
+  - Fee: 5.62
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-08-01 15:00:00
+  - Price: 16.400
+  - Amount: 24600.00
+  - Fee: 6.15
+  - Reason: T+2收盘上涨21.01%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 11.77
+  - PnL: 2103.23
+  - Return: 9.35%
+  - Equity after trade: 25823.40
+
+### 18. 002706 良信股份
+- Signal date: 2025-08-05
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=44.44%; board=1; ret1=9.98%.
+- Buy:
+  - Time: 2025-08-06 09:30:00
+  - Price: 10.000
+  - Shares: 2400
+  - Amount: 24000.00
+  - Fee: 6.00
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-08-07 15:00:00
+  - Price: 10.140
+  - Amount: 24336.00
+  - Fee: 6.08
+  - Reason: T+2收盘上涨1.40%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 12.08
+  - PnL: 323.92
+  - Return: 1.35%
+  - Equity after trade: 26147.31
+
+### 19. 688265 南模生物
+- Signal date: 2025-08-08
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=47.45%; board=1; ret1=19.99%.
+- Buy:
+  - Time: 2025-08-11 09:30:00
+  - Price: 51.900
+  - Shares: 400
+  - Amount: 20760.00
+  - Fee: 5.19
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-08-12 15:00:00
+  - Price: 49.290
+  - Amount: 19716.00
+  - Fee: 5.00
+  - Reason: T+2收盘上涨-5.03%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 10.19
+  - PnL: -1054.19
+  - Return: -5.08%
+  - Equity after trade: 25093.12
+
+### 20. 600366 宁波韵升
+- Signal date: 2025-08-13
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=53.90%; board=1; ret1=9.99%.
+- Buy:
+  - Time: 2025-08-14 09:30:00
+  - Price: 15.850
+  - Shares: 1500
+  - Amount: 23775.00
+  - Fee: 5.94
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-08-18 15:00:00
+  - Price: 17.690
+  - Amount: 26535.00
+  - Fee: 6.63
+  - Reason: T+2收盘上涨8.64%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 12.58
+  - PnL: 2747.42
+  - Return: 11.55%
+  - Equity after trade: 27840.55
+
+### 21. 002212 天融信
+- Signal date: 2025-08-26
+- Pick reason: Top2 pick rank=2; score=100.00%; raw_prob=49.83%; board=1; ret1=9.97%.
+- Buy:
+  - Time: 2025-08-27 09:30:00
+  - Price: 11.260
+  - Shares: 2300
+  - Amount: 25898.00
+  - Fee: 6.47
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-08-29 15:00:00
+  - Price: 11.900
+  - Amount: 27370.00
+  - Fee: 6.84
+  - Reason: T+2收盘上涨15.36%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 13.32
+  - PnL: 1458.68
+  - Return: 5.63%
+  - Equity after trade: 29299.23
+
+### 22. 600580 卧龙电驱
+- Signal date: 2025-09-12
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=47.43%; board=1; ret1=10.01%.
+- Buy:
+  - Time: 2025-09-15 09:30:00
+  - Price: 46.150
+  - Shares: 600
+  - Amount: 27690.00
+  - Fee: 6.92
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-09-16 15:00:00
+  - Price: 47.580
+  - Amount: 28548.00
+  - Fee: 7.14
+  - Reason: T+2收盘上涨3.10%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 14.06
+  - PnL: 843.94
+  - Return: 3.05%
+  - Equity after trade: 30143.17
+
+### 23. 605289 罗曼股份
+- Signal date: 2025-09-17
+- Pick reason: Top2 pick rank=2; score=100.00%; raw_prob=50.22%; board=1; ret1=10.00%.
+- Buy:
+  - Time: 2025-09-18 09:30:00
+  - Price: 59.900
+  - Shares: 400
+  - Amount: 23960.00
+  - Fee: 5.99
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-09-22 15:00:00
+  - Price: 64.470
+  - Amount: 25788.00
+  - Fee: 6.45
+  - Reason: T+2收盘上涨7.21%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 12.44
+  - PnL: 1815.56
+  - Return: 7.58%
+  - Equity after trade: 31958.73
+
+### 24. 002925 盈趣科技
+- Signal date: 2025-09-29
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=48.25%; board=1; ret1=10.03%.
+- Buy:
+  - Time: 2025-09-30 09:30:00
+  - Price: 20.680
+  - Shares: 1400
+  - Amount: 28952.00
+  - Fee: 7.24
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-10-09 15:00:00
+  - Price: 20.240
+  - Amount: 28336.00
+  - Fee: 7.08
+  - Reason: T+2收盘上涨-2.13%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 14.32
+  - PnL: -630.32
+  - Return: -2.18%
+  - Equity after trade: 31328.41
+
+### 25. 600569 安阳钢铁
+- Signal date: 2025-10-30
+- Pick reason: Top2 pick rank=2; score=100.00%; raw_prob=50.83%; board=1; ret1=10.08%.
+- Buy:
+  - Time: 2025-10-31 09:30:00
+  - Price: 2.630
+  - Shares: 11300
+  - Amount: 29719.00
+  - Fee: 7.43
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-11-03 15:00:00
+  - Price: 2.610
+  - Amount: 29493.00
+  - Fee: 7.37
+  - Reason: T+2收盘上涨-0.76%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 14.80
+  - PnL: -240.80
+  - Return: -0.81%
+  - Equity after trade: 31087.61
+
+### 26. 688448 磁谷科技
+- Signal date: 2025-11-11
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=51.94%; board=1; ret1=20.00%.
+- Buy:
+  - Time: 2025-11-12 09:30:00
+  - Price: 45.000
+  - Shares: 600
+  - Amount: 27000.00
+  - Fee: 6.75
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-11-13 15:00:00
+  - Price: 47.350
+  - Amount: 28410.00
+  - Fee: 7.10
+  - Reason: T+2收盘上涨5.22%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 13.85
+  - PnL: 1396.15
+  - Return: 5.17%
+  - Equity after trade: 32483.75
+
+### 27. 002990 盛视科技
+- Signal date: 2025-11-17
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=48.21%; board=1; ret1=9.99%.
+- Buy:
+  - Time: 2025-11-18 09:30:00
+  - Price: 32.280
+  - Shares: 900
+  - Amount: 29052.00
+  - Fee: 7.26
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-11-19 15:00:00
+  - Price: 30.520
+  - Amount: 27468.00
+  - Fee: 6.87
+  - Reason: T+2收盘上涨-5.45%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 14.13
+  - PnL: -1598.13
+  - Return: -5.50%
+  - Equity after trade: 30885.62
+
+### 28. 603216 梦天家居
+- Signal date: 2025-11-28
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=45.27%; board=1; ret1=10.02%.
+- Buy:
+  - Time: 2025-12-01 09:30:00
+  - Price: 28.930
+  - Shares: 1000
+  - Amount: 28930.00
+  - Fee: 7.23
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-12-03 15:00:00
+  - Price: 30.290
+  - Amount: 30290.00
+  - Fee: 7.57
+  - Reason: T+2收盘上涨16.35%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 14.80
+  - PnL: 1345.19
+  - Return: 4.65%
+  - Equity after trade: 32230.82
+
+### 29. 002788 鹭燕医药
+- Signal date: 2025-12-22
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=50.11%; board=4; ret1=10.01%.
+- Buy:
+  - Time: 2025-12-23 09:30:00
+  - Price: 17.000
+  - Shares: 1800
+  - Amount: 30600.00
+  - Fee: 7.65
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2025-12-25 15:00:00
+  - Price: 20.060
+  - Amount: 36108.00
+  - Fee: 9.03
+  - Reason: T+2收盘上涨15.59%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 16.68
+  - PnL: 5491.32
+  - Return: 17.94%
+  - Equity after trade: 37722.14
+
+### 30. 002361 神剑股份
+- Signal date: 2025-12-31
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=46.97%; board=1; ret1=9.97%.
+- Buy:
+  - Time: 2026-01-05 09:30:00
+  - Price: 14.340
+  - Shares: 2400
+  - Amount: 34416.00
+  - Fee: 8.60
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2026-01-06 15:00:00
+  - Price: 14.460
+  - Amount: 34704.00
+  - Fee: 8.68
+  - Reason: T+2收盘上涨0.84%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 17.28
+  - PnL: 270.72
+  - Return: 0.79%
+  - Equity after trade: 37992.86
+
+### 31. 002554 惠博普
+- Signal date: 2026-01-21
+- Pick reason: Top2 pick rank=1; score=100.00%; raw_prob=46.07%; board=1; ret1=10.08%.
+- Buy:
+  - Time: 2026-01-22 09:30:00
+  - Price: 4.040
+  - Shares: 8900
+  - Amount: 35956.00
+  - Fee: 8.99
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2026-01-23 15:00:00
+  - Price: 4.140
+  - Amount: 36846.00
+  - Fee: 9.21
+  - Reason: T+2收盘上涨2.48%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 18.20
+  - PnL: 871.80
+  - Return: 2.42%
+  - Equity after trade: 38864.66
+
+### 32. 003042 中农联合
+- Signal date: 2026-01-27
+- Pick reason: Top2 pick rank=2; score=100.00%; raw_prob=45.95%; board=3; ret1=10.00%.
+- Buy:
+  - Time: 2026-01-28 09:30:00
+  - Price: 23.200
+  - Shares: 1500
+  - Amount: 34800.00
+  - Fee: 8.70
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2026-01-29 15:00:00
+  - Price: 22.870
+  - Amount: 34305.00
+  - Fee: 8.58
+  - Reason: T+2收盘上涨-1.42%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 17.28
+  - PnL: -512.28
+  - Return: -1.47%
+  - Equity after trade: 38352.39
+
+### 33. 600759 洲际油气
+- Signal date: 2026-02-04
+- Pick reason: Top2 pick rank=2; score=100.00%; raw_prob=48.73%; board=1; ret1=10.09%.
+- Buy:
+  - Time: 2026-02-05 09:30:00
+  - Price: 4.930
+  - Shares: 7300
+  - Amount: 35989.00
+  - Fee: 9.00
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2026-02-09 15:00:00
+  - Price: 5.400
+  - Amount: 39420.00
+  - Fee: 9.86
+  - Reason: T+2收盘上涨11.56%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 18.85
+  - PnL: 3412.15
+  - Return: 9.48%
+  - Equity after trade: 41764.53
+
+### 34. 600482 中国动力
+- Signal date: 2026-02-10
+- Pick reason: Top2 pick rank=2; score=100.00%; raw_prob=44.32%; board=1; ret1=9.99%.
+- Buy:
+  - Time: 2026-02-11 09:30:00
+  - Price: 30.000
+  - Shares: 1300
+  - Amount: 39000.00
+  - Fee: 9.75
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2026-02-13 15:00:00
+  - Price: 31.260
+  - Amount: 40638.00
+  - Fee: 10.16
+  - Reason: T+2收盘上涨6.03%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 19.91
+  - PnL: 1618.09
+  - Return: 4.15%
+  - Equity after trade: 43382.62
+
+### 35. 001896 豫能控股
+- Signal date: 2026-02-25
+- Pick reason: Top2 pick rank=2; score=100.00%; raw_prob=62.68%; board=5; ret1=9.97%.
+- Buy:
+  - Time: 2026-02-26 09:30:00
+  - Price: 11.040
+  - Shares: 3700
+  - Amount: 40848.00
+  - Fee: 10.21
+  - Reason: model=mlp_h48_e300_gt0, alpha=10; score>=threshold; gap_filter=[-0.50%, 1.50%], max_board=None; risk_profile=ultra (broken<=35.00%, red>=30.00%, limit_down<=12, pullback<=7.00%); capital_use=95%; T signal -> T+1 open buy, limit-up open is unfilled.
+- Sell:
+  - Time: 2026-02-27 15:00:00
+  - Price: 13.340
+  - Amount: 49358.00
+  - Fee: 12.34
+  - Reason: T+2收盘上涨20.83%未触发延长，T+2收盘卖出 (no intraday-high optimization).
+- Result:
+  - Total fee: 22.55
+  - PnL: 8487.45
+  - Return: 20.77%
+  - Equity after trade: 51870.07

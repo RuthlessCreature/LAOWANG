@@ -1,0 +1,123 @@
+train=2020-01-01~2024-12-31 backtest=2025-01-01~2026-02-28
+seed_offsets=328..450 n=62
+[seed coarse done] seed=380 ret=-53.7157% dd=54.2415% checked=1
+[seed coarse done] seed=382 ret=-27.3533% dd=47.6473% checked=2
+[seed coarse done] seed=384 ret=15.8276% dd=35.5610% checked=3
+[seed coarse done] seed=386 ret=-70.9861% dd=71.5699% checked=4
+[seed coarse done] seed=388 ret=89.5679% dd=33.3067% checked=5
+[seed coarse done] seed=390 ret=-19.5197% dd=64.8320% checked=6
+[seed coarse done] seed=392 ret=0.3116% dd=45.4703% checked=7
+[seed coarse done] seed=394 ret=-26.1580% dd=39.4010% checked=8
+[seed coarse done] seed=396 ret=-39.2183% dd=63.5989% checked=9
+[seed coarse done] seed=398 ret=-56.2880% dd=66.8525% checked=10
+[seed coarse done] seed=400 ret=-65.0566% dd=68.3217% checked=11
+[seed coarse done] seed=402 ret=30.9042% dd=33.8862% checked=12
+[seed coarse done] seed=404 ret=-12.4041% dd=62.9491% checked=13
+[seed coarse done] seed=406 ret=-10.9000% dd=49.7151% checked=14
+[seed coarse done] seed=408 ret=-5.4186% dd=27.3473% checked=15
+[seed coarse done] seed=410 ret=-50.7595% dd=58.8950% checked=16
+[seed coarse done] seed=412 ret=-42.6325% dd=66.5630% checked=17
+[seed coarse done] seed=414 ret=-53.5843% dd=60.7802% checked=18
+[seed coarse done] seed=416 ret=-77.9914% dd=77.9914% checked=19
+[seed coarse done] seed=418 ret=-28.3103% dd=42.8055% checked=20
+[seed coarse done] seed=420 ret=172.0651% dd=40.8604% checked=21
+[seed coarse done] seed=422 ret=59.5734% dd=46.4676% checked=22
+[seed coarse done] seed=424 ret=-52.7678% dd=58.9069% checked=23
+[seed coarse done] seed=426 ret=91.1129% dd=30.5275% checked=24
+[seed coarse done] seed=428 ret=10.2557% dd=35.3689% checked=25
+[seed coarse done] seed=430 ret=-64.2917% dd=71.3037% checked=26
+[seed coarse done] seed=432 ret=-65.2287% dd=67.6810% checked=27
+[seed coarse done] seed=434 ret=15.5223% dd=63.6137% checked=28
+[seed coarse done] seed=436 ret=8.0044% dd=36.3546% checked=29
+[seed coarse done] seed=438 ret=-60.3644% dd=67.5727% checked=30
+[seed coarse best<=16.13] ret=1328.984266% dd=16.033821% seed=440
+[seed coarse done] seed=440 ret=1328.9843% dd=16.0338% checked=31
+[seed coarse done] seed=442 ret=9.9235% dd=46.7671% checked=32
+[seed coarse done] seed=444 ret=53.6082% dd=38.7450% checked=33
+[seed coarse done] seed=446 ret=-44.5199% dd=65.3099% checked=34
+[seed coarse done] seed=448 ret=-47.5458% dd=68.9254% checked=35
+[seed coarse done] seed=450 ret=12.0189% dd=37.2017% checked=36
+[seed coarse done] seed=452 ret=3.5661% dd=36.7173% checked=37
+[seed coarse done] seed=454 ret=265.5341% dd=32.3443% checked=38
+[seed coarse done] seed=456 ret=-38.3702% dd=38.7466% checked=39
+[seed coarse done] seed=458 ret=15.6110% dd=32.6175% checked=40
+[seed coarse done] seed=460 ret=-29.7029% dd=63.3845% checked=41
+[seed coarse done] seed=462 ret=5.5885% dd=34.4164% checked=42
+[seed coarse done] seed=464 ret=-60.2890% dd=63.7284% checked=43
+[seed coarse done] seed=466 ret=-71.2242% dd=71.9659% checked=44
+[seed coarse done] seed=468 ret=-50.2029% dd=62.7527% checked=45
+[seed coarse done] seed=470 ret=-11.2884% dd=46.0576% checked=46
+[seed coarse done] seed=472 ret=-6.5825% dd=44.7139% checked=47
+[seed coarse done] seed=474 ret=-60.2253% dd=68.5261% checked=48
+[seed coarse done] seed=476 ret=328.8079% dd=27.9517% checked=49
+[seed coarse done] seed=478 ret=-44.7824% dd=56.6133% checked=50
+[seed coarse done] seed=480 ret=-24.9662% dd=55.0377% checked=51
+[seed coarse done] seed=482 ret=-17.2932% dd=35.3433% checked=52
+[seed coarse done] seed=484 ret=-15.3481% dd=51.9971% checked=53
+[seed coarse done] seed=486 ret=67.3816% dd=42.7056% checked=54
+[seed coarse done] seed=488 ret=-9.2484% dd=68.0165% checked=55
+[seed coarse done] seed=490 ret=-41.6194% dd=45.6088% checked=56
+[seed coarse done] seed=492 ret=-60.0240% dd=68.5390% checked=57
+[seed coarse done] seed=494 ret=-44.6101% dd=62.4733% checked=58
+[seed coarse done] seed=496 ret=-65.3065% dd=67.5455% checked=59
+[seed coarse done] seed=498 ret=-8.0408% dd=44.1112% checked=60
+[seed coarse done] seed=500 ret=98.2475% dd=28.0008% checked=61
+[seed coarse done] seed=502 ret=-20.9271% dd=47.3570% checked=62
+top_seeds=[440, 476, 500, 408, 454, 426, 388, 458, 402, 462, 428, 384]
+risk_families=2304
+[family done] seed=440 checked=2366
+[family done] seed=476 checked=4670
+[family done] seed=500 checked=6974
+[family done] seed=408 checked=9278
+[family done] seed=454 checked=11582
+[family done] seed=426 checked=13886
+[family done] seed=388 checked=16190
+[family done] seed=458 checked=18494
+[family done] seed=402 checked=20798
+[family done] seed=462 checked=23102
+[family done] seed=428 checked=25406
+[family done] seed=384 checked=27710
+family_focus=40
+[refine done] 1/40 checked=29852
+[refine done] 2/40 checked=31994
+[refine done] 3/40 checked=34136
+[refine done] 4/40 checked=36278
+[refine done] 5/40 checked=38420
+[refine done] 6/40 checked=40562
+[refine done] 7/40 checked=42704
+[refine done] 8/40 checked=44846
+[refine done] 9/40 checked=46988
+[refine done] 10/40 checked=49130
+[refine done] 11/40 checked=51272
+[refine done] 12/40 checked=53414
+[refine done] 13/40 checked=55556
+[refine done] 14/40 checked=57698
+[refine done] 15/40 checked=59840
+[refine done] 16/40 checked=61982
+[refine done] 17/40 checked=64124
+[refine done] 18/40 checked=66266
+[refine done] 19/40 checked=68408
+[refine done] 20/40 checked=70550
+[refine done] 21/40 checked=72692
+[refine done] 22/40 checked=74834
+[refine done] 23/40 checked=76976
+[refine done] 24/40 checked=79118
+[refine done] 25/40 checked=81260
+[refine done] 26/40 checked=83402
+[refine done] 27/40 checked=85544
+[refine done] 28/40 checked=87686
+[refine done] 29/40 checked=89828
+[refine done] 30/40 checked=91970
+[refine done] 31/40 checked=94112
+[refine done] 32/40 checked=96254
+[refine done] 33/40 checked=98396
+[refine done] 34/40 checked=100538
+[refine done] 35/40 checked=102680
+[refine done] 36/40 checked=104822
+[refine done] 37/40 checked=106964
+[refine done] 38/40 checked=109106
+[refine done] 39/40 checked=111248
+[refine done] 40/40 checked=113390
+checked=113390
+best=(1328.9842663415704, 16.033820607107423, {'stage': 'seed_coarse', 'seed': 440, 'seed_offset': 388, 'alpha': 15, 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.398, 'min_red_rate': 0.25, 'max_limit_down': 22, 'max_pullback': 0.096, 'threshold': 0.5, 'alloc': 0.96, 'sell_rule': 't2_close', 'ret_pct': 1328.9842663415704, 'dd_pct': 16.033820607107423, 'trades': 75, 'obj': 1328.9842663415704})
+saved=reports/search_1613_seed_customrisk_candidates.csv

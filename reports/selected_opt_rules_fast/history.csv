@@ -1,0 +1,5 @@
+﻿round,seed_offset,feasible,best_ret_pct,best_dd_pct,best_cfg,improved
+1,0,True,14.108844580000014,4.040267009573996,"mlp_h56_e320_gt1/a5/strong_hold_t3/k3/gap[-0.01,None]/board<=3/risk=strict/alloc=0.12",True
+2,97,True,21.030852320000037,3.3898065038228697,"mlp_h56_e320_gt1/a10/t2_close/k1/gap[None,None]/board<=3/risk=off/alloc=0.18",True
+3,194,True,19.190929459999985,7.394732425958339,"mlp_h40_e280_gt5/a10/profit_lock_t3/k3/gap[None,0.02]/board<=2/risk=off/alloc=0.20",False
+4,291,True,12.122348550000005,6.735089979345418,"mlp_h56_e320_gt1/a10/t2_close/k1/gap[None,None]/board<=3/risk=off/alloc=0.18",False

@@ -1,0 +1,26 @@
+[mock-backtest] train_range=2020-01-01~2024-12-31 backtest_range=2025-01-01~2026-02-27
+[mock-backtest] rule_targets=ret>=1000.0% dd<=15.0%
+[mock-backtest] variant_profile=aggressive variants=8
+[mock-backtest] train mlp_h48_e300_gt0 ...
+[mock-backtest] train mlp_h48_e300_gt0 acc=56.84%
+[mock-backtest] train mlp_h56_e320_gt1 ...
+[mock-backtest] train mlp_h56_e320_gt1 acc=61.58%
+[mock-backtest] train mlp_h64_e360_gt2 ...
+[mock-backtest] train mlp_h64_e360_gt2 acc=66.38%
+[mock-backtest] train mlp_h72_e380_gt15 ...
+[mock-backtest] train mlp_h72_e380_gt15 acc=64.21%
+[mock-backtest] train mlp_h40_e280_gt5 ...
+[mock-backtest] train mlp_h40_e280_gt5 acc=58.96%
+[mock-backtest] train mlp_h96_e460_gt15 ...
+[mock-backtest] train mlp_h96_e460_gt15 acc=64.03%
+[mock-backtest] train mlp_h88_e500_gt1_wd2e4 ...
+[mock-backtest] train mlp_h88_e500_gt1_wd2e4 acc=61.83%
+[mock-backtest] train mlp_h128_e560_gt25 ...
+[mock-backtest] train mlp_h128_e560_gt25 acc=68.78%
+[mock-backtest] th=0.60 final=65198.91 ret=551.99% dd=15.24% fee=1000.11 trades=74 cfg=mlp_h64_e360_gt2/a10/weak_hold_t3/k3/gap[-0.02,0.04]/board<=2/risk=off/alloc=0.90 rules[ret_target=FAIL, dd_target=FAIL]
+[mock-backtest] th=0.65 final=65198.91 ret=551.99% dd=15.24% fee=1000.11 trades=74 cfg=mlp_h64_e360_gt2/a10/weak_hold_t3/k3/gap[-0.02,0.04]/board<=2/risk=off/alloc=0.90 rules[ret_target=FAIL, dd_target=FAIL]
+[mock-backtest] th=0.70 final=65198.91 ret=551.99% dd=15.24% fee=1000.11 trades=74 cfg=mlp_h64_e360_gt2/a10/weak_hold_t3/k3/gap[-0.02,0.04]/board<=2/risk=off/alloc=0.90 rules[ret_target=FAIL, dd_target=FAIL]
+[mock-backtest] th=0.75 final=63608.91 ret=536.09% dd=15.24% fee=998.10 trades=74 cfg=mlp_h64_e360_gt2/a10/weak_hold_t3/k3/gap[-0.02,0.04]/board<=2/risk=off/alloc=0.90 rules[ret_target=FAIL, dd_target=FAIL]
+[mock-backtest] th=0.80 final=64678.58 ret=546.79% dd=15.24% fee=976.43 trades=73 cfg=mlp_h64_e360_gt2/a10/weak_hold_t3/k3/gap[-0.02,0.04]/board<=2/risk=off/alloc=0.90 rules[ret_target=FAIL, dd_target=FAIL]
+[mock-backtest] th=0.85 final=64678.58 ret=546.79% dd=15.24% fee=976.43 trades=73 cfg=mlp_h64_e360_gt2/a10/weak_hold_t3/k3/gap[-0.02,0.04]/board<=2/risk=off/alloc=0.90 rules[ret_target=FAIL, dd_target=FAIL]
+[mock-backtest] th=0.90 final=64678.58 ret=546.79% dd=15.24% fee=976.43 trades=73 cfg=mlp_h64_e360_gt2/a10/weak_hold_t3/k3/gap[-0.02,0.04]/board<=2/risk=off/alloc=0.90 rules[ret_target=FAIL, dd_target=FAIL]

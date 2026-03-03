@@ -1,0 +1,67 @@
+train=2020-01-01~2024-12-31 backtest=2025-01-01~2026-02-28
+variant=mlp_h88_e500_gt1_wd2e4 seed=440
+alphas=[13, 14, 15, 16]
+coarse space=65280
+[coarse alpha-done] a=13 checked=16320
+[coarse alpha-done] a=14 checked=32640
+[coarse alpha-done] a=15 checked=48960
+[coarse best<=16.13] ret=540.164988% dd=15.650226% cfg={'stage': 'coarse', 'alpha': 16, 'sell_rule': 'loss_rebound_t3', 'top_k': 2, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': 2, 'risk': 'strict', 'max_broken_rate': 0.4, 'min_red_rate': 0.28, 'max_limit_down': 15, 'max_pullback': 0.08, 'threshold': 0.65, 'alloc': 1.0, 'ret_pct': 540.1649879389, 'dd_pct': 15.650225601011261, 'trades': 54}
+[coarse best<=16.13] ret=562.988326% dd=15.623218% cfg={'stage': 'coarse', 'alpha': 16, 'sell_rule': 'loss_rebound_t3', 'top_k': 2, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': 2, 'risk': 'custom_b0.42_r0.22_ld24_pb0.08', 'max_broken_rate': 0.42, 'min_red_rate': 0.22, 'max_limit_down': 24, 'max_pullback': 0.08, 'threshold': 0.65, 'alloc': 1.0, 'ret_pct': 562.98832583917, 'dd_pct': 15.623218034219521, 'trades': 57}
+[coarse best<=16.13] ret=771.417479% dd=15.695087% cfg={'stage': 'coarse', 'alpha': 16, 'sell_rule': 'loss_rebound_t3', 'top_k': 2, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': 3, 'risk': 'custom_b0.42_r0.22_ld24_pb0.08', 'max_broken_rate': 0.42, 'min_red_rate': 0.22, 'max_limit_down': 24, 'max_pullback': 0.08, 'threshold': 0.65, 'alloc': 1.0, 'ret_pct': 771.4174787029002, 'dd_pct': 15.695087202342553, 'trades': 58}
+[coarse alpha-done] a=16 checked=65280
+refine targets=50
+[refine cfg-done] 1/50 checked=66551
+[refine cfg-done] 2/50 checked=67822
+[refine cfg-done] 3/50 checked=69093
+[refine cfg-done] 4/50 checked=70364
+[refine cfg-done] 5/50 checked=71635
+[refine cfg-done] 6/50 checked=72906
+[refine cfg-done] 7/50 checked=74177
+[refine cfg-done] 8/50 checked=75448
+[refine cfg-done] 9/50 checked=76719
+[refine cfg-done] 10/50 checked=77990
+[refine cfg-done] 11/50 checked=79261
+[refine cfg-done] 12/50 checked=80532
+[refine cfg-done] 13/50 checked=81803
+[refine cfg-done] 14/50 checked=83074
+[refine cfg-done] 15/50 checked=84345
+[refine cfg-done] 16/50 checked=85616
+[refine cfg-done] 17/50 checked=86887
+[refine cfg-done] 18/50 checked=88158
+[refine cfg-done] 19/50 checked=89429
+[refine cfg-done] 20/50 checked=90700
+[refine cfg-done] 21/50 checked=91971
+[refine cfg-done] 22/50 checked=93242
+[refine cfg-done] 23/50 checked=94513
+[refine cfg-done] 24/50 checked=95784
+[refine cfg-done] 25/50 checked=97055
+[refine cfg-done] 26/50 checked=98326
+[refine cfg-done] 27/50 checked=99597
+[refine cfg-done] 28/50 checked=100868
+[refine cfg-done] 29/50 checked=102139
+[refine cfg-done] 30/50 checked=103410
+[refine cfg-done] 31/50 checked=104681
+[refine cfg-done] 32/50 checked=105952
+[refine cfg-done] 33/50 checked=107223
+[refine cfg-done] 34/50 checked=108494
+[refine cfg-done] 35/50 checked=109765
+[refine cfg-done] 36/50 checked=111036
+[refine cfg-done] 37/50 checked=112307
+[refine cfg-done] 38/50 checked=113578
+[refine cfg-done] 39/50 checked=114849
+[refine cfg-done] 40/50 checked=116120
+[refine cfg-done] 41/50 checked=117391
+[refine cfg-done] 42/50 checked=118662
+[refine cfg-done] 43/50 checked=119933
+[refine cfg-done] 44/50 checked=121204
+[refine cfg-done] 45/50 checked=122475
+[refine cfg-done] 46/50 checked=123746
+[refine cfg-done] 47/50 checked=125017
+[refine cfg-done] 48/50 checked=126288
+[refine cfg-done] 49/50 checked=127559
+[refine cfg-done] 50/50 checked=128830
+ultra around th=0.6500 alloc=1.0000 -> ths=61 allocs=61
+checked=132551
+best_any=(2172.225514907895, 21.142541557177267, {'stage': 'coarse', 'alpha': 13, 'sell_rule': 'strong_hold_t3', 'top_k': 2, 'gap_min': -0.005, 'gap_max': 0.03, 'max_board': None, 'risk': 'custom_b0.42_r0.22_ld20_pb0.08', 'max_broken_rate': 0.42, 'min_red_rate': 0.22, 'max_limit_down': 20, 'max_pullback': 0.08, 'threshold': 0.65, 'alloc': 1.0, 'ret_pct': 2172.225514907895, 'dd_pct': 21.142541557177267, 'trades': 60})
+best_feasible=(771.4174787029002, 15.695087202342553, {'stage': 'coarse', 'alpha': 16, 'sell_rule': 'loss_rebound_t3', 'top_k': 2, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': 3, 'risk': 'custom_b0.42_r0.22_ld24_pb0.08', 'max_broken_rate': 0.42, 'min_red_rate': 0.22, 'max_limit_down': 24, 'max_pullback': 0.08, 'threshold': 0.65, 'alloc': 1.0, 'ret_pct': 771.4174787029002, 'dd_pct': 15.695087202342553, 'trades': 58})
+saved=reports/search_1613_strategy_adaptive_candidates.csv

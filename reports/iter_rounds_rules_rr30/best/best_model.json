@@ -1,0 +1,32 @@
+{
+  "best_round": 1,
+  "best_indicator": 30.380403458213255,
+  "best_avg_ret_pct": 421.68,
+  "best_avg_dd_pct": 13.88,
+  "metric_mode": "ret_over_dd",
+  "dd_penalty": 1.0,
+  "seed_offset": 0,
+  "retain_ratio": 0.3,
+  "min_return_floor": 0.0,
+  "adapt_cycle": 0,
+  "thresholds": [
+    0.75
+  ],
+  "metrics_by_threshold": {
+    "0.75": {
+      "final": 52167.83,
+      "ret_pct": 421.68,
+      "dd_pct": 13.88,
+      "fee": 854.84,
+      "trades": 74,
+      "cfg": "mlp_h64_e360_gt2/a10/weak_hold_t3/k3/gap[-0.02,0.04]/board<=2/risk=off/alloc=0.80 rules[ret_target=FAIL, dd_target=OK]"
+    }
+  },
+  "rules_file": "rules.txt",
+  "start_date": null,
+  "end_date": null,
+  "train_start_date": null,
+  "train_end_date": null,
+  "variant_profile": "base",
+  "infinite_mode": false
+}

@@ -1,0 +1,2 @@
+[manual-1613-precise] train_range=2020-01-01~2024-12-31 backtest_range=2025-01-01~2026-02-27
+[manual-1613-precise] variant=mlp_h88_e500_gt1_wd2e4 seed=440

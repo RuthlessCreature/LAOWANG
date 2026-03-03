@@ -1,0 +1,77 @@
+{
+  "best_round": 2,
+  "best_indicator": 458.91,
+  "best_avg_ret_pct": 559.35,
+  "best_avg_dd_pct": 16.74,
+  "metric_mode": "ret_minus_dd",
+  "dd_penalty": 6.0,
+  "seed_offset": 97,
+  "retain_ratio": 0.32999999999999996,
+  "min_return_floor": 0.0,
+  "adapt_cycle": 0,
+  "thresholds": [
+    0.6,
+    0.7,
+    0.75,
+    0.8,
+    0.85,
+    0.9
+  ],
+  "metrics_by_threshold": {
+    "0.6": {
+      "final": 65934.95,
+      "ret_pct": 559.35,
+      "dd_pct": 16.74,
+      "fee": 896.85,
+      "trades": 52,
+      "cfg": "mlp_h72_e380_gt15/a10/weak_hold_t3/k1/gap[-0.02,0.04]/board<=None/risk=strict/alloc=1.00 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.7": {
+      "final": 65934.95,
+      "ret_pct": 559.35,
+      "dd_pct": 16.74,
+      "fee": 896.85,
+      "trades": 52,
+      "cfg": "mlp_h72_e380_gt15/a10/weak_hold_t3/k1/gap[-0.02,0.04]/board<=None/risk=strict/alloc=1.00 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.75": {
+      "final": 65934.95,
+      "ret_pct": 559.35,
+      "dd_pct": 16.74,
+      "fee": 896.85,
+      "trades": 52,
+      "cfg": "mlp_h72_e380_gt15/a10/weak_hold_t3/k1/gap[-0.02,0.04]/board<=None/risk=strict/alloc=1.00 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.8": {
+      "final": 65934.95,
+      "ret_pct": 559.35,
+      "dd_pct": 16.74,
+      "fee": 896.85,
+      "trades": 52,
+      "cfg": "mlp_h72_e380_gt15/a10/weak_hold_t3/k1/gap[-0.02,0.04]/board<=None/risk=strict/alloc=1.00 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.85": {
+      "final": 65934.95,
+      "ret_pct": 559.35,
+      "dd_pct": 16.74,
+      "fee": 896.85,
+      "trades": 52,
+      "cfg": "mlp_h72_e380_gt15/a10/weak_hold_t3/k1/gap[-0.02,0.04]/board<=None/risk=strict/alloc=1.00 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.9": {
+      "final": 65934.95,
+      "ret_pct": 559.35,
+      "dd_pct": 16.74,
+      "fee": 896.85,
+      "trades": 52,
+      "cfg": "mlp_h72_e380_gt15/a10/weak_hold_t3/k1/gap[-0.02,0.04]/board<=None/risk=strict/alloc=1.00 rules[ret_target=FAIL, dd_target=FAIL]"
+    }
+  },
+  "rules_file": "rules.txt",
+  "start_date": null,
+  "end_date": null,
+  "train_start_date": null,
+  "train_end_date": null,
+  "variant_profile": "base",
+  "infinite_mode": true
+}

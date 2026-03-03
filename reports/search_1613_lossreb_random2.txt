@@ -1,0 +1,46 @@
+train=2020-01-01~2024-12-31 backtest=2025-01-01~2026-02-28
+variant=mlp_h88_e500_gt1_wd2e4 seed=440
+random_trials=160000
+[random best<=16.13] ret=1041.077288% dd=15.477040% cfg={'alpha': 14, 'top_k': 3, 'gap_min': -0.0044, 'gap_max': 0.0281, 'max_board': None, 'max_broken_rate': 0.404, 'min_red_rate': 0.214, 'max_limit_down': 15, 'max_pullback': 0.095, 'threshold': 0.5977, 'alloc': 0.9708, 'stage': 'random', 'sell_rule': 'loss_rebound_t3', 'ret_pct': 1041.077287551587, 'dd_pct': 15.477040427999814, 'trades': 70, 'obj': 1041.077287551587}
+[random best<=16.13] ret=1318.047320% dd=15.980134% cfg={'alpha': 14, 'top_k': 3, 'gap_min': -0.0033, 'gap_max': 0.0248, 'max_board': None, 'max_broken_rate': 0.396, 'min_red_rate': 0.314, 'max_limit_down': 8, 'max_pullback': 0.112, 'threshold': 0.5598, 'alloc': 0.9995, 'stage': 'random', 'sell_rule': 'loss_rebound_t3', 'ret_pct': 1318.0473196398593, 'dd_pct': 15.980134275659916, 'trades': 61, 'obj': 1318.0473196398593}
+[random best<=16.13] ret=1851.070642% dd=15.630688% cfg={'alpha': 15, 'top_k': 3, 'gap_min': -0.0037, 'gap_max': 0.024, 'max_board': None, 'max_broken_rate': 0.395, 'min_red_rate': 0.22, 'max_limit_down': 10, 'max_pullback': 0.099, 'threshold': 0.5465, 'alloc': 0.9753, 'stage': 'random', 'sell_rule': 'loss_rebound_t3', 'ret_pct': 1851.0706424101008, 'dd_pct': 15.630688436561785, 'trades': 64, 'obj': 1851.0706424101008}
+[random best<=16.13] ret=1857.571849% dd=15.984874% cfg={'alpha': 14, 'top_k': 3, 'gap_min': -0.0038, 'gap_max': 0.0266, 'max_board': None, 'max_broken_rate': 0.382, 'min_red_rate': 0.293, 'max_limit_down': 10, 'max_pullback': 0.068, 'threshold': 0.5539, 'alloc': 0.9987, 'stage': 'random', 'sell_rule': 'loss_rebound_t3', 'ret_pct': 1857.571849016633, 'dd_pct': 15.984874462067411, 'trades': 65, 'obj': 1857.571849016633}
+[random best<=16.13] ret=2835.018563% dd=15.729631% cfg={'alpha': 15, 'top_k': 3, 'gap_min': -0.0008, 'gap_max': 0.0265, 'max_board': None, 'max_broken_rate': 0.417, 'min_red_rate': 0.272, 'max_limit_down': 10, 'max_pullback': 0.097, 'threshold': 0.5631, 'alloc': 0.9822, 'stage': 'random', 'sell_rule': 'loss_rebound_t3', 'ret_pct': 2835.0185629700063, 'dd_pct': 15.72963129270237, 'trades': 65, 'obj': 2835.0185629700063}
+[random progress] 10000/160000 checked=10000
+[random progress] 20000/160000 checked=20000
+[random progress] 30000/160000 checked=30000
+[random best<=16.13] ret=2836.169158% dd=15.773355% cfg={'alpha': 15, 'top_k': 3, 'gap_min': -0.0005, 'gap_max': 0.0265, 'max_board': None, 'max_broken_rate': 0.402, 'min_red_rate': 0.218, 'max_limit_down': 10, 'max_pullback': 0.084, 'threshold': 0.529, 'alloc': 0.9838, 'stage': 'random', 'sell_rule': 'loss_rebound_t3', 'ret_pct': 2836.169157970006, 'dd_pct': 15.773354549931975, 'trades': 65, 'obj': 2836.169157970006}
+[random progress] 40000/160000 checked=40000
+[random progress] 50000/160000 checked=50000
+[random progress] 60000/160000 checked=60000
+[random progress] 70000/160000 checked=70000
+[random progress] 80000/160000 checked=80000
+[random progress] 90000/160000 checked=90000
+[random progress] 100000/160000 checked=100000
+[random progress] 110000/160000 checked=110000
+[random progress] 120000/160000 checked=120000
+[random progress] 130000/160000 checked=130000
+[random progress] 140000/160000 checked=140000
+[random progress] 150000/160000 checked=150000
+[random progress] 160000/160000 checked=160000
+mutate_parents=320
+[mutate best<=16.13] ret=2849.862693% dd=15.674522% cfg={'alpha': 15, 'top_k': 3, 'gap_min': -0.0009, 'gap_max': 0.0255, 'max_board': None, 'max_broken_rate': 0.412, 'min_red_rate': 0.287, 'max_limit_down': 10, 'max_pullback': 0.065, 'threshold': 0.6141, 'alloc': 0.9782, 'stage': 'mutate', 'sell_rule': 'loss_rebound_t3', 'ret_pct': 2849.8626931975964, 'dd_pct': 15.674522321186526, 'trades': 64, 'obj': 2849.8626931975964}
+[mutate progress] 20/320 checked=160800
+[mutate progress] 40/320 checked=161600
+[mutate progress] 60/320 checked=162400
+[mutate progress] 80/320 checked=163200
+[mutate progress] 100/320 checked=164000
+[mutate progress] 120/320 checked=164800
+[mutate progress] 140/320 checked=165600
+[mutate progress] 160/320 checked=166400
+[mutate progress] 180/320 checked=167200
+[mutate progress] 200/320 checked=168000
+[mutate progress] 220/320 checked=168800
+[mutate progress] 240/320 checked=169600
+[mutate progress] 260/320 checked=170400
+[mutate progress] 280/320 checked=171200
+[mutate progress] 300/320 checked=172000
+[mutate progress] 320/320 checked=172800
+checked=172800
+best=(2849.8626931975964, 15.674522321186526, {'alpha': 15, 'top_k': 3, 'gap_min': -0.0009, 'gap_max': 0.0255, 'max_board': None, 'max_broken_rate': 0.412, 'min_red_rate': 0.287, 'max_limit_down': 10, 'max_pullback': 0.065, 'threshold': 0.6141, 'alloc': 0.9782, 'stage': 'mutate', 'sell_rule': 'loss_rebound_t3', 'ret_pct': 2849.8626931975964, 'dd_pct': 15.674522321186526, 'trades': 64, 'obj': 2849.8626931975964})
+saved=reports/search_1613_lossreb_random2_candidates.csv

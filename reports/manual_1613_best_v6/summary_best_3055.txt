@@ -1,0 +1,5 @@
+ret_pct=3055.384797
+dd_pct=16.019106
+trades=64
+final_capital=315538.479713
+csv=reports/manual_1613_best_v6/mockOperations_best_3055.csv

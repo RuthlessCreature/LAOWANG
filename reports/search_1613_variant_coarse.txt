@@ -1,0 +1,31 @@
+jobs=10 alphas=8 thresholds=21 allocs=11
+[train] mlp_h88_e500_gt1_wd2e4 seed=343
+[job-done] mlp_h88_e500_gt1_wd2e4 seed=343 local_best_ret=25.6676% local_best_dd=41.5816% checked=1848
+[train] mlp_h88_e500_gt1_wd2e4 seed=440
+[best<=16.13] ret=816.678793% dd=14.794604% cfg={'variant': 'mlp_h88_e500_gt1_wd2e4', 'seed': 440, 'alpha': 14, 'threshold': np.float64(0.55), 'alloc': np.float64(0.9), 'ret_pct': 816.6787934832431, 'dd_pct': 14.794603597087097, 'trades': 77}
+[best<=16.13] ret=850.896734% dd=14.950741% cfg={'variant': 'mlp_h88_e500_gt1_wd2e4', 'seed': 440, 'alpha': 14, 'threshold': np.float64(0.55), 'alloc': np.float64(0.91), 'ret_pct': 850.8967340880354, 'dd_pct': 14.95074100789433, 'trades': 77}
+[best<=16.13] ret=886.731020% dd=15.106829% cfg={'variant': 'mlp_h88_e500_gt1_wd2e4', 'seed': 440, 'alpha': 14, 'threshold': np.float64(0.55), 'alloc': np.float64(0.92), 'ret_pct': 886.73102039449, 'dd_pct': 15.106828686465324, 'trades': 77}
+[best<=16.13] ret=903.142960% dd=15.438604% cfg={'variant': 'mlp_h88_e500_gt1_wd2e4', 'seed': 440, 'alpha': 14, 'threshold': np.float64(0.55), 'alloc': np.float64(0.94), 'ret_pct': 903.1429603975656, 'dd_pct': 15.438603873136392, 'trades': 77}
+[best<=16.13] ret=938.990326% dd=15.629403% cfg={'variant': 'mlp_h88_e500_gt1_wd2e4', 'seed': 440, 'alpha': 14, 'threshold': np.float64(0.55), 'alloc': np.float64(0.95), 'ret_pct': 938.9903261951704, 'dd_pct': 15.629403076097354, 'trades': 77}
+[best<=16.13] ret=972.200552% dd=15.780971% cfg={'variant': 'mlp_h88_e500_gt1_wd2e4', 'seed': 440, 'alpha': 14, 'threshold': np.float64(0.55), 'alloc': np.float64(0.96), 'ret_pct': 972.2005520559561, 'dd_pct': 15.78097069608288, 'trades': 77}
+[best<=16.13] ret=995.170506% dd=15.933371% cfg={'variant': 'mlp_h88_e500_gt1_wd2e4', 'seed': 440, 'alpha': 14, 'threshold': np.float64(0.55), 'alloc': np.float64(0.97), 'ret_pct': 995.1705056796774, 'dd_pct': 15.933370768288865, 'trades': 77}
+[best<=16.13] ret=1023.828968% dd=16.122169% cfg={'variant': 'mlp_h88_e500_gt1_wd2e4', 'seed': 440, 'alpha': 14, 'threshold': np.float64(0.55), 'alloc': np.float64(0.98), 'ret_pct': 1023.8289683587826, 'dd_pct': 16.12216920078426, 'trades': 77}
+[job-done] mlp_h88_e500_gt1_wd2e4 seed=440 local_best_ret=1194.5865% local_best_dd=29.0537% checked=3696
+[train] mlp_h88_e500_gt1_wd2e4 seed=537
+[job-done] mlp_h88_e500_gt1_wd2e4 seed=537 local_best_ret=130.5684% local_best_dd=30.3629% checked=5544
+[train] mlp_h88_e500_gt1_wd2e4 seed=634
+[job-done] mlp_h88_e500_gt1_wd2e4 seed=634 local_best_ret=-31.5016% local_best_dd=40.2046% checked=7392
+[train] mlp_h96_e460_gt15 seed=335
+[job-done] mlp_h96_e460_gt15 seed=335 local_best_ret=61.2590% local_best_dd=50.9145% checked=9240
+[train] mlp_h96_e460_gt15 seed=432
+[job-done] mlp_h96_e460_gt15 seed=432 local_best_ret=81.7944% local_best_dd=48.3777% checked=11088
+[train] mlp_h96_e460_gt15 seed=529
+[job-done] mlp_h96_e460_gt15 seed=529 local_best_ret=22.4433% local_best_dd=52.2382% checked=12936
+[train] mlp_h128_e560_gt25 seed=344
+[job-done] mlp_h128_e560_gt25 seed=344 local_best_ret=39.3133% local_best_dd=38.3609% checked=14784
+[train] mlp_h128_e560_gt25 seed=441
+[job-done] mlp_h128_e560_gt25 seed=441 local_best_ret=119.5191% local_best_dd=29.0069% checked=16632
+[train] mlp_h128_e560_gt25 seed=538
+[job-done] mlp_h128_e560_gt25 seed=538 local_best_ret=70.0389% local_best_dd=37.2974% checked=18480
+checked=18480
+best=(1023.8289683587826, 16.12216920078426, {'variant': 'mlp_h88_e500_gt1_wd2e4', 'seed': 440, 'alpha': 14, 'threshold': np.float64(0.55), 'alloc': np.float64(0.98), 'ret_pct': 1023.8289683587826, 'dd_pct': 16.12216920078426, 'trades': 77})

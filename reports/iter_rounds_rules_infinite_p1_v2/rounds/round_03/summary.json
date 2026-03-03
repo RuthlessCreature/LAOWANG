@@ -1,0 +1,24 @@
+{
+  "round": 3,
+  "adapt_cycle": 0,
+  "seed_offset": 194,
+  "variant_profile": "aggressive",
+  "retain_ratio": 0.33999999999999997,
+  "min_return_floor": 0.0,
+  "metric_mode": "ret_minus_dd",
+  "dd_penalty": 6.0,
+  "avg_ret_pct": 371.41,
+  "avg_dd_pct": 9.14,
+  "indicator": 316.57000000000005,
+  "improved": false,
+  "metrics_by_threshold": {
+    "0.75": {
+      "final": 47141.36,
+      "ret_pct": 371.41,
+      "dd_pct": 9.14,
+      "fee": 417.9,
+      "trades": 37,
+      "cfg": "mlp_h40_e280_gt5/a10/weak_hold_t3/k1/gap[-0.01,0.02]/board<=2/risk=strict/alloc=0.90 rules[ret_target=FAIL, dd_target=OK]"
+    }
+  }
+}

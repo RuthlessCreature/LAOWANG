@@ -1,0 +1,57 @@
+train=2020-01-01~2024-12-31 backtest=2025-01-01~2026-02-28
+seed_offsets=373..403 n=31
+alphas=[14, 15, 16] thresholds=31 allocs=31
+[seed-done] seed=425 local_best_ret=19.4822% local_best_dd=54.8460% checked=2883
+[seed-done] seed=426 local_best_ret=170.8937% local_best_dd=31.5918% checked=5766
+[seed-done] seed=427 local_best_ret=116.8067% local_best_dd=48.1675% checked=8649
+[seed-done] seed=428 local_best_ret=27.5799% local_best_dd=35.2057% checked=11532
+[seed-done] seed=429 local_best_ret=-0.6705% local_best_dd=49.2805% checked=14415
+[seed-done] seed=430 local_best_ret=-19.6054% local_best_dd=62.7311% checked=17298
+[seed-done] seed=431 local_best_ret=-1.8859% local_best_dd=33.5928% checked=20181
+[seed-done] seed=432 local_best_ret=-54.9435% local_best_dd=55.7395% checked=23064
+[seed-done] seed=433 local_best_ret=2.9262% local_best_dd=43.4798% checked=25947
+[seed-done] seed=434 local_best_ret=204.5439% local_best_dd=46.6564% checked=28830
+[seed-done] seed=435 local_best_ret=15.3620% local_best_dd=33.0792% checked=31713
+[seed-done] seed=436 local_best_ret=139.3989% local_best_dd=26.7675% checked=34596
+[seed-done] seed=437 local_best_ret=206.8119% local_best_dd=30.8700% checked=37479
+[seed-done] seed=438 local_best_ret=-17.2190% local_best_dd=60.3925% checked=40362
+[seed-done] seed=439 local_best_ret=152.1069% local_best_dd=30.0222% checked=43245
+[best<=16.13] ret=903.142960% dd=15.438604% seed=440 alpha=14 th=0.500 alloc=0.940
+[best<=16.13] ret=904.665865% dd=15.513815% seed=440 alpha=14 th=0.500 alloc=0.944
+[best<=16.13] ret=933.704546% dd=15.543924% seed=440 alpha=14 th=0.500 alloc=0.946
+[best<=16.13] ret=934.813911% dd=15.590889% seed=440 alpha=14 th=0.500 alloc=0.948
+[best<=16.13] ret=938.990326% dd=15.629403% seed=440 alpha=14 th=0.500 alloc=0.950
+[best<=16.13] ret=947.910474% dd=15.758549% seed=440 alpha=14 th=0.500 alloc=0.958
+[best<=16.13] ret=972.200552% dd=15.780971% seed=440 alpha=14 th=0.500 alloc=0.960
+[best<=16.13] ret=975.185347% dd=15.831854% seed=440 alpha=14 th=0.500 alloc=0.962
+[best<=16.13] ret=988.943211% dd=15.923561% seed=440 alpha=14 th=0.500 alloc=0.968
+[best<=16.13] ret=995.170506% dd=15.933371% seed=440 alpha=14 th=0.500 alloc=0.970
+[best<=16.13] ret=999.114697% dd=16.028214% seed=440 alpha=14 th=0.500 alloc=0.974
+[best<=16.13] ret=1000.494780% dd=16.039889% seed=440 alpha=14 th=0.500 alloc=0.976
+[best<=16.13] ret=1023.828968% dd=16.122169% seed=440 alpha=14 th=0.500 alloc=0.980
+[best<=16.13] ret=1068.656142% dd=15.980381% seed=440 alpha=15 th=0.500 alloc=0.940
+[best<=16.13] ret=1113.261425% dd=15.964875% seed=440 alpha=15 th=0.500 alloc=0.946
+[best<=16.13] ret=1114.004333% dd=15.983208% seed=440 alpha=15 th=0.500 alloc=0.948
+[best<=16.13] ret=1118.064703% dd=15.983749% seed=440 alpha=15 th=0.500 alloc=0.950
+[best<=16.13] ret=1145.602794% dd=16.127809% seed=440 alpha=15 th=0.500 alloc=0.960
+[best<=16.13] ret=1149.750969% dd=16.127809% seed=440 alpha=15 th=0.500 alloc=0.964
+[best<=16.13] ret=1151.521079% dd=16.127809% seed=440 alpha=15 th=0.500 alloc=0.966
+[seed-done] seed=440 local_best_ret=1270.1613% local_best_dd=16.4015% checked=46128
+[seed-done] seed=441 local_best_ret=-33.6205% local_best_dd=51.2737% checked=49011
+[seed-done] seed=442 local_best_ret=38.3758% local_best_dd=45.2908% checked=51894
+[seed-done] seed=443 local_best_ret=11.4072% local_best_dd=36.4280% checked=54777
+[seed-done] seed=444 local_best_ret=129.0090% local_best_dd=30.9129% checked=57660
+[seed-done] seed=445 local_best_ret=10.0084% local_best_dd=59.1580% checked=60543
+[seed-done] seed=446 local_best_ret=194.4192% local_best_dd=37.7741% checked=63426
+[seed-done] seed=447 local_best_ret=-56.3317% local_best_dd=60.5787% checked=66309
+[seed-done] seed=448 local_best_ret=-42.4278% local_best_dd=69.0623% checked=69192
+[seed-done] seed=449 local_best_ret=22.0624% local_best_dd=37.0788% checked=72075
+[seed-done] seed=450 local_best_ret=185.0182% local_best_dd=30.2991% checked=74958
+[seed-done] seed=451 local_best_ret=195.3677% local_best_dd=27.6408% checked=77841
+[seed-done] seed=452 local_best_ret=-24.7585% local_best_dd=50.5489% checked=80724
+[seed-done] seed=453 local_best_ret=-26.9667% local_best_dd=57.3632% checked=83607
+[seed-done] seed=454 local_best_ret=381.3213% local_best_dd=21.7038% checked=86490
+[seed-done] seed=455 local_best_ret=131.5834% local_best_dd=36.4822% checked=89373
+checked=89373
+best=(1151.5210785898628, 16.127809410280413, {'seed': 440, 'seed_offset': 388, 'alpha': 15, 'threshold': 0.5, 'alloc': 0.966, 'ret_pct': 1151.5210785898628, 'dd_pct': 16.127809410280413, 'trades': 76})
+saved=reports/search_1613_seed_neighborhood2_candidates.csv

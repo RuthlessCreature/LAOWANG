@@ -1,0 +1,101 @@
+prepared
+sampled_cfg=6523
+[coarse best<=16.13] ret=771.417479% dd=15.695087% cfg={'alpha': 16, 'sell_rule': 'loss_rebound_t3', 'top_k': 2, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': 3.0, 'max_broken_rate': 0.42, 'min_red_rate': 0.22, 'max_limit_down': 24.0, 'max_pullback': 0.08, 'stage': 'coarse', 'threshold': 0.65, 'alloc': 1.0, 'ret_pct': 771.4174787029002, 'dd_pct': 15.695087202342553, 'trades': 58, 'obj': 771.4174787029002}
+[coarse best<=16.13] ret=829.266621% dd=15.695087% cfg={'alpha': 16, 'sell_rule': 'loss_rebound_t3', 'top_k': 2, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': 3.0, 'max_broken_rate': 0.422, 'min_red_rate': 0.188, 'max_limit_down': 21.0, 'max_pullback': 0.086, 'stage': 'coarse', 'threshold': 0.65, 'alloc': 1.0, 'ret_pct': 829.2666212028996, 'dd_pct': 15.695087202342553, 'trades': 57, 'obj': 829.2666212028996}
+[coarse best<=16.13] ret=906.014024% dd=12.819184% cfg={'alpha': 15, 'sell_rule': 'loss_rebound_t3', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': 2.0, 'max_broken_rate': 0.419, 'min_red_rate': 0.172, 'max_limit_down': 8.0, 'max_pullback': 0.109, 'stage': 'coarse', 'threshold': 0.65, 'alloc': 1.0, 'ret_pct': 906.0140235401374, 'dd_pct': 12.81918363840598, 'trades': 56, 'obj': 906.0140235401374}
+coarse_checked=6523 focus=80
+[refine-done] 1/80 checked=11464
+[refine-done] 2/80 checked=16405
+[refine-done] 3/80 checked=21346
+[refine-done] 4/80 checked=26287
+[refine-done] 5/80 checked=31228
+[refine-done] 6/80 checked=36169
+[refine best<=16.13] ret=1115.954630% dd=15.133365% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.408, 'min_red_rate': 0.279, 'max_limit_down': 20, 'max_pullback': 0.114, 'threshold': 0.5, 'alloc': 0.92, 'ret_pct': 1115.9546296731323, 'dd_pct': 15.133364658922858, 'trades': 74, 'obj': 1115.9546296731323}
+[refine best<=16.13] ret=1131.291250% dd=15.155115% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.408, 'min_red_rate': 0.279, 'max_limit_down': 20, 'max_pullback': 0.114, 'threshold': 0.5, 'alloc': 0.922, 'ret_pct': 1131.2912500892348, 'dd_pct': 15.155115440040252, 'trades': 74, 'obj': 1131.2912500892348}
+[refine best<=16.13] ret=1196.931579% dd=15.168906% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.408, 'min_red_rate': 0.279, 'max_limit_down': 20, 'max_pullback': 0.114, 'threshold': 0.5, 'alloc': 0.923, 'ret_pct': 1196.9315785380693, 'dd_pct': 15.168905631765641, 'trades': 74, 'obj': 1196.9315785380693}
+[refine best<=16.13] ret=1211.350879% dd=15.197758% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.408, 'min_red_rate': 0.279, 'max_limit_down': 20, 'max_pullback': 0.114, 'threshold': 0.5, 'alloc': 0.924, 'ret_pct': 1211.3508792450689, 'dd_pct': 15.19775755544398, 'trades': 74, 'obj': 1211.3508792450689}
+[refine best<=16.13] ret=1211.430512% dd=15.196971% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.408, 'min_red_rate': 0.279, 'max_limit_down': 20, 'max_pullback': 0.114, 'threshold': 0.5, 'alloc': 0.925, 'ret_pct': 1211.4305117450688, 'dd_pct': 15.196971078498292, 'trades': 74, 'obj': 1211.4305117450688}
+[refine best<=16.13] ret=1211.925339% dd=15.216569% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.408, 'min_red_rate': 0.279, 'max_limit_down': 20, 'max_pullback': 0.114, 'threshold': 0.5, 'alloc': 0.926, 'ret_pct': 1211.925339270611, 'dd_pct': 15.216569262623663, 'trades': 74, 'obj': 1211.925339270611}
+[refine best<=16.13] ret=1218.146727% dd=15.276780% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.408, 'min_red_rate': 0.279, 'max_limit_down': 20, 'max_pullback': 0.114, 'threshold': 0.5, 'alloc': 0.929, 'ret_pct': 1218.1467269407685, 'dd_pct': 15.276779951645903, 'trades': 74, 'obj': 1218.1467269407685}
+[refine best<=16.13] ret=1219.418654% dd=15.312654% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.408, 'min_red_rate': 0.279, 'max_limit_down': 20, 'max_pullback': 0.114, 'threshold': 0.5, 'alloc': 0.931, 'ret_pct': 1219.4186544663114, 'dd_pct': 15.312654173679563, 'trades': 74, 'obj': 1219.4186544663114}
+[refine best<=16.13] ret=1248.497605% dd=16.065156% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.408, 'min_red_rate': 0.279, 'max_limit_down': 20, 'max_pullback': 0.114, 'threshold': 0.5, 'alloc': 0.948, 'ret_pct': 1248.497605160516, 'dd_pct': 16.065155878881757, 'trades': 74, 'obj': 1248.497605160516}
+[refine best<=16.13] ret=1255.027683% dd=16.065156% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.408, 'min_red_rate': 0.279, 'max_limit_down': 20, 'max_pullback': 0.114, 'threshold': 0.5, 'alloc': 0.954, 'ret_pct': 1255.0276826860588, 'dd_pct': 16.065155878881757, 'trades': 74, 'obj': 1255.0276826860588}
+[refine best<=16.13] ret=1273.490471% dd=16.066943% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.408, 'min_red_rate': 0.279, 'max_limit_down': 20, 'max_pullback': 0.114, 'threshold': 0.5, 'alloc': 0.959, 'ret_pct': 1273.49047114587, 'dd_pct': 16.06694261966232, 'trades': 74, 'obj': 1273.49047114587}
+[refine best<=16.13] ret=1280.497476% dd=16.033821% cfg={'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.408, 'min_red_rate': 0.279, 'max_limit_down': 20, 'max_pullback': 0.114, 'threshold': 0.5, 'alloc': 0.96, 'ret_pct': 1280.4974763415703, 'dd_pct': 16.033820607107423, 'trades': 74, 'obj': 1280.4974763415703}
+[refine-done] 7/80 checked=41110
+[refine-done] 8/80 checked=46051
+[refine-done] 9/80 checked=50992
+[refine-done] 10/80 checked=55933
+[refine-done] 11/80 checked=60874
+[refine-done] 12/80 checked=65815
+[refine-done] 13/80 checked=70756
+[refine-done] 14/80 checked=75697
+[refine-done] 15/80 checked=80638
+[refine-done] 16/80 checked=85579
+[refine-done] 17/80 checked=90520
+[refine-done] 18/80 checked=95461
+[refine-done] 19/80 checked=100402
+[refine-done] 20/80 checked=105343
+[refine-done] 21/80 checked=110284
+[refine-done] 22/80 checked=115225
+[refine-done] 23/80 checked=120166
+[refine-done] 24/80 checked=125107
+[refine-done] 25/80 checked=130048
+[refine-done] 26/80 checked=134989
+[refine-done] 27/80 checked=139930
+[refine-done] 28/80 checked=144871
+[refine-done] 29/80 checked=149812
+[refine-done] 30/80 checked=154753
+[refine-done] 31/80 checked=159694
+[refine-done] 32/80 checked=164635
+[refine-done] 33/80 checked=169576
+[refine-done] 34/80 checked=174517
+[refine-done] 35/80 checked=179458
+[refine-done] 36/80 checked=184399
+[refine-done] 37/80 checked=189340
+[refine-done] 38/80 checked=194281
+[refine-done] 39/80 checked=199222
+[refine-done] 40/80 checked=204163
+[refine-done] 41/80 checked=209104
+[refine-done] 42/80 checked=214045
+[refine-done] 43/80 checked=218986
+[refine-done] 44/80 checked=223927
+[refine-done] 45/80 checked=228868
+[refine-done] 46/80 checked=233809
+[refine-done] 47/80 checked=238750
+[refine-done] 48/80 checked=243691
+[refine-done] 49/80 checked=248632
+[refine-done] 50/80 checked=253573
+[refine-done] 51/80 checked=258514
+[refine-done] 52/80 checked=263455
+[refine-done] 53/80 checked=268396
+[refine-done] 54/80 checked=273337
+[refine-done] 55/80 checked=278278
+[refine-done] 56/80 checked=283219
+[refine-done] 57/80 checked=288160
+[refine-done] 58/80 checked=293101
+[refine-done] 59/80 checked=298042
+[refine-done] 60/80 checked=302983
+[refine-done] 61/80 checked=307924
+[refine-done] 62/80 checked=312865
+[refine-done] 63/80 checked=317806
+[refine-done] 64/80 checked=322747
+[refine-done] 65/80 checked=327688
+[refine-done] 66/80 checked=332629
+[refine-done] 67/80 checked=337570
+[refine-done] 68/80 checked=342511
+[refine-done] 69/80 checked=347452
+[refine-done] 70/80 checked=352393
+[refine-done] 71/80 checked=357334
+[refine-done] 72/80 checked=362275
+[refine-done] 73/80 checked=367216
+[refine-done] 74/80 checked=372157
+[refine-done] 75/80 checked=377098
+[refine-done] 76/80 checked=382039
+[refine-done] 77/80 checked=386980
+[refine-done] 78/80 checked=391921
+[refine-done] 79/80 checked=396862
+[refine-done] 80/80 checked=401803
+checked=401803
+best_feasible=(1280.4974763415703, 16.033820607107423, {'stage': 'refine', 'alpha': 15, 'sell_rule': 't2_close', 'top_k': 3, 'gap_min': -0.005, 'gap_max': 0.025, 'max_board': None, 'max_broken_rate': 0.408, 'min_red_rate': 0.279, 'max_limit_down': 20, 'max_pullback': 0.114, 'threshold': 0.5, 'alloc': 0.96, 'ret_pct': 1280.4974763415703, 'dd_pct': 16.033820607107423, 'trades': 74, 'obj': 1280.4974763415703})
+saved=reports/search_1613_risk_random_candidates.csv

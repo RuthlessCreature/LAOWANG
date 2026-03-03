@@ -58,6 +58,12 @@ class ExecutionRules:
     block_limit_up_buy: bool
     fee_rate: float
     min_fee: float
+    train_start_date: Optional[str]
+    train_end_date: Optional[str]
+    backtest_start_date: Optional[str]
+    backtest_end_date: Optional[str]
+    min_return_pct: Optional[float]
+    max_drawdown_pct: Optional[float]
 
 
 BASE_VARIANT_SPECS: List[Dict[str, Any]] = [
@@ -108,7 +114,10 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     p.add_argument("--db-url", default=None)
     p.add_argument("--db", default=None)
     p.add_argument("--rules-file", default="rules.txt")
-    p.add_argument("--start-date", default="2025-01-01")
+    p.add_argument("--start-date", default=None, help="Backtest start date (default from rules file or 2025-01-01).")
+    p.add_argument("--end-date", default=None, help="Backtest end date (default from rules file or latest trade date).")
+    p.add_argument("--train-start-date", default=None, help="Train start date (default from rules file or 2020-01-01).")
+    p.add_argument("--train-end-date", default=None, help="Train end date (default from rules file or backtest-start-1d).")
     p.add_argument("--thresholds", default="0.5,0.75,0.99")
     p.add_argument("--initial-capital", type=float, default=10000.0)
     p.add_argument("--seed-offset", type=int, default=0)
@@ -128,6 +137,16 @@ def _to_iso(d: str) -> str:
     if len(s) == 8 and s.isdigit():
         return f"{s[0:4]}-{s[4:6]}-{s[6:8]}"
     return dt.datetime.strptime(s, "%Y-%m-%d").strftime("%Y-%m-%d")
+
+
+def _to_iso_optional(d: Optional[str]) -> Optional[str]:
+    s = str(d or "").strip()
+    if not s:
+        return None
+    try:
+        return _to_iso(s)
+    except Exception:
+        return None
 
 
 def _fmt_pct(v: float) -> str:
@@ -243,6 +262,46 @@ def _parse_buy_delay(text: str) -> int:
         return 1
 
 
+def _parse_rule_date_range(text: str, keyword: str) -> Tuple[Optional[str], Optional[str]]:
+    pattern = (
+        rf"{re.escape(keyword)}[^\n\r\d]*"
+        r"(\d{4}(?:-?\d{2}){2})\s*[-~—至]+\s*(\d{4}(?:-?\d{2}){2})"
+    )
+    m = re.search(pattern, text)
+    if not m:
+        return None, None
+    start_raw = m.group(1).replace("-", "")
+    end_raw = m.group(2).replace("-", "")
+    return _to_iso_optional(start_raw), _to_iso_optional(end_raw)
+
+
+def _parse_min_return_pct(text: str) -> Optional[float]:
+    m = re.search(r"收益率[^\n\r\d]*(?:不低于|不少于|>=|＞=|大于等于)\s*([\d.]+)\s*%", text)
+    if not m:
+        return None
+    try:
+        return float(m.group(1))
+    except Exception:
+        return None
+
+
+def _parse_max_drawdown_pct(text: str) -> Optional[float]:
+    patterns = [
+        r"最大回撤[^\n\r\d]*(?:不高于|不超过|<=|＜=|小于等于)\s*([\d.]+)\s*%",
+        # Legacy rules may write '不低于' by mistake; still treat as drawdown upper bound.
+        r"最大回撤[^\n\r\d]*(?:不低于|不少于)\s*([\d.]+)\s*%",
+    ]
+    for ptn in patterns:
+        m = re.search(ptn, text)
+        if not m:
+            continue
+        try:
+            return float(m.group(1))
+        except Exception:
+            continue
+    return None
+
+
 def _load_execution_rules(path: str) -> ExecutionRules:
     p = Path(path)
     if not p.exists():
@@ -252,23 +311,40 @@ def _load_execution_rules(path: str) -> ExecutionRules:
             block_limit_up_buy=True,
             fee_rate=0.00025,
             min_fee=5.0,
+            train_start_date=None,
+            train_end_date=None,
+            backtest_start_date=None,
+            backtest_end_date=None,
+            min_return_pct=None,
+            max_drawdown_pct=None,
         )
     text = p.read_text(encoding="utf-8", errors="ignore")
+    train_start, train_end = _parse_rule_date_range(text, "训练集")
+    backtest_start, backtest_end = _parse_rule_date_range(text, "回测集")
     return ExecutionRules(
         source_file=str(p.as_posix()),
         buy_delay=_parse_buy_delay(text),
         block_limit_up_buy=("涨停" in text and "买不到" in text),
         fee_rate=_parse_fee_rate(text),
         min_fee=_parse_min_fee(text),
+        train_start_date=train_start,
+        train_end_date=train_end,
+        backtest_start_date=backtest_start,
+        backtest_end_date=backtest_end,
+        min_return_pct=_parse_min_return_pct(text),
+        max_drawdown_pct=_parse_max_drawdown_pct(text),
     )
 
 
-def _load_trade_dates(engine, start_date: str) -> List[str]:
+def _load_trade_dates(engine, start_date: str, end_date: Optional[str] = None) -> List[str]:
+    if end_date:
+        sql = text("SELECT DISTINCT date FROM stock_daily WHERE date >= :s AND date <= :e ORDER BY date ASC")
+        params = {"s": start_date, "e": end_date}
+    else:
+        sql = text("SELECT DISTINCT date FROM stock_daily WHERE date >= :s ORDER BY date ASC")
+        params = {"s": start_date}
     with engine.connect() as conn:
-        rows = conn.execute(
-            text("SELECT DISTINCT date FROM stock_daily WHERE date >= :s ORDER BY date ASC"),
-            {"s": start_date},
-        ).fetchall()
+        rows = conn.execute(sql, params).fetchall()
     return [str(r[0]) for r in rows if r and r[0]]
 
 
@@ -877,6 +953,8 @@ def _select_best_for_threshold(
     threshold: float,
     retain_ratio: float = 0.80,
     min_return_floor: float = 4.0,
+    target_return_pct: Optional[float] = None,
+    target_max_dd_pct: Optional[float] = None,
 ) -> SearchResult:
     if not candidates:
         raise ValueError("empty candidates")
@@ -891,6 +969,20 @@ def _select_best_for_threshold(
         rows.append((sr, ret, dd, trades))
         if ret > best_ret:
             best_ret = ret
+
+    # Rule-aware selection: if there are candidates satisfying explicit return/DD targets,
+    # prefer the one with highest return, then lowest drawdown.
+    if target_return_pct is not None or target_max_dd_pct is not None:
+        feasible_rows: List[Tuple[SearchResult, float, float, float]] = []
+        for item in rows:
+            _, ret, dd, _ = item
+            ok_ret = (target_return_pct is None) or (ret >= float(target_return_pct) - 1e-12)
+            ok_dd = (target_max_dd_pct is None) or (dd <= float(target_max_dd_pct) + 1e-12)
+            if ok_ret and ok_dd:
+                feasible_rows.append(item)
+        if feasible_rows:
+            feasible_rows.sort(key=lambda x: (x[1], -x[2], x[3]), reverse=True)
+            return feasible_rows[0][0]
 
     rr = max(0.01, min(1.0, float(retain_ratio)))
     abs_floor = float(min_return_floor)
@@ -907,6 +999,56 @@ def _select_best_for_threshold(
 
     filtered.sort(key=lambda x: (x[2], -x[1], -x[3]))
     return filtered[0][0]
+
+
+def _write_operations_csv(path: Path, trades: Sequence[Dict[str, Any]], initial_capital: float) -> None:
+    import csv
+
+    headers = [
+        "操作日期",
+        "操作时间",
+        "股票代码",
+        "股票名称",
+        "操作（买or卖）",
+        "操作价格",
+        "操作原因",
+        "总资产",
+    ]
+    rows: List[List[str]] = []
+    cash = float(initial_capital)
+    for t in trades:
+        buy_fee = float(t["buy_fee"])
+        buy_asset = cash - buy_fee
+        rows.append(
+            [
+                str(t["buy_date"]),
+                str(t.get("buy_time", "09:30:00")),
+                str(t["stock_code"]),
+                str(t["stock_name"]),
+                "buy",
+                f"{float(t['buy_price']):.3f}",
+                str(t.get("buy_reason", "")),
+                f"{buy_asset:.2f}",
+            ]
+        )
+        cash = float(t["equity_after"])
+        rows.append(
+            [
+                str(t["sell_date"]),
+                str(t.get("sell_time", "15:00:00")),
+                str(t["stock_code"]),
+                str(t["stock_name"]),
+                "sell",
+                f"{float(t['sell_price']):.3f}",
+                str(t.get("sell_reason", "")),
+                f"{cash:.2f}",
+            ]
+        )
+
+    with path.open("w", newline="", encoding="utf-8-sig") as f:
+        w = csv.writer(f)
+        w.writerow(headers)
+        w.writerows(rows)
 
 
 def _render_report(
@@ -953,6 +1095,11 @@ def _render_report(
         (
             f"- Selection policy: keep candidates above max({retain_ratio*100:.0f}% of best return, "
             f"{_fmt_pct(min_return_floor)}), then minimize drawdown"
+        ),
+        (
+            f"- Rule targets: return>={rules.min_return_pct if rules.min_return_pct is not None else 'N/A'}%, "
+            f"max_dd<={rules.max_drawdown_pct if rules.max_drawdown_pct is not None else 'N/A'}%; "
+            "if feasible candidates exist, prioritize rule-feasible set first"
         ),
         "",
         "## Search Top 8 (current threshold)",
@@ -1034,7 +1181,6 @@ def _render_report(
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = parse_args(argv)
-    start_date = _to_iso(args.start_date)
     thresholds = [float(x.strip()) for x in str(args.thresholds).split(",") if str(x).strip()]
     thresholds = [max(0.50, min(0.99, t)) for t in thresholds]
     thresholds = sorted(set(thresholds))
@@ -1045,14 +1191,37 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     variant_profile = str(args.variant_profile or "base")
     rules = _load_execution_rules(args.rules_file)
 
+    backtest_start = (
+        _to_iso_optional(args.start_date)
+        or _to_iso_optional(rules.backtest_start_date)
+        or "2025-01-01"
+    )
+    backtest_end = _to_iso_optional(args.end_date) or _to_iso_optional(rules.backtest_end_date)
+    train_start = (
+        _to_iso_optional(args.train_start_date)
+        or _to_iso_optional(rules.train_start_date)
+        or "2020-01-01"
+    )
+    train_end = _to_iso_optional(args.train_end_date) or _to_iso_optional(rules.train_end_date)
+    if not train_end:
+        try:
+            train_end = (dt.datetime.strptime(backtest_start, "%Y-%m-%d").date() - dt.timedelta(days=1)).strftime("%Y-%m-%d")
+        except Exception:
+            train_end = None
+    if not train_end:
+        raise SystemExit("Cannot resolve train-end date.")
+    if train_start > train_end:
+        raise SystemExit(f"train date range invalid: {train_start} ~ {train_end}")
+    if backtest_end and backtest_start > backtest_end:
+        raise SystemExit(f"backtest date range invalid: {backtest_start} ~ {backtest_end}")
+
     ns = argparse.Namespace(config=args.config, db_url=args.db_url, db=args.db)
     engine = relay_model.make_engine(relay_model.resolve_db_target(ns))
-    trade_dates = _load_trade_dates(engine, start_date)
+    trade_dates = _load_trade_dates(engine, backtest_start, backtest_end)
     if not trade_dates:
-        raise SystemExit(f"No trade dates from {start_date}.")
+        tail = f"~{backtest_end}" if backtest_end else "+"
+        raise SystemExit(f"No trade dates in backtest range: {backtest_start}{tail}.")
     end_date = trade_dates[-1]
-
-    train_start = "2020-01-01"
     train_start_dt = dt.datetime.strptime(train_start, "%Y-%m-%d").date()
     load_start = (train_start_dt - dt.timedelta(days=60)).strftime("%Y-%m-%d")
 
@@ -1078,18 +1247,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     full_pool["tomorrow_stage"] = "N/A"
     full_pool["tomorrow_prob"] = np.nan
 
-    base = full_pool[full_pool["date"] >= start_date].copy()
+    base = full_pool[(full_pool["date"] >= backtest_start) & (full_pool["date"] <= end_date)].copy()
     if base.empty:
-        raise SystemExit(f"No candidate rows from {start_date}.")
+        raise SystemExit(f"No candidate rows from backtest start {backtest_start}.")
 
-    train_df = full_pool.copy()
+    train_df = full_pool[(full_pool["date"] >= train_start) & (full_pool["date"] <= train_end)].copy()
     train_df = train_df[(train_df["next_open"].notna()) & (train_df["next2_close"].notna())].copy()
     train_df["next_open"] = pd.to_numeric(train_df["next_open"], errors="coerce")
     train_df["next2_close"] = pd.to_numeric(train_df["next2_close"], errors="coerce")
     train_df = train_df[(train_df["next_open"] > 0) & (train_df["next2_close"] > 0)].copy()
     train_df["t1_hold_ret"] = train_df["next2_close"] / train_df["next_open"] - 1.0
     if train_df.empty:
-        raise SystemExit("No train samples after T+1 buy / T+2 sell target.")
+        raise SystemExit(f"No train samples in range {train_start}~{train_end} after T+1 buy / T+2 sell target.")
 
     feat_cols = _feature_cols()
     x_train_raw = train_df[feat_cols].to_numpy(dtype=float)
@@ -1109,6 +1278,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for spec in list_variant_specs(variant_profile)
     ]
     print(
+        f"[mock-backtest] train_range={train_start}~{train_end} "
+        f"backtest_range={backtest_start}~{end_date}",
+        flush=True,
+    )
+    if rules.min_return_pct is not None or rules.max_drawdown_pct is not None:
+        print(
+            "[mock-backtest] rule_targets="
+            f"ret>={rules.min_return_pct if rules.min_return_pct is not None else 'N/A'}% "
+            f"dd<={rules.max_drawdown_pct if rules.max_drawdown_pct is not None else 'N/A'}%",
+            flush=True,
+        )
+    print(
         f"[mock-backtest] variant_profile={variant_profile} variants={len(variants)}",
         flush=True,
     )
@@ -1117,17 +1298,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     top_ks = [1, 2, 3]
     gap_windows: List[Tuple[Optional[float], Optional[float]]] = [
         (None, None),
+        (-0.005, 0.015),
+        (-0.01, 0.02),
         (-0.005, 0.025),
         (-0.01, 0.03),
         (-0.02, 0.04),
     ]
-    board_caps: List[Optional[int]] = [None, 2, 3]
+    board_caps: List[Optional[int]] = [None, 1, 2, 3]
     risk_profiles: List[Tuple[str, Optional[float], Optional[float], Optional[int], Optional[float]]] = [
         ("off", None, None, None, None),
         ("balanced", 0.45, 0.24, 20, 0.09),
         ("strict", 0.40, 0.28, 15, 0.08),
+        ("ultra", 0.35, 0.30, 12, 0.07),
+        ("defensive", 0.30, 0.35, 8, 0.06),
     ]
-    alloc_pcts = [1.0, 0.9]
+    alloc_pcts = [1.0, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4]
 
     date_set = set(trade_dates)
     search_logs: List[SearchResult] = []
@@ -1228,6 +1413,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             threshold=float(th),
             retain_ratio=retain_ratio,
             min_return_floor=min_return_floor,
+            target_return_pct=rules.min_return_pct,
+            target_max_dd_pct=rules.max_drawdown_pct,
         )
         mv = variant_map[chosen.variant]
         base_prob = variant_base_prob[chosen.variant]
@@ -1260,7 +1447,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
         report = _render_report(
             threshold=float(th),
-            start_date=start_date,
+            start_date=backtest_start,
             end_date=end_date,
             variant=mv,
             selected=chosen,
@@ -1272,13 +1459,25 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
         out = Path(f"mockReport_{_threshold_tag(float(th))}.md")
         out.write_text(report, encoding="utf-8")
+        ops_csv = Path(f"mockOperations_{_threshold_tag(float(th))}.csv")
+        _write_operations_csv(ops_csv, detail["trades"], initial_capital=initial_capital)
+
+        rule_flags: List[str] = []
+        if rules.min_return_pct is not None:
+            ok_ret = detail["total_ret"] * 100.0 >= float(rules.min_return_pct)
+            rule_flags.append(f"ret_target={'OK' if ok_ret else 'FAIL'}")
+        if rules.max_drawdown_pct is not None:
+            ok_dd = detail["max_dd"] * 100.0 <= float(rules.max_drawdown_pct)
+            rule_flags.append(f"dd_target={'OK' if ok_dd else 'FAIL'}")
+        rule_suffix = f" rules[{', '.join(rule_flags)}]" if rule_flags else ""
+
         print(
             f"[mock-backtest] th={th:.2f} final={detail['final_capital']:.2f} "
             f"ret={detail['total_ret']*100:.2f}% dd={detail['max_dd']*100:.2f}% "
             f"fee={detail['total_fee']:.2f} trades={detail['trade_n']} "
             f"cfg={chosen.variant}/a{chosen.alpha}/{chosen.sell_rule}/k{chosen.top_k}/"
             f"gap[{chosen.gap_min},{chosen.gap_max}]/board<={chosen.max_board}/"
-            f"risk={chosen.risk_profile}/alloc={chosen.alloc_pct:.2f}"
+            f"risk={chosen.risk_profile}/alloc={chosen.alloc_pct:.2f}{rule_suffix}"
         )
     return 0
 

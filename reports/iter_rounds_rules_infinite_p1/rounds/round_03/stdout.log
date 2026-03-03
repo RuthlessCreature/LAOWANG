@@ -1,0 +1,14 @@
+[mock-backtest] train_range=2020-01-01~2024-12-31 backtest_range=2025-01-01~2026-02-27
+[mock-backtest] rule_targets=ret>=1000.0% dd<=15.0%
+[mock-backtest] variant_profile=base variants=4
+[mock-backtest] train mlp_h48_e300_gt0 ...
+[mock-backtest] train mlp_h48_e300_gt0 acc=56.72%
+[mock-backtest] train mlp_h56_e320_gt1 ...
+[mock-backtest] train mlp_h56_e320_gt1 acc=61.23%
+[mock-backtest] train mlp_h64_e360_gt2 ...
+[mock-backtest] train mlp_h64_e360_gt2 acc=66.65%
+[mock-backtest] train mlp_h72_e380_gt15 ...
+[mock-backtest] train mlp_h72_e380_gt15 acc=64.44%
+[mock-backtest] th=0.65 final=43449.17 ret=334.49% dd=13.51% fee=868.63 trades=84 cfg=mlp_h48_e300_gt0/a10/t2_close/k1/gap[None,None]/board<=None/risk=balanced/alloc=0.60 rules[ret_target=FAIL, dd_target=OK]
+[mock-backtest] th=0.75 final=43449.17 ret=334.49% dd=13.51% fee=868.63 trades=84 cfg=mlp_h48_e300_gt0/a10/t2_close/k1/gap[None,None]/board<=None/risk=balanced/alloc=0.60 rules[ret_target=FAIL, dd_target=OK]
+[mock-backtest] th=0.85 final=43449.17 ret=334.49% dd=13.51% fee=868.63 trades=84 cfg=mlp_h48_e300_gt0/a10/t2_close/k1/gap[None,None]/board<=None/risk=balanced/alloc=0.60 rules[ret_target=FAIL, dd_target=OK]

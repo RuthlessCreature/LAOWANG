@@ -1,0 +1,64 @@
+{
+  "round": 3,
+  "adapt_cycle": 0,
+  "seed_offset": 194,
+  "variant_profile": "base",
+  "retain_ratio": 0.36,
+  "min_return_floor": 0.0,
+  "metric_mode": "ret_minus_dd",
+  "dd_penalty": 6.0,
+  "avg_ret_pct": 436.55,
+  "avg_dd_pct": 15.9,
+  "indicator": 341.15,
+  "improved": false,
+  "metrics_by_threshold": {
+    "0.6": {
+      "final": 53655.0,
+      "ret_pct": 436.55,
+      "dd_pct": 15.9,
+      "fee": 1014.21,
+      "trades": 84,
+      "cfg": "mlp_h48_e300_gt0/a10/t2_close/k1/gap[None,None]/board<=None/risk=balanced/alloc=0.70 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.7": {
+      "final": 53655.0,
+      "ret_pct": 436.55,
+      "dd_pct": 15.9,
+      "fee": 1014.21,
+      "trades": 84,
+      "cfg": "mlp_h48_e300_gt0/a10/t2_close/k1/gap[None,None]/board<=None/risk=balanced/alloc=0.70 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.75": {
+      "final": 53655.0,
+      "ret_pct": 436.55,
+      "dd_pct": 15.9,
+      "fee": 1014.21,
+      "trades": 84,
+      "cfg": "mlp_h48_e300_gt0/a10/t2_close/k1/gap[None,None]/board<=None/risk=balanced/alloc=0.70 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.8": {
+      "final": 53655.0,
+      "ret_pct": 436.55,
+      "dd_pct": 15.9,
+      "fee": 1014.21,
+      "trades": 84,
+      "cfg": "mlp_h48_e300_gt0/a10/t2_close/k1/gap[None,None]/board<=None/risk=balanced/alloc=0.70 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.85": {
+      "final": 53655.0,
+      "ret_pct": 436.55,
+      "dd_pct": 15.9,
+      "fee": 1014.21,
+      "trades": 84,
+      "cfg": "mlp_h48_e300_gt0/a10/t2_close/k1/gap[None,None]/board<=None/risk=balanced/alloc=0.70 rules[ret_target=FAIL, dd_target=FAIL]"
+    },
+    "0.9": {
+      "final": 53655.0,
+      "ret_pct": 436.55,
+      "dd_pct": 15.9,
+      "fee": 1014.21,
+      "trades": 84,
+      "cfg": "mlp_h48_e300_gt0/a10/t2_close/k1/gap[None,None]/board<=None/risk=balanced/alloc=0.70 rules[ret_target=FAIL, dd_target=FAIL]"
+    }
+  }
+}
