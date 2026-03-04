@@ -102,3 +102,96 @@ conclusion_update_5:
 - monthly score-base + local hp/risk grid confirms ceiling remains 3091.114720 under dd<=16.13
 - keep deployed model unchanged: relay_best_3091_20260303
 
+search_10_strategy_v11:
+- file=reports/search_npz_strategy_v11.csv
+- checked=14436
+- best_ret_pct=3091.114720
+- best_dd_pct=16.019106
+- best_cfg=hidden=88 epochs=500 lr=0.0210 wd=0.0002 target_gt=0.0100 seed=440 score_base_start=2025-02-01 alpha=15 sell_rule=loss_rebound_t3 top_k=3 threshold=0.62 alloc=0.9998 gap=[-0.0010,0.0255] risk(br<=0.412,rr>=0.287,ld<=10,pb<=0.065)
+- note=strategy-dimension search (sell_rule/top_k/alpha/threshold/risk random) found no improvement; strong_hold_t3/t2_close not superior under dd<=16.13
+
+conclusion_update_6:
+- strategy-layer random refinement still ties at 3091.114720
+- keep deployed model unchanged: relay_best_3091_20260303
+
+search_11_adaptive_gen_v12:
+- file=reports/search_npz_adaptive_gen_v12.csv
+- checked=1080
+- best_ret_pct=3091.114720
+- best_dd_pct=16.019106
+- best_cfg=hidden=88 epochs=500 lr=0.0210 wd=0.0002 target_gt=0.0100 seed=440 score_base_start=2025-02-01 alpha=15 sell_rule=loss_rebound_t3 top_k=3 threshold=0.62 alloc=0.9998 gap=[-0.0010,0.0255] risk(br<=0.412,rr>=0.287,ld<=10,pb<=0.065)
+- note=genetic-adaptive hp+strategy search (gen1+gen2) found no improvement; delta_vs_current_best=0
+
+conclusion_update_7:
+- adaptive-genetic search still ties at 3091.114720 under dd<=16.13
+- keep deployed model unchanged: relay_best_3091_20260303
+
+search_12_batch10_v13:
+- file=reports/search_npz_10round_batch_v13.csv
+- checked=2889
+- rounds=10
+- best_ret_pct=3091.114720
+- best_dd_pct=16.019106
+- best_cfg=round=1 hidden=88 epochs=500 lr=0.0210 wd=0.0002 target_gt=0.0100 seed=440 score_base_start=2025-02-01 alpha=15 sell_rule=loss_rebound_t3 top_k=3 threshold=0.62 alloc=0.9998 gap=[-0.0010,0.0255] risk(br<=0.412,rr>=0.287,ld<=10,pb<=0.065)
+- note=explicit 10-round batch completed; each round tied at same ceiling, no breakthrough
+
+conclusion_update_8:
+- 10 additional adaptive rounds completed with zero uplift beyond 3091.114720
+- keep deployed model unchanged: relay_best_3091_20260303
+
+
+search_13_batch100_v14:
+- file=reports/search_npz_100round_fixedhp_v14.csv
+- checked=3000
+- feasible=1089
+- rounds=100
+- best_ret_pct=3091.114720
+- best_dd_pct=16.019106
+- best_cfg=round=1 hidden=88 epochs=500 lr=0.0210 wd=0.0002 target_gt=0.0100 seed=440 score_base_start=2025-02-01 alpha=15 sell_rule=loss_rebound_t3 top_k=3 threshold=0.62 alloc=0.9998 gap=[-0.0010,0.0255] risk(br<=0.412,rr>=0.287,ld<=10,pb<=0.065)
+- note=explicit 100-round fixed-hp random-config batch completed; all rounds tied at 3091.114720, delta_vs_current_best=0
+
+conclusion_update_9:
+- 100 additional rounds completed with zero uplift beyond 3091.114720
+- keep deployed model unchanged: relay_best_3091_20260303
+
+search_14_batch100_v15:
+- file=reports/search_npz_100round_fixedhp_v15.csv
+- checked=3000
+- feasible=1125
+- rounds=100
+- best_ret_pct=3091.114720
+- best_dd_pct=16.019106
+- best_cfg=round=1 hidden=88 epochs=500 lr=0.0210 wd=0.0002 target_gt=0.0100 seed=440 score_base_start=2025-02-01 alpha=15 sell_rule=loss_rebound_t3 top_k=3 threshold=0.62 alloc=0.9998 gap=[-0.0010,0.0255] risk(br<=0.412,rr>=0.287,ld<=10,pb<=0.065)
+- note=second explicit 100-round fixed-hp random-config batch completed; all rounds tied at 3091.114720, delta_vs_current_best=0
+
+conclusion_update_10:
+- another 100 rounds completed with zero uplift beyond 3091.114720
+- keep deployed model unchanged: relay_best_3091_20260303
+
+search_15_batch100_v16:
+- file=reports/search_npz_100round_fixedhp_v16.csv
+- checked=3000
+- feasible=1093
+- rounds=100
+- best_ret_pct=3091.114720
+- best_dd_pct=16.019106
+- best_cfg=round=1 hidden=88 epochs=500 lr=0.0210 wd=0.0002 target_gt=0.0100 seed=440 score_base_start=2025-02-01 alpha=15 sell_rule=loss_rebound_t3 top_k=3 threshold=0.62 alloc=0.9998 gap=[-0.0010,0.0255] risk(br<=0.412,rr>=0.287,ld<=10,pb<=0.065)
+- note=third explicit 100-round fixed-hp random-config batch completed; all rounds tied at 3091.114720, delta_vs_current_best=0
+
+conclusion_update_11:
+- another 100 rounds completed with zero uplift beyond 3091.114720
+- keep deployed model unchanged: relay_best_3091_20260303
+
+search_16_batch100_v17:
+- file=reports/search_npz_100round_fixedhp_v17.csv
+- checked=3000
+- feasible=1110
+- rounds=100
+- best_ret_pct=3091.114720
+- best_dd_pct=16.019106
+- best_cfg=round=1 hidden=88 epochs=500 lr=0.0210 wd=0.0002 target_gt=0.0100 seed=440 score_base_start=2025-02-01 alpha=15 sell_rule=loss_rebound_t3 top_k=3 threshold=0.62 alloc=0.9998 gap=[-0.0010,0.0255] risk(br<=0.412,rr>=0.287,ld<=10,pb<=0.065)
+- note=fourth explicit 100-round fixed-hp random-config batch completed; all rounds tied at 3091.114720, delta_vs_current_best=0
+
+conclusion_update_12:
+- another 100 rounds completed with zero uplift beyond 3091.114720
+- keep deployed model unchanged: relay_best_3091_20260303

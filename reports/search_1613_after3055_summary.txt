@@ -73,3 +73,50 @@ npz_iteration_followup6_20260303:
 - best unchanged: ret=3091.114720 dd=16.019106 trades=63
 - note: monthly score_base sweep and local risk/hp refinement still only ties
 
+npz_iteration_followup7_20260303:
+- reports/search_npz_strategy_v11.csv (14436 rows)
+- reports/search_npz_strategy_v11.txt
+- best unchanged: ret=3091.114720 dd=16.019106 trades=63
+- note: strategy-space random search (sell_rule/top_k/alpha/risk) produced no breakthrough
+
+npz_iteration_followup8_20260303:
+- reports/search_npz_adaptive_gen_v12.csv (1080 rows)
+- reports/search_npz_adaptive_gen_v12.txt
+- best unchanged: ret=3091.114720 dd=16.019106 trades=63
+- note: adaptive genetic hp+strategy search produced no breakthrough (delta=0)
+
+npz_iteration_followup9_20260303:
+- reports/search_npz_10round_batch_v13.csv (2889 rows)
+- reports/search_npz_10round_batch_v13.txt
+- rounds=10 completed
+- best unchanged: ret=3091.114720 dd=16.019106 trades=63
+- note: all 10 rounds tied at current ceiling; no breakthrough
+
+
+npz_iteration_followup10_20260303:
+- reports/search_npz_100round_fixedhp_v14.csv (3000 rows, feasible=1089)
+- reports/search_npz_100round_fixedhp_v14.txt
+- rounds=100 completed
+- best unchanged: ret=3091.114720 dd=16.019106 trades=63
+- note: fixed-hp + random strategy/risk config 100-round batch produced no breakthrough (delta=0)
+
+npz_iteration_followup11_20260304:
+- reports/search_npz_100round_fixedhp_v15.csv (3000 rows, feasible=1125)
+- reports/search_npz_100round_fixedhp_v15.txt
+- rounds=100 completed
+- best unchanged: ret=3091.114720 dd=16.019106 trades=63
+- note: second fixed-hp + random strategy/risk config 100-round batch produced no breakthrough (delta=0)
+
+npz_iteration_followup12_20260304:
+- reports/search_npz_100round_fixedhp_v16.csv (3000 rows, feasible=1093)
+- reports/search_npz_100round_fixedhp_v16.txt
+- rounds=100 completed
+- best unchanged: ret=3091.114720 dd=16.019106 trades=63
+- note: third fixed-hp + random strategy/risk config 100-round batch produced no breakthrough (delta=0)
+
+npz_iteration_followup13_20260304:
+- reports/search_npz_100round_fixedhp_v17.csv (3000 rows, feasible=1110)
+- reports/search_npz_100round_fixedhp_v17.txt
+- rounds=100 completed
+- best unchanged: ret=3091.114720 dd=16.019106 trades=63
+- note: fourth fixed-hp + random strategy/risk config 100-round batch produced no breakthrough (delta=0)
