@@ -1,0 +1,12 @@
+model_version=relay_best_3091_20260303
+model_path=models/relay_model_active.npz
+train_range=2020-01-01~2024-12-31
+backtest_range=2025-01-01~2026-02-27
+score_base_start=2025-03-01
+ret_pct=3091.114720
+dd_pct=16.019106
+trades=63
+fast_final_cap=319111.47
+detail_final_cap=319111.47
+ops_csv=reports/manual_1613_best_v7/mockOperations_best_3091.csv
+cfg=mlp_h88_e500_gt1_wd2e4/a15/loss_rebound_t3/k3/gap[-0.0010,0.0255]/board<=None/risk=custom(br<=0.412,rr>=0.287,ld<=10,pb<=0.065)/alloc=0.9998

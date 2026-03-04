@@ -1,7 +1,7 @@
-latest_best_ret_pct=3055.384797
+latest_best_ret_pct=3091.114720
 latest_best_dd_pct=16.019106
-latest_best_trades=64
-latest_best_cfg=variant=mlp_h88_e500_gt1_wd2e4 seed=440 alpha=15 sell_rule=loss_rebound_t3 top_k=3 max_board=None gap_min=-0.0010 gap_max=0.0255 max_broken_rate=0.412 min_red_rate=0.287 max_limit_down=10 max_pullback=0.065 threshold=0.6000 alloc=0.9998
+latest_best_trades=63
+latest_best_cfg=variant=mlp_h88_e500_gt1_wd2e4 seed=440 alpha=15 sell_rule=loss_rebound_t3 top_k=3 max_board=None gap_min=-0.0010 gap_max=0.0255 max_broken_rate=0.412 min_red_rate=0.287 max_limit_down=10 max_pullback=0.065 threshold=0.6200 alloc=0.9998 score_base_start=2025-03-01
 
 new_search_files:
 - reports/search_1613_lossreb_ultrafine_anchor.csv (101101 rows)
@@ -22,3 +22,54 @@ model_seed_adaptive_search:
 - reports/search_1613_modelseed_adaptive.txt
 - best unchanged: ret=3055.384797 dd=16.019106 trades=64
 - reports/search_1613_seed_wide_h88_step25.csv (530 rows, coarse lattice had no feasible dd<=16.13 point; note seed 440 not in step-25 lattice)
+
+npz_iteration_20260303:
+- reports/search_npz_iter_v1.csv (19680 rows)
+- reports/search_npz_variant_seed_coarse_v2.csv (2880 rows)
+- reports/npz_iteration_20260303.txt
+- best unchanged: ret=3055.384797 dd=16.019106
+
+npz_iteration_followup_20260303:
+- reports/search_npz_adaptive_v4.csv (1050 rows)
+- reports/search_npz_local_refine_v5.csv (1023 rows)
+- reports/search_npz_adaptive_v4.txt
+- reports/search_npz_local_refine_v5.txt
+- best unchanged: ret=3055.384797 dd=16.019106
+- note: npz model neighborhood shows plateau; multiple local hp combinations tie at same ceiling
+
+npz_iteration_followup2_20260303:
+- reports/search_npz_seedfine_v6.csv (744 rows)
+- reports/search_npz_seedfine_v6.txt
+- best unchanged: ret=3055.384797 dd=16.019106
+- note: seed fine scan around 440 confirms plateau; only seed=440 cluster reaches ceiling
+
+npz_iteration_followup3_20260303:
+- reports/search_npz_riskmut_v7.csv (1976 rows)
+- reports/search_npz_riskmut_v7.txt
+- best unchanged: ret=3055.384797 dd=16.019106
+- note: adaptive risk mutation around anchor did not exceed current ceiling
+
+npz_iteration_followup4_20260303:
+- reports/search_npz_scorebase_v8.csv (1068 rows)
+- reports/search_npz_scorebase_v8.txt
+- best updated: ret=3091.114720 dd=16.019106 trades=63
+- key change: score_base_start moved to 2025-03-01 (alpha=15, threshold=0.62)
+
+deployment_update_20260303:
+- models/relay_model_active.npz => model_version=relay_best_3091_20260303
+- reports/manual_1613_best_v7/mockOperations_best_3091.csv
+- reports/manual_1613_best_v7/summary_best_3091.txt
+- scoring_relay full rebuild done: range=2025-01-01~2026-02-27 rows=14637
+
+npz_iteration_followup5_20260303:
+- reports/search_npz_scorebase_refine_v9.csv (11664 rows)
+- reports/search_npz_scorebase_refine_v9.txt
+- best unchanged: ret=3091.114720 dd=16.019106 trades=63
+- note: refined score_base/risk grid found only ties; no breakthrough beyond 3091
+
+npz_iteration_followup6_20260303:
+- reports/search_npz_scorebase_monthly_v10.csv (14580 rows)
+- reports/search_npz_scorebase_monthly_v10.txt
+- best unchanged: ret=3091.114720 dd=16.019106 trades=63
+- note: monthly score_base sweep and local risk/hp refinement still only ties
+

@@ -64,7 +64,7 @@ python scoring_fhkq.py    --config config.ini --start-date 2026-01-01 --end-date
 
 ### 4.3 启动 UI
 ```bash
-python ui.py --config config.ini --start-date 20250101 --port 80 --host 0.0.0.0
+python ui.py --config config.ini --start-date 20260101 --port 80 --host 0.0.0.0
 # http://127.0.0.1:8000
 ```
 

@@ -1,0 +1,104 @@
+npz_model_path=models/relay_model_active.npz
+current_model_version=relay_best_3055_20260303
+
+search_1_npz_iter_v1:
+- file=reports/search_npz_iter_v1.csv
+- checked=19680
+- best_ret_pct=3055.384797
+- best_dd_pct=16.019106
+- best_cfg=variant=mlp_h88_e500_gt1_wd2e4 seed=440 score_base_start=2025-01-01 alpha=15 threshold=0.60 alloc=0.9998 gap=[-0.0010,0.0255] risk(br<=0.412,rr>=0.287,ld<=10,pb<=0.065)
+
+search_2_variant_seed_coarse_v2:
+- file=reports/search_npz_variant_seed_coarse_v2.csv
+- checked=2880
+- best_ret_pct=3055.384797
+- best_dd_pct=16.019106
+- best_cfg=variant=mlp_h88_e500_gt1_wd2e4 seed=440 score_base_start=2025-01-01 alpha=15 threshold=0.60 alloc=0.9998 gap=[-0.0010,0.0255]
+
+conclusion:
+- no better npz model found in this iteration
+- keep deployed model unchanged: relay_best_3055_20260303
+
+search_3_adaptive_v4:
+- file=reports/search_npz_adaptive_v4.csv
+- checked=1050
+- best_ret_pct=3055.384797
+- best_dd_pct=16.019106
+- best_cfg=hidden=88 epochs=500 lr=0.0210 wd=0.0002 target_gt=0.0100 seed=440 alpha=15 threshold=0.60 alloc=0.9998 gap=[-0.0010,0.0255]
+- note=adaptive hparam+config search around incumbent; no breakthrough above 3055
+
+search_4_local_refine_v5:
+- file=reports/search_npz_local_refine_v5.csv
+- checked=1023
+- best_ret_pct=3055.384797
+- best_dd_pct=16.019106
+- best_cfg=hidden=88 epochs=500 lr=0.0210 wd=0.0002 target_gt=0.0100 seed=440 alpha=15 threshold=0.60 alloc=0.9998 gap=[-0.0010,0.0255]
+- plateau=multiple local hp tie at same ceiling (e.g. wd in [0.00016,0.00024], epochs 500/520)
+
+conclusion_update:
+- npz search has entered local plateau around ret=3055.384797, dd=16.019106
+- deployed model remains unchanged: relay_best_3055_20260303
+
+search_5_seedfine_v6:
+- file=reports/search_npz_seedfine_v6.csv
+- checked=744
+- best_ret_pct=3055.384797
+- best_dd_pct=16.019106
+- best_cfg=hidden=88 epochs=500 lr=0.0210 wd=0.0002 target_gt=0.0100 seed=440 alpha=15 threshold=0.60 alloc=0.9998 gap=[-0.0010,0.0255]
+- tie_hp=hidden=88/epochs=520/lr=0.0205/wd=0.0002/target_gt=0.0100/seed=440 also reaches same ceiling
+
+conclusion_update_2:
+- seed-fine + local hp neighborhood still cannot exceed ret=3055.384797 under dd<=16.13
+- keep deployed model unchanged: relay_best_3055_20260303
+
+search_6_riskmut_v7:
+- file=reports/search_npz_riskmut_v7.csv
+- checked=1976
+- best_ret_pct=3055.384797
+- best_dd_pct=16.019106
+- best_cfg=hidden=88 epochs=500 lr=0.0210 wd=0.0002 target_gt=0.0100 seed=440 alpha=15 threshold=0.60 alloc=0.9998 gap=[-0.0010,0.0255] risk(br<=0.412,rr>=0.287,ld<=10,pb<=0.065)
+- note=risk-mutation around anchor (br/rr/ld/pb + threshold/alloc/gap) still no breakthrough
+
+conclusion_update_3:
+- adaptive risk mutation confirms plateau near ret=3055.384797 with dd=16.019106
+- keep deployed model unchanged: relay_best_3055_20260303
+
+search_7_scorebase_v8:
+- file=reports/search_npz_scorebase_v8.csv
+- checked=1068
+- best_ret_pct=3091.114720
+- best_dd_pct=16.019106
+- best_cfg=hidden=88 epochs=500 lr=0.0210 wd=0.0002 target_gt=0.0100 seed=440 score_base_start=2025-03-01 alpha=15 threshold=0.62 alloc=0.9998 gap=[-0.0010,0.0255]
+- breakthrough=+35.729922pct over 3055.384797 baseline
+
+deployment_3091:
+- active_model=models/relay_model_active.npz
+- active_model_version=relay_best_3091_20260303
+- manual_backtest=reports/manual_1613_best_v7/mockOperations_best_3091.csv
+- manual_summary=reports/manual_1613_best_v7/summary_best_3091.txt
+- scoring_relay=done(full_rebuild,start=2025-01-01)
+
+search_8_scorebase_refine_v9:
+- file=reports/search_npz_scorebase_refine_v9.csv
+- checked=11664
+- best_ret_pct=3091.114720
+- best_dd_pct=16.019106
+- best_cfg=hidden=88 epochs=500 lr=0.0210 wd=0.0002 target_gt=0.0100 seed=440 score_base_start=2025-02-01 alpha=15 threshold=0.62 alloc=0.9998 gap=[-0.0010,0.0255] risk(br<=0.412,rr>=0.287,pb<=0.065)
+- note=no further breakthrough above 3091.114720; multiple ties found (score_base_start 2025-02/2025-03)
+
+conclusion_update_4:
+- score_base refined + risk local grid confirms current ceiling 3091.114720 under dd<=16.13
+- keep deployed model unchanged: relay_best_3091_20260303
+
+search_9_scorebase_monthly_v10:
+- file=reports/search_npz_scorebase_monthly_v10.csv
+- checked=14580
+- best_ret_pct=3091.114720
+- best_dd_pct=16.019106
+- best_cfg=hidden=88 epochs=500 lr=0.0210 wd=0.0002 target_gt=0.0100 seed=440 score_base_start=2025-02-01 alpha=15 threshold=0.62 alloc=0.9998 gap=[-0.0010,0.0255] risk(br<=0.412,rr>=0.287,pb<=0.065)
+- note=monthly score-base expansion (2024-12~2025-09) produced ties only, no new high
+
+conclusion_update_5:
+- monthly score-base + local hp/risk grid confirms ceiling remains 3091.114720 under dd<=16.13
+- keep deployed model unchanged: relay_best_3091_20260303
+
