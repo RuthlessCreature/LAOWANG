@@ -1,0 +1,19 @@
+{
+  "round": 13,
+  "seed_offset": 1164,
+  "retain_ratio": 0.9,
+  "avg_ret_pct": 936.53,
+  "avg_dd_pct": 37.82,
+  "indicator": 936.53,
+  "improved": false,
+  "metrics_by_threshold": {
+    "0.75": {
+      "final": 103652.85,
+      "ret_pct": 936.53,
+      "dd_pct": 37.82,
+      "fee": 1171.02,
+      "trades": 78,
+      "cfg": "mlp_h56_e320_gt1/a2/strong_hold_t3/k3/gap[None,None]/board<=3/risk=off/alloc=1.00"
+    }
+  }
+}

@@ -136,7 +136,9 @@ def _run_pipeline(args: argparse.Namespace, *, setup_logging: bool) -> None:
     need_fetch = fetch_start <= today_yyyymmdd
     base_cli = _build_common_cli(args)
 
-    get_workers = 1
+    get_workers = max(1, int(args.getdata_workers))
+    get_shards = max(1, int(getattr(args, "getdata_shards", 1) or 1))
+    get_write_chunk_size = max(1, int(getattr(args, "getdata_write_chunk_size", 5000) or 5000))
     if need_fetch:
         get_cli = base_cli + [
             "--start-date",
@@ -145,8 +147,19 @@ def _run_pipeline(args: argparse.Namespace, *, setup_logging: bool) -> None:
             today_yyyymmdd,
             "--workers",
             str(get_workers),
+            "--process-shards",
+            str(get_shards),
+            "--upsert-chunk-size",
+            str(get_write_chunk_size),
         ]
-        logging.info("[everyday] getDataBaoStock: %s -> %s (workers=%s)", fetch_start, today_yyyymmdd, get_workers)
+        logging.info(
+            "[everyday] getDataBaoStock: %s -> %s (workers=%s shards=%s chunk=%s)",
+            fetch_start,
+            today_yyyymmdd,
+            get_workers,
+            get_shards,
+            get_write_chunk_size,
+        )
         getdata_mod.main(get_cli)
     else:
         logging.info("[everyday] getDataBaoStock: K 线已最新，跳过")
@@ -259,6 +272,8 @@ def run_once(
     ywcx_min_score: float,
     stwg_top: int,
     stwg_min_score: float,
+    getdata_shards: int = 1,
+    getdata_write_chunk_size: int = 5000,
 ) -> None:
     args = argparse.Namespace(
         config=config,
@@ -266,6 +281,8 @@ def run_once(
         db=db,
         initial_start_date=initial_start_date,
         getdata_workers=int(getdata_workers),
+        getdata_shards=int(getdata_shards),
+        getdata_write_chunk_size=int(getdata_write_chunk_size),
         laowang_workers=int(laowang_workers),
         ywcx_workers=int(ywcx_workers),
         stwg_workers=int(stwg_workers),
@@ -288,6 +305,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--db", default=None, help="SQLite 文件")
     parser.add_argument("--initial-start-date", default="2000-01-01", help="数据库为空时的起始日期")
     parser.add_argument("--getdata-workers", type=int, default=1)
+    parser.add_argument("--getdata-shards", type=int, default=1)
+    parser.add_argument("--getdata-write-chunk-size", type=int, default=5000)
     parser.add_argument("--laowang-workers", type=int, default=16)
     parser.add_argument("--ywcx-workers", type=int, default=16)
     parser.add_argument("--stwg-workers", type=int, default=16)

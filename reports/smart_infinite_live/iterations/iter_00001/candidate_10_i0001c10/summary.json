@@ -1,0 +1,52 @@
+{
+  "train_start_date": "2020-01-01",
+  "backtest_start_date": "2025-01-01",
+  "end_date": "2026-02-13",
+  "max_dd_limit": 0.45,
+  "initial_capital": 10000.0,
+  "rules_file": "rules.txt",
+  "variant_profile": "base",
+  "variant_specs_file": "reports/smart_infinite_live/iterations/iter_00001/candidate_10_spec.json",
+  "variant_count": 1,
+  "patience": 10,
+  "max_rounds": 80,
+  "history_rows": 15,
+  "best": {
+    "round_no": 5,
+    "seed_offset": 388,
+    "variant": "i0001c10",
+    "alpha": 2,
+    "threshold": 0.75,
+    "sell_rule": "profit_lock_t3",
+    "top_k": 3,
+    "gap_min": -0.005,
+    "gap_max": null,
+    "max_board": 2,
+    "risk_profile": "balanced",
+    "max_broken_rate": 0.45,
+    "min_red_rate": 0.24,
+    "max_limit_down": 20,
+    "max_pullback": 0.09,
+    "alloc_pct": 0.2,
+    "train_acc": 0.577212543554007,
+    "ret": 0.24363716170000016,
+    "max_dd": 0.06348404112915558,
+    "trades": 56,
+    "final_capital": 12436.371617,
+    "fee": 560.0
+  },
+  "best_cfg_text": "i0001c10/a2/profit_lock_t3/k3/gap[-0.005,None]/board<=2/risk=balanced/alloc=0.20",
+  "best_detail": {
+    "final_capital": 12436.371617,
+    "ret_pct": 24.363716170000018,
+    "max_dd_pct": 6.348404112915558,
+    "trade_n": 56,
+    "total_fee": 560.0
+  },
+  "outputs": {
+    "history_csv": "reports/smart_infinite_live/iterations/iter_00001/candidate_10_i0001c10/history.csv",
+    "trades_csv": "reports/smart_infinite_live/iterations/iter_00001/candidate_10_i0001c10/best_selected_trades.csv",
+    "operations_csv": "reports/smart_infinite_live/iterations/iter_00001/candidate_10_i0001c10/best_selected_operations.csv"
+  },
+  "timestamp": "2026-02-27 13:44:48"
+}

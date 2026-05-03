@@ -1,55 +1,91 @@
 # 数据库初始化与排错
 
-## 1. 连接方式
+## 连接方式
 
-- 推荐：在 `config.ini` 中写 `db_url = mysql+pymysql://user:pass@127.0.0.1:3306/astock?charset=utf8mb4`
-- 也可填写 `[mysql]` 段，脚本会自动拼接。
-- 连接优先级：`--db-url` > `ASTOCK_DB_URL` > `--db` > `config.ini` > `data/stock.db`
+推荐在 `config.ini` 中配置完整 SQLAlchemy URL：
 
-## 2. 初始化步骤
+```ini
+[database]
+db_url = mysql+pymysql://user:password@127.0.0.1:3306/astock?charset=utf8mb4
+```
+
+也可以通过 `[mysql]` 段、`--db-url`、`--db` 或环境变量 `ASTOCK_DB_URL` 指定。
+
+优先级：
+
+`--db-url` > `ASTOCK_DB_URL` > `--db` > `config.ini` > `data/stock.db`
+
+## 初始化
 
 ```bash
 python init.py --config config.ini
 ```
 
-- 若连接的是 MySQL，会自动 `CREATE DATABASE IF NOT EXISTS`。
-- 创建表：`stock_info`、`stock_daily`、`stock_levels`、`stock_scores_v3`、`stock_scores_ywcx`、`stock_scores_stwg`、`model_laowang_pool`、`model_ywcx_pool`、`model_stwg_pool`、`model_fhkq`。
+该命令会创建主流程需要的核心表：
 
-## 3. 核心脚本与表对应关系
+- `stock_info`
+- `stock_daily`
+- `stock_ingest_watermark`
+- `stock_scores_v3`
+- `stock_levels`
+- `stock_scores_ywcx`
+- `stock_scores_stwg`
+- `model_laowang_pool`
+- `model_ywcx_pool`
+- `model_stwg_pool`
+- `model_fhkq`
+- `daily_review_akshare_pool`
+- `daily_review_xgb_limit_up`
+- `model_relay_pool`
+- `model_relay_registry`
 
-| 脚本 | 依赖表 | 写入表 |
-| --- | --- | --- |
-| `legacy/getData.py` | `stock_info`*、`stock_daily`* | `stock_info`（含 `float_cap_billion`）、`stock_daily`（历史脚本） |
-| `scoring_laowang.py` | `stock_info`、`stock_daily` | `stock_scores_v3`、`stock_levels`、`model_laowang_pool` |
-| `scoring_ywcx.py` | `stock_info`、`stock_daily` | `stock_scores_ywcx`、`model_ywcx_pool` |
-| `scoring_stwg.py` | `stock_info`、`stock_daily` | `stock_scores_stwg`、`model_stwg_pool` |
-| `scoring_fhkq.py` | `stock_info`、`stock_daily` | `model_fhkq` |
-| `ui.py` | `model_laowang_pool`、`model_ywcx_pool`、`model_stwg_pool`、`model_fhkq` | —— |
+分钟线表 `stock_minute` 会在首次运行 `getDataBaoStock.py --frequency 5/15/30/60` 时自动创建。
 
-（带 * 的表会在不存在时创建）
+## 性能相关表
 
-## 4. 常见排错 SQL
+`stock_ingest_watermark` 保存每只股票、每个频率的最新入库日期。下载任务优先读取该表，避免在 `stock_minute` 体量很大时反复执行全表聚合。
 
 ```sql
--- 确认日线覆盖
-SELECT COUNT(*) FROM stock_daily WHERE date='2024-05-31';
-
--- 查看 LAOWANG 评分是否写入
-SELECT COUNT(*) FROM stock_scores_v3 WHERE score_date='2024-05-31';
-
--- 查看 UI 数据源
-SELECT COUNT(*) FROM model_laowang_pool WHERE trade_date='2024-05-31';
-SELECT COUNT(*) FROM model_ywcx_pool WHERE trade_date='2024-05-31';
-SELECT COUNT(*) FROM model_stwg_pool WHERE trade_date='2024-05-31';
-SELECT COUNT(*) FROM model_fhkq WHERE trade_date='2024-05-31';
+SELECT frequency, COUNT(*) AS stock_count, MAX(latest_date) AS latest_date
+FROM stock_ingest_watermark
+GROUP BY frequency;
 ```
 
-## 5. SQLite 提示
+如果需要重建水位，可以先备份数据库，再清空该表并重新运行一次对应频率的下载任务。程序会从基础 K 线表回填水位。
 
-- 若使用 `--db data/stock.db`，脚本会自动创建目录并启用 WAL 模式（并发读更快）。
-- 单机轻量使用可快速上手；后续迁移至 MySQL 只需改配置并重新 `init.py`。
+## 常用排错 SQL
 
-## 6. 其他
+日线是否更新：
 
-- 旧版的 `a_stock_analyzer/`、`modeling/` 等仍在 `recycle_bin/`，但与新架构无关。
-- 若需要自定义表结构，可在运行 `init.py` 前修改脚本中的 DDL 语句。
+```sql
+SELECT MAX(date) FROM stock_daily;
+SELECT COUNT(*) FROM stock_daily WHERE date='2026-04-30';
+```
+
+分钟线规模和水位：
+
+```sql
+SELECT table_rows, data_length, index_length
+FROM information_schema.tables
+WHERE table_schema = DATABASE()
+  AND table_name = 'stock_minute';
+
+SELECT stock_code, frequency, latest_date
+FROM stock_ingest_watermark
+ORDER BY updated_at DESC
+LIMIT 20;
+```
+
+模型输出是否存在：
+
+```sql
+SELECT COUNT(*) FROM model_laowang_pool WHERE trade_date='2026-04-30';
+SELECT COUNT(*) FROM model_ywcx_pool    WHERE trade_date='2026-04-30';
+SELECT COUNT(*) FROM model_stwg_pool    WHERE trade_date='2026-04-30';
+SELECT COUNT(*) FROM model_fhkq         WHERE trade_date='2026-04-30';
+SELECT COUNT(*) FROM model_relay_pool   WHERE trade_date='2026-04-30';
+```
+
+## SQLite 提示
+
+使用 `--db data/stock.db` 时，脚本会自动创建目录并启用 WAL。SQLite 适合轻量试跑；如果要长期保存分钟线，建议使用 MySQL。

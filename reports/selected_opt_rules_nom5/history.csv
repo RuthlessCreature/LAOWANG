@@ -1,0 +1,2 @@
+﻿round,seed_offset,feasible,best_ret_pct,best_dd_pct,best_cfg,improved
+1,0,True,13.15621188,4.751113739255343,"mlp_h72_e380_gt15/a10/t2_close/k1/gap[-0.01,None]/board<=2/risk=off/alloc=0.18",True

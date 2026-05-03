@@ -1,0 +1,62 @@
+{
+  "train_start_date": "2020-01-01",
+  "backtest_start_date": "2025-01-01",
+  "end_date": "2026-02-13",
+  "eval_mode": "walk_forward",
+  "train_end_date": "",
+  "retrain_every_days": 20,
+  "min_train_rows": 80,
+  "max_dd_limit": 0.45,
+  "initial_capital": 10000.0,
+  "rules_file": "rules.txt",
+  "variant_profile": "base",
+  "variant_specs_file": "reports/smart_infinite_wf_smoke/iterations/iter_00001/candidate_01_spec.json",
+  "variant_count": 1,
+  "patience": 1,
+  "max_rounds": 1,
+  "history_rows": 1,
+  "best": {
+    "round_no": 1,
+    "seed_offset": 0,
+    "variant": "i0001c01",
+    "alpha": 5,
+    "threshold": 0.75,
+    "sell_rule": "strong_hold_t3",
+    "top_k": 1,
+    "gap_min": null,
+    "gap_max": 0.02,
+    "max_board": 3,
+    "risk_profile": "off",
+    "max_broken_rate": null,
+    "min_red_rate": null,
+    "max_limit_down": null,
+    "max_pullback": null,
+    "alloc_pct": 0.05,
+    "train_acc": 0.6621461046922904,
+    "ret": -0.00880000000000003,
+    "max_dd": 0.013993003498250875,
+    "trades": 13,
+    "final_capital": 9912.0,
+    "fee": 130.0
+  },
+  "best_cfg_text": "i0001c01/a5/strong_hold_t3/k1/gap[None,0.02]/board<=3/risk=off/alloc=0.05",
+  "best_detail": {
+    "final_capital": 9912.0,
+    "ret_pct": -0.880000000000003,
+    "max_dd_pct": 1.3993003498250876,
+    "trade_n": 13,
+    "total_fee": 130.0
+  },
+  "outputs": {
+    "history_csv": "reports/smart_infinite_wf_smoke/iterations/iter_00001/candidate_01_i0001c01/history.csv",
+    "trades_csv": "reports/smart_infinite_wf_smoke/iterations/iter_00001/candidate_01_i0001c01/best_selected_trades.csv",
+    "operations_csv": "reports/smart_infinite_wf_smoke/iterations/iter_00001/candidate_01_i0001c01/best_selected_operations.csv"
+  },
+  "walk_forward_meta": {
+    "segments": 14,
+    "trained_segments": 14,
+    "missing_rows": 0,
+    "train_rows_all": 14350
+  },
+  "timestamp": "2026-02-27 15:22:40"
+}

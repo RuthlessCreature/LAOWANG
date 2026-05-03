@@ -1,0 +1,16 @@
+﻿round,seed_offset,feasible,best_ret_pct,best_dd_pct,best_cfg,improved
+1,0,True,11.440412189999982,4.58085548263703,"i0001c10/a10/t2_close/k1/gap[-0.01,None]/board<=2/risk=off/alloc=0.18",True
+2,97,True,6.834440169999989,4.762148629794754,"i0001c10/a5/t2_close/k2/gap[None,0.02]/board<=None/risk=strict/alloc=0.20",False
+3,194,True,9.084777650000042,4.866935949245821,"i0001c10/a2/t2_close/k3/gap[None,None]/board<=None/risk=strict/alloc=0.18",False
+4,291,True,12.963559069999974,3.0384790918765825,"i0001c10/a2/t2_close/k3/gap[None,None]/board<=None/risk=balanced/alloc=0.15",True
+5,388,True,24.363716170000018,6.348404112915558,"i0001c10/a2/profit_lock_t3/k3/gap[-0.005,None]/board<=2/risk=balanced/alloc=0.20",True
+6,485,True,17.004085739999965,3.2488429303340194,"i0001c10/a5/strong_hold_t3/k3/gap[-0.01,0.02]/board<=3/risk=strict/alloc=0.20",False
+7,582,True,23.65124658000002,3.2022290884959013,"i0001c10/a5/t2_close/k3/gap[None,0.02]/board<=None/risk=balanced/alloc=0.20",False
+8,679,True,9.363516669999994,7.236498104083674,"i0001c10/a10/strong_hold_t3/k3/gap[None,0.02]/board<=2/risk=off/alloc=0.20",False
+9,776,True,11.54024050000002,8.014440558807626,"i0001c10/a2/strong_hold_t3/k3/gap[-0.01,0.02]/board<=None/risk=balanced/alloc=0.15",False
+10,873,True,17.082479839999976,2.8349821136590294,"i0001c10/a2/profit_lock_t3/k3/gap[-0.005,None]/board<=2/risk=balanced/alloc=0.20",False
+11,970,True,14.946776659999994,4.326919775937676,"i0001c10/a2/profit_lock_t3/k3/gap[-0.005,None]/board<=2/risk=balanced/alloc=0.20",False
+12,1067,True,4.52526939000002,3.117658534015533,"i0001c10/a10/profit_lock_t3/k1/gap[-0.005,0.02]/board<=2/risk=strict/alloc=0.20",False
+13,1164,True,8.027803960000046,5.136295335073573,"i0001c10/a2/profit_lock_t3/k3/gap[-0.005,None]/board<=2/risk=balanced/alloc=0.20",False
+14,1261,True,15.295629860000037,6.014834411823426,"i0001c10/a10/profit_lock_t3/k1/gap[-0.005,None]/board<=None/risk=balanced/alloc=0.20",False
+15,1358,True,19.278473360000014,2.7923622584403773,"i0001c10/a5/strong_hold_t3/k3/gap[-0.005,None]/board<=None/risk=balanced/alloc=0.12",False

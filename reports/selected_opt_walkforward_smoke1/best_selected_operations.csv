@@ -1,0 +1,13 @@
+﻿操作日期,操作时间,股票代码,股票名称,操作（买or卖）,操作价格,操作原因,总资产
+2025-01-08,09:30:00,000010,美丽生态,buy,2.920,"model=mlp_h48_e300_gt0, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9995.00
+2025-01-09,15:00:00,000010,美丽生态,sell,2.960,T+2收盘上涨1.37%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9994.00
+2025-02-05,09:30:00,002256,兆新股份,buy,2.420,"model=mlp_h48_e300_gt0, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9989.00
+2025-02-06,15:00:00,002256,兆新股份,sell,2.470,T+2收盘上涨2.07%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9994.00
+2025-03-31,09:30:00,600239,云南城投,buy,2.780,"model=mlp_h48_e300_gt0, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9989.00
+2025-04-01,15:00:00,600239,云南城投,sell,2.840,T+2收盘上涨2.16%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9990.00
+2025-04-15,09:30:00,002127,南极电商,buy,4.211,"model=mlp_h48_e300_gt0, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9985.00
+2025-04-16,15:00:00,002127,南极电商,sell,3.933,T+2收盘上涨-6.59%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9952.26
+2025-06-24,09:30:00,000637,茂化实华,buy,4.820,"model=mlp_h48_e300_gt0, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9947.26
+2025-06-25,15:00:00,000637,茂化实华,sell,4.340,T+2收盘上涨-9.96%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9894.26
+2025-09-03,09:30:00,000981,山子高科,buy,2.660,"model=mlp_h48_e300_gt0, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9889.26
+2025-09-04,15:00:00,000981,山子高科,sell,2.370,T+2收盘上涨-10.90%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9855.26

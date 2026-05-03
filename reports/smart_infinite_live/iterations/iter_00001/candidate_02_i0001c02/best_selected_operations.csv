@@ -1,0 +1,75 @@
+﻿操作日期,操作时间,股票代码,股票名称,操作（买or卖）,操作价格,操作原因,总资产
+2025-01-06,09:30:00,002184,海得控制,buy,14.220,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",9995.00
+2025-01-08,15:00:00,002184,海得控制,sell,18.820,T+2收盘上涨20.32%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,10450.00
+2025-01-16,09:30:00,002031,巨轮智能,buy,6.680,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",10445.00
+2025-01-20,15:00:00,002031,巨轮智能,sell,7.040,T+2收盘上涨8.38%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,10548.00
+2025-01-23,09:30:00,002861,瀛通通讯,buy,17.308,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",10543.00
+2025-01-24,15:00:00,002861,瀛通通讯,sell,16.831,T+2收盘上涨-2.76%未触发延长，T+2收盘卖出 (no intraday-high optimization).,10490.31
+2025-02-20,09:30:00,002046,国机精工,buy,15.015,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",10485.31
+2025-02-21,15:00:00,002046,国机精工,sell,15.193,T+2收盘上涨1.18%未触发延长，T+2收盘卖出 (no intraday-high optimization).,10498.08
+2025-02-26,09:30:00,000892,欢瑞世纪,buy,4.700,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",10493.08
+2025-02-27,15:00:00,000892,欢瑞世纪,sell,4.830,T+2收盘上涨2.77%未触发延长，T+2收盘卖出 (no intraday-high optimization).,10540.08
+2025-03-10,09:30:00,600281,华阳新材,buy,4.130,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",10535.08
+2025-03-11,15:00:00,600281,华阳新材,sell,4.320,T+2收盘上涨4.60%未触发延长，T+2收盘卖出 (no intraday-high optimization).,10625.08
+2025-03-17,09:30:00,600774,汉商集团,buy,8.400,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",10620.08
+2025-03-18,15:00:00,600774,汉商集团,sell,8.060,T+2收盘上涨-4.05%未触发延长，T+2收盘卖出 (no intraday-high optimization).,10547.08
+2025-03-20,09:30:00,600185,珠免集团,buy,6.270,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",10542.08
+2025-03-21,15:00:00,600185,珠免集团,sell,6.280,T+2收盘上涨0.16%未触发延长，T+2收盘卖出 (no intraday-high optimization).,10540.08
+2025-03-27,09:30:00,603579,荣泰健康,buy,20.348,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",10535.08
+2025-03-31,15:00:00,603579,荣泰健康,sell,26.769,T+2收盘上涨19.60%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,11172.22
+2025-04-10,09:30:00,000066,中国长城,buy,16.490,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11167.22
+2025-04-11,15:00:00,000066,中国长城,sell,16.400,T+2收盘上涨-0.55%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11153.22
+2025-04-16,09:30:00,601083,锦江航运,buy,11.025,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11148.22
+2025-04-17,15:00:00,601083,锦江航运,sell,10.651,T+2收盘上涨-3.39%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11068.45
+2025-04-23,09:30:00,601008,连云港,buy,5.933,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11063.45
+2025-04-24,15:00:00,601008,连云港,sell,5.973,T+2收盘上涨0.67%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11070.31
+2025-04-28,09:30:00,600771,广誉远,buy,19.000,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11065.31
+2025-04-29,15:00:00,600771,广誉远,sell,19.190,T+2收盘上涨1.00%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11079.31
+2025-05-08,09:30:00,000965,天保基建,buy,4.229,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11074.31
+2025-05-09,15:00:00,000965,天保基建,sell,4.109,T+2收盘上涨-2.83%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11009.47
+2025-05-14,09:30:00,000520,凤凰航运,buy,5.090,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11004.47
+2025-05-16,15:00:00,000520,凤凰航运,sell,5.240,T+2收盘上涨8.06%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,11059.47
+2025-05-22,09:30:00,605136,丽人丽妆,buy,12.660,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11054.47
+2025-05-26,15:00:00,605136,丽人丽妆,sell,14.500,T+2收盘上涨14.61%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,11233.47
+2025-05-29,09:30:00,603518,锦泓集团,buy,10.180,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11228.47
+2025-05-30,15:00:00,603518,锦泓集团,sell,10.400,T+2收盘上涨2.16%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11267.47
+2025-06-10,09:30:00,000889,中嘉博创,buy,3.960,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11262.47
+2025-06-11,15:00:00,000889,中嘉博创,sell,3.760,T+2收盘上涨-5.05%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11157.47
+2025-06-19,09:30:00,002490,山东墨龙,buy,5.800,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11152.47
+2025-06-23,15:00:00,002490,山东墨龙,sell,7.720,T+2收盘上涨21.03%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,11723.47
+2025-07-08,09:30:00,000037,深南电A,buy,10.570,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11718.47
+2025-07-09,15:00:00,000037,深南电A,sell,10.380,T+2收盘上涨-1.80%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11675.47
+2025-07-14,09:30:00,600513,联环药业,buy,15.060,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11670.47
+2025-07-15,15:00:00,600513,联环药业,sell,14.830,T+2收盘上涨-1.53%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11642.47
+2025-07-22,09:30:00,000679,大连友谊,buy,8.120,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11637.47
+2025-07-23,15:00:00,000679,大连友谊,sell,8.300,T+2收盘上涨2.22%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11668.47
+2025-07-28,09:30:00,002298,中电鑫龙,buy,7.690,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11663.47
+2025-07-29,15:00:00,002298,中电鑫龙,sell,7.890,T+2收盘上涨2.60%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11718.47
+2025-08-06,09:30:00,600203,福日电子,buy,13.020,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11713.47
+2025-08-08,15:00:00,600203,福日电子,sell,15.310,T+2收盘上涨19.89%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,11937.47
+2025-08-19,09:30:00,600654,中安科,buy,3.710,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11932.47
+2025-08-20,15:00:00,600654,中安科,sell,3.680,T+2收盘上涨-0.81%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11909.47
+2025-08-27,09:30:00,603158,腾龙股份,buy,15.080,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11904.47
+2025-08-28,15:00:00,603158,腾龙股份,sell,14.480,T+2收盘上涨-3.98%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11839.47
+2025-09-01,09:30:00,601333,广深铁路,buy,3.200,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11834.47
+2025-09-02,15:00:00,601333,广深铁路,sell,3.330,T+2收盘上涨4.06%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11920.47
+2025-09-10,09:30:00,002244,滨江集团,buy,11.180,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11915.47
+2025-09-11,15:00:00,002244,滨江集团,sell,11.220,T+2收盘上涨0.36%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11918.47
+2025-09-24,09:30:00,002515,金字火腿,buy,8.000,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11913.47
+2025-09-25,15:00:00,002515,金字火腿,sell,7.570,T+2收盘上涨-5.37%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11822.47
+2025-10-20,09:30:00,002004,华邦健康,buy,5.100,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11817.47
+2025-10-21,15:00:00,002004,华邦健康,sell,4.910,T+2收盘上涨-3.73%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11736.47
+2025-11-05,09:30:00,300591,万里马,buy,12.330,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11731.47
+2025-11-06,15:00:00,300591,万里马,sell,11.400,T+2收盘上涨-7.54%未触发延长，T+2收盘卖出 (no intraday-high optimization).,11633.47
+2025-11-28,09:30:00,603778,国晟科技,buy,10.670,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",11628.47
+2025-12-02,15:00:00,603778,国晟科技,sell,13.110,T+2收盘上涨19.49%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,12111.47
+2025-12-15,09:30:00,600550,保变电气,buy,10.250,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",12106.47
+2025-12-16,15:00:00,600550,保变电气,sell,10.060,T+2收盘上涨-1.85%未触发延长，T+2收盘卖出 (no intraday-high optimization).,12063.47
+2025-12-19,09:30:00,002853,皮阿诺,buy,21.930,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",12058.47
+2025-12-23,15:00:00,002853,皮阿诺,sell,22.800,T+2收盘上涨10.85%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,12140.47
+2026-01-13,09:30:00,603608,天创时尚,buy,9.870,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",12135.47
+2026-01-14,15:00:00,603608,天创时尚,sell,10.100,T+2收盘上涨2.33%未触发延长，T+2收盘卖出 (no intraday-high optimization).,12176.47
+2026-01-21,09:30:00,600986,浙文互联,buy,10.090,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",12171.47
+2026-01-23,15:00:00,600986,浙文互联,sell,12.050,T+2收盘上涨8.52%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,12558.47
+2026-02-03,09:30:00,600785,新华百货,buy,23.270,"model=i0001c02, alpha=10; score>=threshold; gap_filter=[-0.50%, 2.00%], max_board=None; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=20%; T signal -> T+1 open buy, limit-up open is unfilled.",12553.47
+2026-02-05,15:00:00,600785,新华百货,sell,24.400,T+2收盘上涨8.94%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,12661.47

@@ -1,0 +1,6 @@
+[opt] variants=1 source=custom_file
+[round 1] best ret=87.20% dd=32.97% trades=56 (improved)
+[round 2] best ret=2.10% dd=36.00% trades=73 (no improve)
+[stop] no return improvement for 1 consecutive rounds.
+[best] ret=87.20% dd=32.97% trades=56 cfg=i0001c01/a10/profit_lock_t3/k2/gap[-0.01,0.04]/board<=2/risk=strict/alloc=1.00
+[out] reports/smart_infinite_wf_probe2/iterations/iter_00001/candidate_01_i0001c01/summary.json

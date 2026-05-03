@@ -1,0 +1,16 @@
+﻿round,seed_offset,feasible,best_ret_pct,best_dd_pct,best_cfg,improved
+1,0,True,2.1523223699999816,1.3244807350360897,"i0001c05/a10/profit_lock_t3/k2/gap[-0.005,None]/board<=3/risk=off/alloc=0.08",True
+2,97,True,5.744837899999955,4.065270761608866,"i0001c05/a10/strong_hold_t3/k1/gap[-0.005,0.02]/board<=None/risk=off/alloc=0.20",True
+3,194,True,9.047721780000018,2.969407855946758,"i0001c05/a10/strong_hold_t3/k1/gap[-0.005,0.02]/board<=None/risk=off/alloc=0.20",True
+4,291,True,11.492496150000008,4.829991474577837,"i0001c05/a10/strong_hold_t3/k1/gap[-0.005,0.02]/board<=None/risk=off/alloc=0.20",True
+5,388,True,19.725172460000028,4.789350519290688,"i0001c05/a2/strong_hold_t3/k1/gap[None,0.02]/board<=2/risk=strict/alloc=0.20",True
+6,485,True,6.688531249999974,5.19046508599237,"i0001c05/a10/t2_close/k1/gap[None,0.02]/board<=2/risk=strict/alloc=0.20",False
+7,582,True,-0.4827440300000263,5.2597739649229265,"i0001c05/a2/profit_lock_t3/k1/gap[-0.01,0.02]/board<=2/risk=strict/alloc=0.20",False
+8,679,True,0.030642069999986532,7.239377750000004,"i0001c05/a2/strong_hold_t3/k1/gap[None,0.02]/board<=2/risk=strict/alloc=0.20",False
+9,776,True,6.442854180000057,5.206453154526451,"i0001c05/a10/t2_close/k3/gap[-0.005,None]/board<=None/risk=strict/alloc=0.18",False
+10,873,True,5.429030420000003,6.762295362476902,"i0001c05/a5/strong_hold_t3/k1/gap[-0.01,None]/board<=3/risk=off/alloc=0.15",False
+11,970,True,-1.6554794400000183,4.650169487532674,"i0001c05/a10/profit_lock_t3/k3/gap[-0.005,0.02]/board<=None/risk=balanced/alloc=0.15",False
+12,1067,True,8.517771109999984,6.713044941914041,"i0001c05/a5/strong_hold_t3/k2/gap[-0.005,None]/board<=3/risk=strict/alloc=0.18",False
+13,1164,True,12.177926110000016,5.09438379893088,"i0001c05/a10/strong_hold_t3/k1/gap[None,None]/board<=3/risk=balanced/alloc=0.18",False
+14,1261,True,-0.6159165500000063,8.375916550000003,"i0001c05/a2/strong_hold_t3/k1/gap[None,0.02]/board<=2/risk=strict/alloc=0.20",False
+15,1358,True,3.888050870000015,3.200396362564225,"i0001c05/a10/t2_close/k2/gap[None,0.02]/board<=3/risk=balanced/alloc=0.15",False

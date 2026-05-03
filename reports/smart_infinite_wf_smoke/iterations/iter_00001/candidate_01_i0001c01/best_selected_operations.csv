@@ -1,0 +1,27 @@
+﻿操作日期,操作时间,股票代码,股票名称,操作（买or卖）,操作价格,操作原因,总资产
+2025-01-08,09:30:00,000010,美丽生态,buy,2.920,"model=i0001c01, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9995.00
+2025-01-09,15:00:00,000010,美丽生态,sell,2.960,T+2收盘上涨1.37%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9994.00
+2025-03-11,09:30:00,600172,黄河旋风,buy,4.550,"model=i0001c01, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9989.00
+2025-03-12,15:00:00,600172,黄河旋风,sell,4.480,T+2收盘上涨-1.54%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9977.00
+2025-03-31,09:30:00,600239,云南城投,buy,2.780,"model=i0001c01, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9972.00
+2025-04-01,15:00:00,600239,云南城投,sell,2.840,T+2收盘上涨2.16%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9973.00
+2025-04-29,09:30:00,600396,华电辽能,buy,3.310,"model=i0001c01, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9968.00
+2025-04-30,15:00:00,600396,华电辽能,sell,2.760,T+2收盘上涨-16.62%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9908.00
+2025-05-14,09:30:00,600448,华纺股份,buy,4.060,"model=i0001c01, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9903.00
+2025-05-16,15:00:00,600448,华纺股份,sell,5.130,T+2收盘上涨29.06%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,10005.00
+2025-06-05,09:30:00,603023,威帝股份,buy,4.100,"model=i0001c01, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",10000.00
+2025-06-06,15:00:00,603023,威帝股份,sell,4.150,T+2收盘上涨1.22%未触发延长，T+2收盘卖出 (no intraday-high optimization).,10000.00
+2025-09-05,09:30:00,002269,美邦服饰,buy,2.600,"model=i0001c01, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9995.00
+2025-09-08,15:00:00,002269,美邦服饰,sell,2.680,T+2收盘上涨3.08%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9998.00
+2025-09-19,09:30:00,603030,全筑股份,buy,3.320,"model=i0001c01, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9993.00
+2025-09-22,15:00:00,603030,全筑股份,sell,3.120,T+2收盘上涨-6.02%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9968.00
+2025-09-25,09:30:00,600103,青山纸业,buy,3.830,"model=i0001c01, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9963.00
+2025-09-26,15:00:00,600103,青山纸业,sell,3.660,T+2收盘上涨-4.44%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9941.00
+2025-11-06,09:30:00,601929,吉视传媒,buy,4.890,"model=i0001c01, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9936.00
+2025-11-07,15:00:00,601929,吉视传媒,sell,4.230,T+2收盘上涨-13.50%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9865.00
+2025-11-28,09:30:00,000078,海王生物,buy,3.050,"model=i0001c01, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9860.00
+2025-12-02,15:00:00,000078,海王生物,sell,4.110,T+2收盘上涨22.62%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,9961.00
+2025-12-15,09:30:00,002256,兆新股份,buy,3.910,"model=i0001c01, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9956.00
+2025-12-16,15:00:00,002256,兆新股份,sell,3.770,T+2收盘上涨-3.58%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9937.00
+2026-01-28,09:30:00,000659,珠海中富,buy,4.910,"model=i0001c01, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9932.00
+2026-01-29,15:00:00,000659,珠海中富,sell,4.760,T+2收盘上涨-3.05%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9912.00

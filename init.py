@@ -170,6 +170,15 @@ DDL_STATEMENTS = [
     )
     """,
     """
+    CREATE TABLE IF NOT EXISTS stock_ingest_watermark (
+        stock_code VARCHAR(16) NOT NULL,
+        frequency VARCHAR(8) NOT NULL,
+        latest_date VARCHAR(10) NOT NULL,
+        updated_at VARCHAR(19) NULL,
+        PRIMARY KEY (stock_code, frequency)
+    )
+    """,
+    """
     CREATE TABLE IF NOT EXISTS stock_levels (
         stock_code VARCHAR(16) NOT NULL,
         calc_date VARCHAR(10) NOT NULL,

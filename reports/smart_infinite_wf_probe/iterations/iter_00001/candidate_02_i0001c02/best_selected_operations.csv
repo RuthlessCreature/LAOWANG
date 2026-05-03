@@ -1,0 +1,37 @@
+﻿操作日期,操作时间,股票代码,股票名称,操作（买or卖）,操作价格,操作原因,总资产
+2025-03-21,09:30:00,600716,凤凰股份,buy,3.680,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9995.00
+2025-03-24,15:00:00,600716,凤凰股份,sell,3.340,T+2收盘上涨-9.24%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9956.00
+2025-03-31,09:30:00,600239,云南城投,buy,2.780,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9951.00
+2025-04-01,15:00:00,600239,云南城投,sell,2.840,T+2收盘上涨2.16%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9952.00
+2025-04-10,09:30:00,000016,深康佳A,buy,4.260,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9947.00
+2025-04-14,15:00:00,000016,深康佳A,sell,5.280,T+2收盘上涨19.72%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,10044.00
+2025-05-09,09:30:00,002124,天邦食品,buy,3.530,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",10039.00
+2025-05-12,15:00:00,002124,天邦食品,sell,3.200,T+2收盘上涨-9.35%未触发延长，T+2收盘卖出 (no intraday-high optimization).,10001.00
+2025-05-22,09:30:00,600828,茂业商业,buy,4.590,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9996.00
+2025-05-23,15:00:00,600828,茂业商业,sell,4.190,T+2收盘上涨-8.71%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9951.00
+2025-05-28,09:30:00,600172,黄河旋风,buy,4.400,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9946.00
+2025-05-29,15:00:00,600172,黄河旋风,sell,4.330,T+2收盘上涨-1.59%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9934.00
+2025-06-03,09:30:00,002162,悦心健康,buy,4.440,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9929.00
+2025-06-04,15:00:00,002162,悦心健康,sell,4.700,T+2收盘上涨5.86%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9950.00
+2025-06-23,09:30:00,002067,景兴纸业,buy,3.770,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9945.00
+2025-06-24,15:00:00,002067,景兴纸业,sell,3.950,T+2收盘上涨4.77%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9958.00
+2025-06-27,09:30:00,000892,欢瑞世纪,buy,4.660,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9953.00
+2025-06-30,15:00:00,000892,欢瑞世纪,sell,4.840,T+2收盘上涨3.86%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9966.00
+2025-07-16,09:30:00,002133,广宇集团,buy,3.363,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9961.00
+2025-07-17,15:00:00,002133,广宇集团,sell,3.116,T+2收盘上涨-7.33%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9931.35
+2025-07-22,09:30:00,600376,首开股份,buy,2.830,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9926.35
+2025-07-23,15:00:00,600376,首开股份,sell,2.830,T+2收盘上涨0.00%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9921.35
+2025-08-04,09:30:00,002652,扬子新材,buy,4.180,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9916.35
+2025-08-05,15:00:00,002652,扬子新材,sell,4.020,T+2收盘上涨-3.83%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9895.35
+2025-09-04,09:30:00,600545,卓郎智能,buy,3.150,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9890.35
+2025-09-05,15:00:00,600545,卓郎智能,sell,2.970,T+2收盘上涨-5.71%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9867.35
+2025-09-16,09:30:00,002418,康盛股份,buy,4.800,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9862.35
+2025-09-17,15:00:00,002418,康盛股份,sell,4.860,T+2收盘上涨1.25%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9863.35
+2025-10-15,09:30:00,601011,宝泰隆,buy,4.000,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9858.35
+2025-10-16,15:00:00,601011,宝泰隆,sell,3.950,T+2收盘上涨-1.25%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9848.35
+2025-10-20,09:30:00,600408,安泰集团,buy,2.800,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9843.35
+2025-10-22,15:00:00,600408,安泰集团,sell,2.900,T+2收盘上涨8.21%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,9848.35
+2025-10-31,09:30:00,002374,中锐股份,buy,2.950,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9843.35
+2025-11-04,15:00:00,002374,中锐股份,sell,3.340,T+2收盘上涨10.17%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,9877.35
+2025-11-07,09:30:00,002578,闽发铝业,buy,4.190,"model=i0001c02, alpha=5; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9872.35
+2025-11-10,15:00:00,002578,闽发铝业,sell,4.190,T+2收盘上涨0.00%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9867.35

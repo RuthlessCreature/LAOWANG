@@ -1,0 +1,1 @@
+[fit-relay-model-file] model=models/relay_model_aggressive_smart.npz version=i0001c09-2026-02-27T134632 samples=14350 train_acc=84.10% variant=i0001c09 alpha=5 threshold=0.75 minute_cov=95.61%

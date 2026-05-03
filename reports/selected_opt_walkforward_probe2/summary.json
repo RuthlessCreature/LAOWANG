@@ -1,0 +1,62 @@
+{
+  "train_start_date": "2020-01-01",
+  "backtest_start_date": "2025-01-01",
+  "end_date": "2026-02-13",
+  "eval_mode": "walk_forward",
+  "train_end_date": "",
+  "retrain_every_days": 20,
+  "min_train_rows": 80,
+  "max_dd_limit": 0.45,
+  "initial_capital": 10000.0,
+  "rules_file": "rules.txt",
+  "variant_profile": "base",
+  "variant_specs_file": "reports/tmp_one_variant.json",
+  "variant_count": 1,
+  "patience": 1,
+  "max_rounds": 2,
+  "history_rows": 2,
+  "best": {
+    "round_no": 1,
+    "seed_offset": 0,
+    "variant": "mlp_h48_e300_gt0",
+    "alpha": 5,
+    "threshold": 0.7,
+    "sell_rule": "t2_close",
+    "top_k": 2,
+    "gap_min": -0.02,
+    "gap_max": 0.03,
+    "max_board": null,
+    "risk_profile": "strict",
+    "max_broken_rate": 0.4,
+    "min_red_rate": 0.28,
+    "max_limit_down": 15,
+    "max_pullback": 0.08,
+    "alloc_pct": 0.8,
+    "train_acc": 0.6080072648897231,
+    "ret": 0.8318515521000001,
+    "max_dd": 0.2654102403594624,
+    "trades": 67,
+    "final_capital": 18318.515521,
+    "fee": 670.0
+  },
+  "best_cfg_text": "mlp_h48_e300_gt0/a5/t2_close/k2/gap[-0.02,0.03]/board<=None/risk=strict/alloc=0.80",
+  "best_detail": {
+    "final_capital": 18318.515521,
+    "ret_pct": 83.18515521,
+    "max_dd_pct": 26.541024035946243,
+    "trade_n": 67,
+    "total_fee": 670.0
+  },
+  "outputs": {
+    "history_csv": "reports/selected_opt_walkforward_probe2/history.csv",
+    "trades_csv": "reports/selected_opt_walkforward_probe2/best_selected_trades.csv",
+    "operations_csv": "reports/selected_opt_walkforward_probe2/best_selected_operations.csv"
+  },
+  "walk_forward_meta": {
+    "segments": 14,
+    "trained_segments": 14,
+    "missing_rows": 0,
+    "train_rows_all": 14350
+  },
+  "timestamp": "2026-02-27 15:40:01"
+}

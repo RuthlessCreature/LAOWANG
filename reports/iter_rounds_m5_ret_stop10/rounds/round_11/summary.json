@@ -1,0 +1,19 @@
+{
+  "round": 11,
+  "seed_offset": 970,
+  "retain_ratio": 0.8,
+  "avg_ret_pct": 603.54,
+  "avg_dd_pct": 17.21,
+  "indicator": 603.54,
+  "improved": false,
+  "metrics_by_threshold": {
+    "0.75": {
+      "final": 70353.83,
+      "ret_pct": 603.54,
+      "dd_pct": 17.21,
+      "fee": 1156.05,
+      "trades": 66,
+      "cfg": "mlp_h72_e380_gt15/a10/strong_hold_t3/k2/gap[-0.02,0.04]/board<=None/risk=balanced/alloc=0.90"
+    }
+  }
+}

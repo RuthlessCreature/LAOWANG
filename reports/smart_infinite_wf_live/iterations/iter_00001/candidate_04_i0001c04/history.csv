@@ -1,0 +1,12 @@
+﻿round,seed_offset,feasible,best_ret_pct,best_dd_pct,best_cfg,improved
+1,0,True,152.44588329999996,24.16356674764359,"i0001c04/a5/weak_hold_t3/k3/gap[-0.01,0.03]/board<=None/risk=strict/alloc=0.80/regime_beta=0.60",True
+2,97,True,26.21959170000001,37.235096909363854,"i0001c04/a2/weak_hold_t3/k4/gap[-0.01,0.02]/board<=None/risk=balanced/alloc=0.80/regime_beta=0.00",False
+3,194,True,9.59054035000002,8.580179021540797,"i0001c04/a5/loss_rebound_t3/k4/gap[None,0.04]/board<=2/risk=off/alloc=0.30/regime_beta=0.60",False
+4,291,True,80.30005552999995,31.185618477022636,"i0001c04/a5/weak_hold_t3/k3/gap[-0.01,0.03]/board<=None/risk=strict/alloc=0.80/regime_beta=0.60",False
+5,388,True,1.2479286500000075,8.452082009550859,"i0001c04/a5/weak_hold_t3/k2/gap[None,0.04]/board<=3/risk=strict/alloc=0.20/regime_beta=1.40",False
+6,485,True,94.56471768000003,29.709989366625628,"i0001c04/a5/loss_rebound_t3/k1/gap[-0.02,0.03]/board<=1/risk=strict/alloc=0.80/regime_beta=0.60",False
+7,582,True,38.64161311999992,31.625444373036565,"i0001c04/a5/weak_hold_t3/k3/gap[-0.01,0.03]/board<=None/risk=strict/alloc=0.80/regime_beta=0.60",False
+8,679,True,32.62863080000007,31.86179882690281,"i0001c04/a10/weak_hold_t3/k4/gap[None,0.02]/board<=1/risk=off/alloc=0.80/regime_beta=0.30",False
+9,776,True,50.187413820000046,25.368952204015184,"i0001c04/a10/loss_rebound_t3/k1/gap[None,0.02]/board<=2/risk=off/alloc=0.80/regime_beta=1.00",False
+10,873,True,2.807507479999982,2.4927946551138325,"i0001c04/a5/profit_lock_t3/k2/gap[-0.005,0.03]/board<=3/risk=off/alloc=0.10/regime_beta=0.30",False
+11,970,True,20.443846109999985,37.15663816935868,"i0001c04/a5/weak_hold_t3/k3/gap[-0.01,0.03]/board<=None/risk=strict/alloc=0.80/regime_beta=0.60",False

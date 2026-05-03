@@ -1,0 +1,3 @@
+﻿round,seed_offset,feasible,best_ret_pct,best_dd_pct,best_cfg,improved
+1,0,True,-1.3265179999999988,1.947947033054556,"i0001c02/a5/strong_hold_t3/k1/gap[None,0.02]/board<=3/risk=off/alloc=0.05",True
+2,97,True,-1.529999999999998,1.53,"i0001c02/a5/strong_hold_t3/k1/gap[None,0.02]/board<=3/risk=off/alloc=0.05",False

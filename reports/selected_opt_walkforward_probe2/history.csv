@@ -1,0 +1,3 @@
+﻿round,seed_offset,feasible,best_ret_pct,best_dd_pct,best_cfg,improved
+1,0,True,83.18515521,26.541024035946243,"mlp_h48_e300_gt0/a5/t2_close/k2/gap[-0.02,0.03]/board<=None/risk=strict/alloc=0.80",True
+2,97,True,-13.607491509999958,20.660115459283254,"mlp_h48_e300_gt0/a5/strong_hold_t3/k2/gap[-0.01,0.04]/board<=2/risk=strict/alloc=0.60",False

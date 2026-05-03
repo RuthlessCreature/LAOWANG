@@ -5,5 +5,5 @@ tqdm
 sqlalchemy>=2.0
 pymysql>=1.1
 cryptography>=41.0
-baostock
+baostock>=0.9.1
 requests>=2.0

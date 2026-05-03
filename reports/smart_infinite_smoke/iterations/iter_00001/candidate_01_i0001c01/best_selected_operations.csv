@@ -1,0 +1,19 @@
+﻿操作日期,操作时间,股票代码,股票名称,操作（买or卖）,操作价格,操作原因,总资产
+2025-01-08,09:30:00,000010,美丽生态,buy,2.920,"model=i0001c01, alpha=10; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9995.00
+2025-01-09,15:00:00,000010,美丽生态,sell,2.960,T+2收盘上涨1.37%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9994.00
+2025-01-15,09:30:00,000631,顺发恒能,buy,3.310,"model=i0001c01, alpha=10; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9989.00
+2025-01-16,15:00:00,000631,顺发恒能,sell,3.190,T+2收盘上涨-3.63%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9972.00
+2025-02-26,09:30:00,601113,华鼎股份,buy,4.350,"model=i0001c01, alpha=10; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9967.00
+2025-02-27,15:00:00,601113,华鼎股份,sell,4.410,T+2收盘上涨1.38%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9968.00
+2025-05-14,09:30:00,000767,晋控电力,buy,3.260,"model=i0001c01, alpha=10; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9963.00
+2025-05-16,15:00:00,000767,晋控电力,sell,3.330,T+2收盘上涨7.36%>=6%，延长到T+3收盘卖出 (no intraday-high optimization).,9965.00
+2025-07-02,09:30:00,000900,现代投资,buy,4.560,"model=i0001c01, alpha=10; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9960.00
+2025-07-03,15:00:00,000900,现代投资,sell,4.410,T+2收盘上涨-3.29%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9940.00
+2025-09-05,09:30:00,002269,美邦服饰,buy,2.600,"model=i0001c01, alpha=10; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9935.00
+2025-09-08,15:00:00,002269,美邦服饰,sell,2.680,T+2收盘上涨3.08%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9938.00
+2025-09-17,09:30:00,000564,供销大集,buy,2.930,"model=i0001c01, alpha=10; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9933.00
+2025-09-18,15:00:00,000564,供销大集,sell,2.890,T+2收盘上涨-1.37%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9924.00
+2025-11-05,09:30:00,601929,吉视传媒,buy,4.480,"model=i0001c01, alpha=10; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9919.00
+2025-11-06,15:00:00,601929,吉视传媒,sell,4.440,T+2收盘上涨-0.89%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9910.00
+2025-12-15,09:30:00,600936,北投科技,buy,4.180,"model=i0001c01, alpha=10; score>=threshold; gap_filter=[None, 2.00%], max_board=3; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=5%; T signal -> T+1 open buy, limit-up open is unfilled.",9905.00
+2025-12-16,15:00:00,600936,北投科技,sell,4.070,T+2收盘上涨-2.63%未触发延长，T+2收盘卖出 (no intraday-high optimization).,9889.00

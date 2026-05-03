@@ -1,0 +1,128 @@
+{
+  "iteration": 1,
+  "created_at": "2026-02-27 15:52:10",
+  "candidate_n": 2,
+  "ok_n": 2,
+  "records": [
+    {
+      "iteration": 1,
+      "candidate_index": 1,
+      "spec": {
+        "name": "i0001c01",
+        "hidden": 48,
+        "epochs": 236,
+        "lr": 0.03373440934172125,
+        "weight_decay": 6.784631488596425e-05,
+        "target_gt": 0.01608904060262371,
+        "seed": 665
+      },
+      "status": "ok",
+      "ret_pct": 87.19526234889763,
+      "max_dd_pct": 32.968610836972246,
+      "final_capital": 18719.526234889763,
+      "history_rows": 2,
+      "best_cfg_text": "i0001c01/a10/profit_lock_t3/k2/gap[-0.01,0.04]/board<=2/risk=strict/alloc=1.00",
+      "best_seed_offset": 0,
+      "report_dir": "reports/smart_infinite_wf_probe2/iterations/iter_00001/candidate_01_i0001c01",
+      "aggressive_score": 87.19526234889763,
+      "balanced_score": 8.398846586889213,
+      "compromise_score": 51.736875255993844
+    },
+    {
+      "iteration": 1,
+      "candidate_index": 2,
+      "spec": {
+        "name": "i0001c02",
+        "hidden": 48,
+        "epochs": 318,
+        "lr": 0.029199817710621963,
+        "weight_decay": 0.0001001366775276321,
+        "target_gt": -0.0069404231351688755,
+        "seed": 1
+      },
+      "status": "ok",
+      "ret_pct": 66.52068629999994,
+      "max_dd_pct": 30.456452462348693,
+      "final_capital": 16652.068629999994,
+      "history_rows": 2,
+      "best_cfg_text": "i0001c02/a5/t2_close/k2/gap[-0.02,0.03]/board<=None/risk=strict/alloc=0.80",
+      "best_seed_offset": 0,
+      "report_dir": "reports/smart_infinite_wf_probe2/iterations/iter_00001/candidate_02_i0001c02",
+      "aggressive_score": 66.52068629999994,
+      "balanced_score": -3.98560682575075,
+      "compromise_score": 34.792854393412135
+    }
+  ],
+  "best_aggressive": {
+    "iteration": 1,
+    "candidate_index": 1,
+    "spec": {
+      "name": "i0001c01",
+      "hidden": 48,
+      "epochs": 236,
+      "lr": 0.03373440934172125,
+      "weight_decay": 6.784631488596425e-05,
+      "target_gt": 0.01608904060262371,
+      "seed": 665
+    },
+    "status": "ok",
+    "ret_pct": 87.19526234889763,
+    "max_dd_pct": 32.968610836972246,
+    "final_capital": 18719.526234889763,
+    "history_rows": 2,
+    "best_cfg_text": "i0001c01/a10/profit_lock_t3/k2/gap[-0.01,0.04]/board<=2/risk=strict/alloc=1.00",
+    "best_seed_offset": 0,
+    "report_dir": "reports/smart_infinite_wf_probe2/iterations/iter_00001/candidate_01_i0001c01",
+    "aggressive_score": 87.19526234889763,
+    "balanced_score": 8.398846586889213,
+    "compromise_score": 51.736875255993844
+  },
+  "best_balanced": {
+    "iteration": 1,
+    "candidate_index": 1,
+    "spec": {
+      "name": "i0001c01",
+      "hidden": 48,
+      "epochs": 236,
+      "lr": 0.03373440934172125,
+      "weight_decay": 6.784631488596425e-05,
+      "target_gt": 0.01608904060262371,
+      "seed": 665
+    },
+    "status": "ok",
+    "ret_pct": 87.19526234889763,
+    "max_dd_pct": 32.968610836972246,
+    "final_capital": 18719.526234889763,
+    "history_rows": 2,
+    "best_cfg_text": "i0001c01/a10/profit_lock_t3/k2/gap[-0.01,0.04]/board<=2/risk=strict/alloc=1.00",
+    "best_seed_offset": 0,
+    "report_dir": "reports/smart_infinite_wf_probe2/iterations/iter_00001/candidate_01_i0001c01",
+    "aggressive_score": 87.19526234889763,
+    "balanced_score": 8.398846586889213,
+    "compromise_score": 51.736875255993844
+  },
+  "best_compromise": {
+    "iteration": 1,
+    "candidate_index": 1,
+    "spec": {
+      "name": "i0001c01",
+      "hidden": 48,
+      "epochs": 236,
+      "lr": 0.03373440934172125,
+      "weight_decay": 6.784631488596425e-05,
+      "target_gt": 0.01608904060262371,
+      "seed": 665
+    },
+    "status": "ok",
+    "ret_pct": 87.19526234889763,
+    "max_dd_pct": 32.968610836972246,
+    "final_capital": 18719.526234889763,
+    "history_rows": 2,
+    "best_cfg_text": "i0001c01/a10/profit_lock_t3/k2/gap[-0.01,0.04]/board<=2/risk=strict/alloc=1.00",
+    "best_seed_offset": 0,
+    "report_dir": "reports/smart_infinite_wf_probe2/iterations/iter_00001/candidate_01_i0001c01",
+    "aggressive_score": 87.19526234889763,
+    "balanced_score": 8.398846586889213,
+    "compromise_score": 51.736875255993844
+  }
+}

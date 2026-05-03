@@ -1,0 +1,138 @@
+{
+  "updated_at": "2026-02-27 15:32:24",
+  "iteration": 1,
+  "parent_spec": {
+    "name": "mlp_h48_e300_gt0",
+    "hidden": 48,
+    "epochs": 300,
+    "lr": 0.03,
+    "weight_decay": 0.0001,
+    "target_gt": 0.0,
+    "seed": 31
+  },
+  "parent_cfg": "mlp_h48_e300_gt0/a5/strong_hold_t3/k3/gap[None,None]/board<=3/risk=off/alloc=1.00",
+  "history_count": 2,
+  "history": [
+    {
+      "iteration": 1,
+      "candidate_index": 1,
+      "spec": {
+        "name": "i0001c01",
+        "hidden": 48,
+        "epochs": 236,
+        "lr": 0.03373440934172125,
+        "weight_decay": 6.784631488596425e-05,
+        "target_gt": 0.01608904060262371,
+        "seed": 665
+      },
+      "status": "ok",
+      "ret_pct": -0.880000000000003,
+      "max_dd_pct": 1.3993003498250876,
+      "final_capital": 9912.0,
+      "history_rows": 2,
+      "best_cfg_text": "i0001c01/a5/strong_hold_t3/k1/gap[None,0.02]/board<=3/risk=off/alloc=0.05",
+      "best_seed_offset": 0,
+      "report_dir": "reports/smart_infinite_wf_probe/iterations/iter_00001/candidate_01_i0001c01",
+      "aggressive_score": -0.880000000000003,
+      "balanced_score": -2.699090454772617,
+      "compromise_score": -1.6985907046476791
+    },
+    {
+      "iteration": 1,
+      "candidate_index": 2,
+      "spec": {
+        "name": "i0001c02",
+        "hidden": 48,
+        "epochs": 318,
+        "lr": 0.029199817710621963,
+        "weight_decay": 0.0001001366775276321,
+        "target_gt": -0.0069404231351688755,
+        "seed": 1
+      },
+      "status": "ok",
+      "ret_pct": -1.3265179999999988,
+      "max_dd_pct": 1.947947033054556,
+      "final_capital": 9867.3482,
+      "history_rows": 2,
+      "best_cfg_text": "i0001c02/a5/strong_hold_t3/k1/gap[None,0.02]/board<=3/risk=off/alloc=0.05",
+      "best_seed_offset": 0,
+      "report_dir": "reports/smart_infinite_wf_probe/iterations/iter_00001/candidate_02_i0001c02",
+      "aggressive_score": -1.3265179999999988,
+      "balanced_score": -3.8588491429709215,
+      "compromise_score": -2.4660670143369137
+    }
+  ],
+  "aggressive_champion": {
+    "iteration": 1,
+    "candidate_index": 1,
+    "spec": {
+      "name": "i0001c01",
+      "hidden": 48,
+      "epochs": 236,
+      "lr": 0.03373440934172125,
+      "weight_decay": 6.784631488596425e-05,
+      "target_gt": 0.01608904060262371,
+      "seed": 665
+    },
+    "status": "ok",
+    "ret_pct": -0.880000000000003,
+    "max_dd_pct": 1.3993003498250876,
+    "final_capital": 9912.0,
+    "history_rows": 2,
+    "best_cfg_text": "i0001c01/a5/strong_hold_t3/k1/gap[None,0.02]/board<=3/risk=off/alloc=0.05",
+    "best_seed_offset": 0,
+    "report_dir": "reports/smart_infinite_wf_probe/iterations/iter_00001/candidate_01_i0001c01",
+    "aggressive_score": -0.880000000000003,
+    "balanced_score": -2.699090454772617,
+    "compromise_score": -1.6985907046476791
+  },
+  "balanced_champion": {
+    "iteration": 1,
+    "candidate_index": 1,
+    "spec": {
+      "name": "i0001c01",
+      "hidden": 48,
+      "epochs": 236,
+      "lr": 0.03373440934172125,
+      "weight_decay": 6.784631488596425e-05,
+      "target_gt": 0.01608904060262371,
+      "seed": 665
+    },
+    "status": "ok",
+    "ret_pct": -0.880000000000003,
+    "max_dd_pct": 1.3993003498250876,
+    "final_capital": 9912.0,
+    "history_rows": 2,
+    "best_cfg_text": "i0001c01/a5/strong_hold_t3/k1/gap[None,0.02]/board<=3/risk=off/alloc=0.05",
+    "best_seed_offset": 0,
+    "report_dir": "reports/smart_infinite_wf_probe/iterations/iter_00001/candidate_01_i0001c01",
+    "aggressive_score": -0.880000000000003,
+    "balanced_score": -2.699090454772617,
+    "compromise_score": -1.6985907046476791
+  },
+  "compromise_champion": {
+    "iteration": 1,
+    "candidate_index": 1,
+    "spec": {
+      "name": "i0001c01",
+      "hidden": 48,
+      "epochs": 236,
+      "lr": 0.03373440934172125,
+      "weight_decay": 6.784631488596425e-05,
+      "target_gt": 0.01608904060262371,
+      "seed": 665
+    },
+    "status": "ok",
+    "ret_pct": -0.880000000000003,
+    "max_dd_pct": 1.3993003498250876,
+    "final_capital": 9912.0,
+    "history_rows": 2,
+    "best_cfg_text": "i0001c01/a5/strong_hold_t3/k1/gap[None,0.02]/board<=3/risk=off/alloc=0.05",
+    "best_seed_offset": 0,
+    "report_dir": "reports/smart_infinite_wf_probe/iterations/iter_00001/candidate_01_i0001c01",
+    "aggressive_score": -0.880000000000003,
+    "balanced_score": -2.699090454772617,
+    "compromise_score": -1.6985907046476791
+  },
+  "report_root": "reports/smart_infinite_wf_probe"
+}

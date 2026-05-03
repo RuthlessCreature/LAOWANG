@@ -1,0 +1,19 @@
+{
+  "round": 9,
+  "seed_offset": 776,
+  "retain_ratio": 0.9500000000000001,
+  "avg_ret_pct": 1342.84,
+  "avg_dd_pct": 31.37,
+  "indicator": 1342.84,
+  "improved": false,
+  "metrics_by_threshold": {
+    "0.75": {
+      "final": 144283.9,
+      "ret_pct": 1342.84,
+      "dd_pct": 31.37,
+      "fee": 2252.16,
+      "trades": 77,
+      "cfg": "mlp_h64_e360_gt2/a2/t2_close/k2/gap[-0.02,0.04]/board<=None/risk=off/alloc=1.00"
+    }
+  }
+}

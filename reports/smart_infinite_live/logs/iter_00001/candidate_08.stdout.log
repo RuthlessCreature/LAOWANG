@@ -1,0 +1,15 @@
+[opt] variants=1 source=custom_file
+[round 1] best ret=21.49% dd=2.94% trades=42 (improved)
+[round 2] best ret=9.79% dd=2.87% trades=35 (no improve)
+[round 3] best ret=-2.38% dd=2.38% trades=26 (no improve)
+[round 4] best ret=12.92% dd=5.08% trades=59 (no improve)
+[round 5] best ret=-1.67% dd=2.11% trades=16 (no improve)
+[round 6] best ret=1.44% dd=7.61% trades=49 (no improve)
+[round 7] best ret=1.51% dd=2.42% trades=20 (no improve)
+[round 8] best ret=-7.21% dd=7.35% trades=29 (no improve)
+[round 9] best ret=0.57% dd=3.89% trades=30 (no improve)
+[round 10] best ret=8.95% dd=5.96% trades=57 (no improve)
+[round 11] best ret=-1.33% dd=2.98% trades=15 (no improve)
+[stop] no return improvement for 10 consecutive rounds.
+[best] ret=21.49% dd=2.94% trades=42 cfg=i0001c08/a10/t2_close/k1/gap[-0.01,None]/board<=2/risk=off/alloc=0.18
+[out] reports/smart_infinite_live/iterations/iter_00001/candidate_08_i0001c08/summary.json

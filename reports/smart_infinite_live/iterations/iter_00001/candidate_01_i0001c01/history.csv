@@ -1,0 +1,17 @@
+﻿round,seed_offset,feasible,best_ret_pct,best_dd_pct,best_cfg,improved
+1,0,True,-0.660000000000005,0.66,"i0001c01/a2/strong_hold_t3/k1/gap[None,0.02]/board<=3/risk=off/alloc=0.05",True
+2,97,True,1.797745929999972,5.023152314334844,"i0001c01/a10/t2_close/k3/gap[-0.005,0.02]/board<=2/risk=off/alloc=0.18",True
+3,194,True,15.301040599999993,6.057792972604183,"i0001c01/a2/t2_close/k3/gap[None,None]/board<=None/risk=strict/alloc=0.18",True
+4,291,True,0.9697483099999626,3.1612104723961485,"i0001c01/a2/strong_hold_t3/k3/gap[-0.005,None]/board<=None/risk=off/alloc=0.10",False
+5,388,True,4.20401359,7.6578635867035105,"i0001c01/a2/t2_close/k3/gap[None,None]/board<=None/risk=strict/alloc=0.18",False
+6,485,True,17.122885909999997,6.625884279728732,"i0001c01/a2/strong_hold_t3/k2/gap[-0.005,0.02]/board<=3/risk=off/alloc=0.20",True
+7,582,True,15.51374538000001,8.621650457620376,"i0001c01/a5/t2_close/k3/gap[None,0.02]/board<=None/risk=balanced/alloc=0.20",False
+8,679,True,8.962828579999993,9.173746855659802,"i0001c01/a2/strong_hold_t3/k2/gap[-0.005,0.02]/board<=3/risk=off/alloc=0.20",False
+9,776,True,14.715808799999985,3.671696877486081,"i0001c01/a2/strong_hold_t3/k2/gap[-0.005,0.02]/board<=3/risk=off/alloc=0.20",False
+10,873,True,1.3922680600000126,5.412702554087628,"i0001c01/a5/strong_hold_t3/k1/gap[-0.01,None]/board<=3/risk=off/alloc=0.15",False
+11,970,True,7.519128870000014,7.0628809760765465,"i0001c01/a5/strong_hold_t3/k3/gap[-0.005,None]/board<=None/risk=off/alloc=0.15",False
+12,1067,True,9.914507779999981,1.87,"i0001c01/a2/t2_close/k2/gap[-0.005,None]/board<=3/risk=off/alloc=0.12",False
+13,1164,True,3.5979211900000196,10.373610415397652,"i0001c01/a5/profit_lock_t3/k1/gap[-0.005,None]/board<=3/risk=balanced/alloc=0.18",False
+14,1261,True,-1.0800000000000032,1.08,"i0001c01/a2/t2_close/k3/gap[-0.005,0.02]/board<=3/risk=off/alloc=0.05",False
+15,1358,True,8.197745789999967,5.156344345669717,"i0001c01/a5/strong_hold_t3/k3/gap[-0.005,None]/board<=None/risk=balanced/alloc=0.12",False
+16,1455,True,-2.7352291100000037,5.766466445605474,"i0001c01/a2/t2_close/k2/gap[None,None]/board<=3/risk=off/alloc=0.10",False

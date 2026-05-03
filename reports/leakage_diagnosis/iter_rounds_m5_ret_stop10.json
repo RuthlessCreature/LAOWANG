@@ -1,0 +1,69 @@
+{
+  "timestamp": "2026-02-27 15:00:04",
+  "meta_source": "reports/iter_rounds_m5_ret_stop10/best/best_model.json",
+  "rules_file": "rules.txt",
+  "train_start_date": "2020-01-01",
+  "backtest_start_date": "2025-01-01",
+  "end_date": "2026-02-13",
+  "trade_date_n": 273,
+  "best_from_meta": {
+    "threshold": 0.75,
+    "cfg_text": "mlp_h48_e300_gt0/a5/strong_hold_t3/k3/gap[None,None]/board<=3/risk=off/alloc=1.00",
+    "seed_offset": 291,
+    "meta_ret_pct": 2271.37,
+    "meta_dd_pct": 22.11
+  },
+  "cfg_parsed": {
+    "variant": "mlp_h48_e300_gt0",
+    "alpha": 5,
+    "sell_rule": "strong_hold_t3",
+    "top_k": 3,
+    "gap_min": null,
+    "gap_max": null,
+    "max_board": 3,
+    "risk_profile": "off",
+    "alloc_pct": 1.0,
+    "max_broken_rate": null,
+    "min_red_rate": null,
+    "max_limit_down": null,
+    "max_pullback": null
+  },
+  "scenario_leaky_train_to_end": {
+    "train_start": "2020-01-01",
+    "train_end": "2026-02-13",
+    "train_rows": 14350,
+    "train_date_min": "2020-02-10",
+    "train_date_max": "2026-02-11",
+    "train_overlap_rows_ge_backtest_start": 14236,
+    "train_overlap_ratio_ge_backtest_start": 0.9920557491289198,
+    "train_acc": 0.5652961672473867,
+    "backtest": {
+      "final_capital": 237137.0111495713,
+      "ret_pct": 2271.370111495713,
+      "max_dd_pct": 22.110594725458558,
+      "trade_n": 79,
+      "total_fee": 3749.72285342875
+    }
+  },
+  "scenario_strict_train_before_backtest": {
+    "train_start": "2020-01-01",
+    "train_end": "2024-12-31",
+    "train_rows": 114,
+    "train_date_min": "2020-02-10",
+    "train_date_max": "2024-07-12",
+    "train_overlap_rows_ge_backtest_start": 0,
+    "train_overlap_ratio_ge_backtest_start": 0.0,
+    "train_acc": 0.8947368421052632,
+    "backtest": {
+      "final_capital": 6894.822706000015,
+      "ret_pct": -31.051772939999843,
+      "max_dd_pct": 74.21609994146928,
+      "trade_n": 72,
+      "total_fee": 720.0
+    }
+  },
+  "delta_leaky_minus_strict": {
+    "ret_pct": 2302.421884435713,
+    "max_dd_pct": -52.10550521601073
+  }
+}

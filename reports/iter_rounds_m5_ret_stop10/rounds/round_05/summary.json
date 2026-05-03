@@ -1,0 +1,19 @@
+{
+  "round": 5,
+  "seed_offset": 388,
+  "retain_ratio": 1.0,
+  "avg_ret_pct": 1194.88,
+  "avg_dd_pct": 21.47,
+  "indicator": 1194.88,
+  "improved": false,
+  "metrics_by_threshold": {
+    "0.75": {
+      "final": 129488.32,
+      "ret_pct": 1194.88,
+      "dd_pct": 21.47,
+      "fee": 2082.99,
+      "trades": 84,
+      "cfg": "mlp_h48_e300_gt0/a2/loss_rebound_t3/k1/gap[None,None]/board<=None/risk=off/alloc=1.00"
+    }
+  }
+}

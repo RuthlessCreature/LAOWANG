@@ -1,0 +1,81 @@
+﻿操作日期,操作时间,股票代码,股票名称,操作（买or卖）,操作价格,操作原因,总资产
+2025-01-07,09:30:00,600664,哈药股份,buy,4.800,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",9995.00
+2025-01-08,15:00:00,600664,哈药股份,sell,4.730,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,9969.00
+2025-01-13,09:30:00,002536,飞龙股份,buy,14.031,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",9964.00
+2025-01-14,15:00:00,002536,飞龙股份,sell,13.208,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,9876.75
+2025-02-20,09:30:00,002522,浙江众成,buy,4.960,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",9871.75
+2025-02-21,15:00:00,002522,浙江众成,sell,5.458,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10016.15
+2025-02-25,09:30:00,002522,浙江众成,buy,5.966,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10011.15
+2025-02-26,15:00:00,002522,浙江众成,sell,6.663,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10215.31
+2025-03-18,09:30:00,002162,悦心健康,buy,5.590,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10210.31
+2025-03-19,15:00:00,002162,悦心健康,sell,4.740,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,9950.31
+2025-03-26,09:30:00,002255,海陆重工,buy,8.251,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",9945.31
+2025-03-27,15:00:00,002255,海陆重工,sell,8.101,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,9910.48
+2025-03-31,09:30:00,002132,恒星科技,buy,3.689,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",9905.48
+2025-04-01,15:00:00,002132,恒星科技,sell,4.182,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10097.74
+2025-04-09,09:30:00,000061,农产品,buy,7.590,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10092.74
+2025-04-10,15:00:00,000061,农产品,sell,7.145,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,9998.68
+2025-04-14,09:30:00,002640,跨境通,buy,3.600,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",9993.68
+2025-04-15,15:00:00,002640,跨境通,sell,3.870,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10096.68
+2025-04-18,09:30:00,603696,安记食品,buy,12.328,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10091.68
+2025-04-21,15:00:00,603696,安记食品,sell,13.558,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10209.76
+2025-04-23,09:30:00,600865,百大集团,buy,12.740,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10204.76
+2025-04-24,15:00:00,600865,百大集团,sell,10.455,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,9971.25
+2025-05-06,09:30:00,002667,威领股份,buy,13.500,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",9966.25
+2025-05-07,15:00:00,002667,威领股份,sell,12.960,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,9907.25
+2025-05-15,09:30:00,600530,交大昂立,buy,7.091,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",9902.25
+2025-05-16,15:00:00,600530,交大昂立,sell,7.191,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,9917.22
+2025-05-20,09:30:00,000088,盐田港,buy,5.192,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",9912.22
+2025-05-21,15:00:00,000088,盐田港,sell,4.792,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,9787.19
+2025-05-26,09:30:00,002471,中超控股,buy,4.990,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",9782.19
+2025-05-27,15:00:00,002471,中超控股,sell,5.700,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,9990.19
+2025-06-16,09:30:00,300164,通源石油,buy,5.430,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",9985.19
+2025-06-17,15:00:00,300164,通源石油,sell,7.040,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10463.19
+2025-06-20,09:30:00,603982,泉峰汽车,buy,10.800,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10458.19
+2025-06-23,15:00:00,603982,泉峰汽车,sell,10.260,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10399.19
+2025-06-25,09:30:00,002537,海联金汇,buy,10.600,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10394.19
+2025-06-26,15:00:00,002537,海联金汇,sell,11.080,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10437.19
+2025-07-01,09:30:00,002015,协鑫能科,buy,14.884,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10432.19
+2025-07-02,15:00:00,002015,协鑫能科,sell,12.741,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10212.85
+2025-07-08,09:30:00,002201,九鼎新材,buy,8.253,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10207.85
+2025-07-09,15:00:00,002201,九鼎新材,sell,9.462,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10444.65
+2025-07-15,09:30:00,600822,上海物贸,buy,12.090,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10439.65
+2025-07-16,15:00:00,600822,上海物贸,sell,14.630,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10688.65
+2025-07-18,09:30:00,601003,柳钢股份,buy,5.690,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10683.65
+2025-07-21,15:00:00,601003,柳钢股份,sell,6.740,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10993.65
+2025-07-31,09:30:00,300732,设研院,buy,11.260,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10988.65
+2025-08-01,15:00:00,300732,设研院,sell,10.800,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10937.65
+2025-08-12,09:30:00,002205,国统股份,buy,15.810,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10932.65
+2025-08-13,15:00:00,002205,国统股份,sell,14.850,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10831.65
+2025-08-27,09:30:00,603098,森特股份,buy,16.040,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10826.65
+2025-08-28,15:00:00,603098,森特股份,sell,14.350,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10652.65
+2025-09-01,09:30:00,002210,飞马国际,buy,3.650,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10647.65
+2025-09-02,15:00:00,002210,飞马国际,sell,3.840,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10737.65
+2025-09-04,09:30:00,600376,首开股份,buy,3.100,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10732.65
+2025-09-05,15:00:00,600376,首开股份,sell,3.510,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10973.65
+2025-09-09,09:30:00,600173,卧龙新能,buy,7.150,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10968.65
+2025-09-10,15:00:00,600173,卧龙新能,sell,8.390,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,11211.65
+2025-09-25,09:30:00,300270,中威电子,buy,10.970,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",11206.65
+2025-09-26,15:00:00,300270,中威电子,sell,11.040,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,11208.65
+2025-09-30,09:30:00,000559,万向钱潮,buy,13.300,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",11203.65
+2025-10-09,15:00:00,000559,万向钱潮,sell,13.030,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,11171.65
+2025-10-16,09:30:00,600617,国新能源,buy,3.980,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",11166.65
+2025-10-17,15:00:00,600617,国新能源,sell,4.000,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,11171.65
+2025-10-29,09:30:00,300300,海峡创新,buy,10.080,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",11166.65
+2025-10-30,15:00:00,300300,海峡创新,sell,8.540,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,11007.65
+2025-11-06,09:30:00,300062,中能电气,buy,10.810,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",11002.65
+2025-11-07,15:00:00,300062,中能电气,sell,11.380,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,11054.65
+2025-12-12,09:30:00,600678,四川金顶,buy,15.680,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",11049.65
+2025-12-15,15:00:00,600678,四川金顶,sell,14.260,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10902.65
+2025-12-17,09:30:00,002697,红旗连锁,buy,7.300,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10897.65
+2025-12-18,15:00:00,002697,红旗连锁,sell,6.790,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10790.65
+2025-12-23,09:30:00,300086,康芝药业,buy,14.180,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10785.65
+2025-12-24,15:00:00,300086,康芝药业,sell,13.310,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10693.65
+2026-01-19,09:30:00,601163,三角轮胎,buy,16.140,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10688.65
+2026-01-20,15:00:00,601163,三角轮胎,sell,15.810,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10650.65
+2026-01-23,09:30:00,603608,天创时尚,buy,12.300,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10645.65
+2026-01-26,15:00:00,603608,天创时尚,sell,11.660,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10576.65
+2026-01-30,09:30:00,300164,通源石油,buy,13.320,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10571.65
+2026-02-02,15:00:00,300164,通源石油,sell,11.050,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10339.65
+2026-02-09,09:30:00,000056,皇庭国际,buy,2.310,"model=mlp_h72_e380_gt15, alpha=10; score>=threshold; gap_filter=[-1.00%, None], max_board=2; risk_profile=off (broken<=None, red>=None, limit_down<=None, pullback<=None); capital_use=18%; T signal -> T+1 open buy, limit-up open is unfilled.",10334.65
+2026-02-10,15:00:00,000056,皇庭国际,sell,2.410,固定规则：T+2收盘卖出（买入后第1个可卖日） (no intraday-high optimization).,10409.65
