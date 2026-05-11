@@ -38,12 +38,42 @@ python init.py --config config.ini
 - `daily_review_xgb_limit_up`
 - `model_relay_pool`
 - `model_relay_registry`
+- `strategy_signal_log`
+- `strategy_trade_journal`
 
 分钟线表 `stock_minute` 会在首次运行 `getDataBaoStock.py --frequency 5/15/30/60` 时自动创建。
 
 ## 性能相关表
 
 `stock_ingest_watermark` 保存每只股票、每个频率的最新入库日期。下载任务优先读取该表，避免在 `stock_minute` 体量很大时反复执行全表聚合。
+
+`init.py` 还会补充常用查询索引：
+
+```sql
+idx_stock_daily_date_code
+idx_scores_v3_date_score
+idx_scores_stwg_date_score
+idx_scores_ywcx_date_score
+idx_model_fhkq_date_score
+idx_model_relay_date_rank_score
+idx_strategy_signal_model_date
+idx_strategy_trade_model_buy_date
+```
+
+`strategy_signal_log` 用于保存每个信号当时的特征、模型版本和行动计划；`strategy_trade_journal` 用于保存人工执行、卖出原因、股数、手续费、盈亏和备注。
+
+手工记录一笔买入：
+
+```bash
+python3 record_trade.py buy --signal-date 2026-05-11 --model relay --stock-code 000005 --buy-date 2026-05-12 --buy-price 6.70 --shares 1000 --buy-fee 5
+```
+
+手工记录卖出并导出复盘：
+
+```bash
+python3 record_trade.py sell --model relay --stock-code 000005 --sell-date 2026-05-13 --sell-price 7.10 --sell-fee 6 --exit-reason t2_close_exit
+python3 record_trade.py export --output-dir reports/trade_journal/20260513
+```
 
 ```sql
 SELECT frequency, COUNT(*) AS stock_count, MAX(latest_date) AS latest_date

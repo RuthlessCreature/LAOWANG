@@ -1,0 +1,12 @@
+{
+  "model": "ordinary_manual",
+  "signals": 23,
+  "planned_buys": 0,
+  "trades": 0,
+  "final_capital": 100000.0,
+  "return_pct": 0.0,
+  "max_dd_pct": 0.0,
+  "win_rate": 0.0,
+  "avg_hold_days": 0.0,
+  "rule": "manual_open_v1"
+}

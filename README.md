@@ -12,6 +12,8 @@ A 股日线、分钟线、模型评分和只读 Web UI。默认数据源为 BaoS
 | `everydayReview.py` | 次日接力增量流程：抓取复盘池并写入接力模型结果 |
 | `ui.py` | 只读 Web UI 和自动任务调度入口 |
 | `tgBot.py` | Telegram 查询与推送 |
+| `backtest_model_follow.py` | 模型跟随、手动计划、Relay hybrid 回测报告 |
+| `optimize_relay_follow.py` | Relay hybrid 参数扫描 |
 | `scoring_laowang.py` | 老王评分 |
 | `scoring_ywcx.py` | 阳痿次新评分 |
 | `scoring_stwg.py` | 缩头乌龟评分 |
@@ -61,8 +63,8 @@ python getDataBaoStock.py --config config.ini --frequency 5 --start-date 2026020
 ## Daily Pipeline
 
 ```bash
-python everyday.py --config config.ini \
-  --initial-start-date 2020-01-01 \
+python -m everyday --config config.ini \
+  --initial-start-date 2026-04-21 \
   --getdata-workers 4 \
   --getdata-shards 2 \
   --getdata-write-chunk-size 5000
@@ -94,6 +96,7 @@ UI 默认在每日主流程结束后触发一次 `everydayReview.py`，夜间也
 | `model_laowang_pool` / `model_ywcx_pool` / `model_stwg_pool` / `model_fhkq` | UI 读取的模型池 |
 | `daily_review_akshare_pool` / `daily_review_xgb_limit_up` | 次日接力原始池 |
 | `model_relay_pool` / `model_relay_registry` | 次日接力评分结果与模型登记 |
+| `strategy_signal_log` / `strategy_trade_journal` | 半自动交易信号审计与人工交易记录 |
 
 ## Disclaimer
 

@@ -373,6 +373,58 @@ DDL_STATEMENTS = [
         updated_at VARCHAR(19) NULL
     )
     """,
+    """
+    CREATE TABLE IF NOT EXISTS strategy_signal_log (
+        signal_date VARCHAR(10) NOT NULL,
+        model VARCHAR(32) NOT NULL,
+        stock_code VARCHAR(16) NOT NULL,
+        stock_name VARCHAR(255) NULL,
+        score DOUBLE NULL,
+        features_json TEXT NULL,
+        model_version VARCHAR(64) NULL,
+        action_plan_json TEXT NULL,
+        created_at VARCHAR(19) NULL,
+        PRIMARY KEY (signal_date, model, stock_code)
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS strategy_trade_journal (
+        trade_id VARCHAR(64) PRIMARY KEY,
+        signal_date VARCHAR(10) NOT NULL,
+        model VARCHAR(32) NOT NULL,
+        stock_code VARCHAR(16) NOT NULL,
+        stock_name VARCHAR(255) NULL,
+        buy_date VARCHAR(10) NULL,
+        buy_price DOUBLE NULL,
+        buy_shares BIGINT NULL,
+        buy_amount DOUBLE NULL,
+        buy_fee DOUBLE NULL,
+        planned_position DOUBLE NULL,
+        sell_date VARCHAR(10) NULL,
+        sell_price DOUBLE NULL,
+        sell_amount DOUBLE NULL,
+        sell_fee DOUBLE NULL,
+        pnl DOUBLE NULL,
+        pnl_pct DOUBLE NULL,
+        exit_reason VARCHAR(255) NULL,
+        trade_status VARCHAR(16) NULL,
+        manual_notes TEXT NULL,
+        created_at VARCHAR(19) NULL,
+        updated_at VARCHAR(19) NULL
+    )
+    """,
+]
+
+
+INDEX_STATEMENTS = [
+    "CREATE INDEX idx_stock_daily_date_code ON stock_daily(date, stock_code)",
+    "CREATE INDEX idx_scores_v3_date_score ON stock_scores_v3(score_date, total_score)",
+    "CREATE INDEX idx_scores_stwg_date_score ON stock_scores_stwg(score_date, total_score)",
+    "CREATE INDEX idx_scores_ywcx_date_score ON stock_scores_ywcx(score_date, total_score)",
+    "CREATE INDEX idx_model_fhkq_date_score ON model_fhkq(trade_date, fhkq_score)",
+    "CREATE INDEX idx_model_relay_date_rank_score ON model_relay_pool(trade_date, rank_no, model_score)",
+    "CREATE INDEX idx_strategy_signal_model_date ON strategy_signal_log(model, signal_date)",
+    "CREATE INDEX idx_strategy_trade_model_buy_date ON strategy_trade_journal(model, buy_date)",
 ]
 
 
@@ -387,7 +439,17 @@ def run_init(engine: Engine) -> None:
                     continue
                 logging.error("DDL #%d 执行失败，需要处理：%s", idx, exc)
                 raise
+        for idx, stmt in enumerate(INDEX_STATEMENTS, start=1):
+            try:
+                conn.execute(text(stmt))
+            except SQLAlchemyError as exc:
+                if _is_index_exists_error(exc):
+                    logging.info("INDEX #%d 已存在，跳过", idx)
+                    continue
+                logging.error("INDEX #%d 执行失败，需要处理：%s", idx, exc)
+                raise
     _ensure_stock_info_float_cap(engine)
+    _ensure_strategy_trade_journal_columns(engine)
     logging.info("数据库表创建完成（如已存在则跳过）")
 
 
@@ -400,6 +462,22 @@ def _is_table_exists_error(exc: SQLAlchemyError) -> bool:
         msg = str(exc)
     msg = msg.lower()
     return "already exists" in msg or "exists" in msg and "table" in msg
+
+
+def _is_index_exists_error(exc: SQLAlchemyError) -> bool:
+    msg = ""
+    orig = getattr(exc, "orig", exc)
+    if hasattr(orig, "args") and orig.args:
+        msg = " ".join(str(a) for a in orig.args if a)
+    if not msg:
+        msg = str(exc)
+    msg = msg.lower()
+    return (
+        "duplicate key name" in msg
+        or "already exists" in msg
+        or ("exists" in msg and "index" in msg)
+        or "duplicate" in msg and "index" in msg
+    )
 
 
 def _ensure_stock_info_float_cap(engine: Engine) -> None:
@@ -415,6 +493,28 @@ def _ensure_stock_info_float_cap(engine: Engine) -> None:
         if "duplicate" in msg or "exists" in msg:
             return
         raise
+
+
+def _ensure_strategy_trade_journal_columns(engine: Engine) -> None:
+    extra_columns = {
+        "stock_name": "VARCHAR(255) NULL",
+        "buy_shares": "BIGINT NULL",
+        "buy_amount": "DOUBLE NULL",
+        "buy_fee": "DOUBLE NULL",
+        "sell_amount": "DOUBLE NULL",
+        "sell_fee": "DOUBLE NULL",
+        "trade_status": "VARCHAR(16) NULL",
+    }
+    for column, ddl in extra_columns.items():
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(f"ALTER TABLE strategy_trade_journal ADD COLUMN {column} {ddl}"))
+                logging.info("strategy_trade_journal 新增 %s 列", column)
+        except SQLAlchemyError as exc:
+            msg = str(getattr(exc, "orig", exc)).lower()
+            if "duplicate" in msg or "exists" in msg:
+                continue
+            raise
 
 
 def main(argv: Optional[list[str]] = None) -> int:
