@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate T-close manual trading plans from model pools.
+"""Generate T-close manual trading plans from ordinary model pools.
 
 This script intentionally avoids T+1 market data. It turns today's model pools
 into conditional next-day action plans and writes an audit trail.
@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from strategy_journal import json_dumps, upsert_strategy_signal_log
-from strategy_protocols import ordinary_model_plan_config, relay_protocol_config
+from strategy_protocols import ORDINARY_MODEL_ORDER, ordinary_model_plan_config
 
 
 ORDINARY_PLAN_COLUMNS = [
@@ -35,40 +35,13 @@ ORDINARY_PLAN_COLUMNS = [
     "entry_filter_status",
     "planned_action",
     "action_state",
+    "t1_buy_condition",
+    "t2_sell_condition",
     "planned_position_pct",
     "hard_stop_pct",
     "structure_stop",
     "max_hold_days",
     "skip_reason",
-]
-
-RELAY_WATCHLIST_COLUMNS = [
-    "signal_date",
-    "watch_date",
-    "model",
-    "stock_code",
-    "stock_name",
-    "model_score",
-    "model_prob",
-    "strategy_version",
-    "model_version",
-    "rank_no",
-    "signal_close",
-    "amount_ma20",
-    "board_count",
-    "broken_rate",
-    "red_rate",
-    "limit_down_count",
-    "pullback",
-    "max_board",
-    "daily_candidate_status",
-    "action_state",
-    "planned_status",
-    "planned_position_pct",
-    "intraday_trigger",
-    "invalidation_rule",
-    "exit_protocol",
-    "drop_reason",
 ]
 
 SIGNAL_AUDIT_COLUMNS = [
@@ -321,35 +294,6 @@ def load_ordinary_pool(conn, model: str, trade_date: str) -> list[dict[str, Any]
     return fetch_rows(conn, queries[model], trade_date)
 
 
-def load_relay_pool(conn, trade_date: str) -> list[dict[str, Any]]:
-    query = """
-        SELECT
-            rank_no,
-            stock_code,
-            stock_name,
-            model_prob,
-            model_score,
-            board_count,
-            ret1,
-            close,
-            is_st,
-            broken_rate,
-            red_rate,
-            limit_down_count,
-            pullback,
-            limit_up_count,
-            max_board,
-            broken_count,
-            amount_change5,
-            model_version,
-            risk_profile
-        FROM model_relay_pool
-        WHERE trade_date = :trade_date
-        ORDER BY rank_no, model_score DESC
-    """
-    return fetch_rows(conn, query, trade_date)
-
-
 def ordinary_reasons(row: Mapping[str, Any], cfg: Mapping[str, Any], liquidity: float) -> list[str]:
     reasons: list[str] = []
     score = safe_float(row.get("score"))
@@ -401,7 +345,7 @@ def build_ordinary_plan_row(
     liquidity: float,
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     reasons = ordinary_reasons(row, cfg, liquidity)
-    action_state = "skip_precheck" if reasons else "pending_open_check"
+    action_state = "skip_precheck" if reasons else "pending_t1_buy_check"
     planned_action = "skip" if reasons else "conditional_buy"
     planned_position = 0.0 if reasons else safe_float(cfg.get("planned_position_pct"), 0.0)
 
@@ -418,7 +362,8 @@ def build_ordinary_plan_row(
         "trailing_stop": cfg.get("profit_trailing_stop"),
         "max_hold_days": cfg.get("max_hold_days"),
         "skip_reason": reasons,
-        "next_day_buy_condition": "Only evaluate next-day open/auction data manually; no T+1 data is used here.",
+        "t1_buy_condition": cfg.get("t1_buy_condition"),
+        "t2_sell_condition": cfg.get("t2_sell_condition"),
     }
     if model == "fhkq":
         action_plan["requires_liquidity_recovery_check"] = True
@@ -433,7 +378,7 @@ def build_ordinary_plan_row(
 
     plan_row = {
         "signal_date": trade_date,
-        "buy_date": "",
+        "buy_date": "T+1",
         "model": model,
         "stock_code": row.get("stock_code"),
         "stock_name": row.get("stock_name"),
@@ -445,6 +390,8 @@ def build_ordinary_plan_row(
         "entry_filter_status": "pass" if not reasons else "fail",
         "planned_action": planned_action,
         "action_state": action_state,
+        "t1_buy_condition": cfg.get("t1_buy_condition"),
+        "t2_sell_condition": cfg.get("t2_sell_condition"),
         "planned_position_pct": fmt_float(planned_position, 4),
         "hard_stop_pct": fmt_float(cfg.get("hard_stop_pct"), 4),
         "structure_stop": cfg.get("structure_stop"),
@@ -480,140 +427,6 @@ def build_ordinary_plan_row(
     return plan_row, audit_row, signal_log_row
 
 
-def relay_reasons(row: Mapping[str, Any], cfg: Mapping[str, Any], liquidity: float) -> list[str]:
-    reasons: list[str] = []
-    candidate = cfg["candidate"]
-    score = safe_float(row.get("model_score"))
-    rank_no = safe_int(row.get("rank_no"))
-    board_count = safe_int(row.get("board_count"), 0) or 0
-    max_board = safe_int(row.get("max_board"), 0) or 0
-    broken_rate = safe_float(row.get("broken_rate"))
-    red_rate = safe_float(row.get("red_rate"))
-    limit_down_count = safe_int(row.get("limit_down_count"), 0) or 0
-    pullback = safe_float(row.get("pullback"))
-
-    if math.isnan(score) or score < safe_float(candidate["min_score"]):
-        reasons.append("relay_score_below_threshold")
-    if rank_no is None or rank_no > safe_int(candidate["max_rank_no"], 999):
-        reasons.append("relay_rank_too_low")
-    if board_count > safe_int(candidate["max_board"], 999):
-        reasons.append("relay_board_count_too_high")
-    if max_board > safe_int(candidate["max_board"], 999):
-        reasons.append("relay_theme_max_board_too_high")
-    if not math.isnan(broken_rate) and broken_rate > safe_float(candidate["max_broken_rate"]):
-        reasons.append("relay_broken_rate_too_high")
-    if not math.isnan(red_rate) and red_rate < safe_float(candidate["min_red_rate"]):
-        reasons.append("relay_red_rate_too_low")
-    if limit_down_count > safe_int(candidate["max_limit_down_count"], 999):
-        reasons.append("relay_limit_down_count_too_high")
-    if not math.isnan(pullback) and pullback > safe_float(candidate["max_pullback"]):
-        reasons.append("relay_pullback_too_deep")
-
-    min_amount_ma20 = safe_float(candidate["min_amount_ma20"], 0.0)
-    if min_amount_ma20 > 0:
-        if math.isnan(liquidity):
-            reasons.append("relay_missing_amount_ma20")
-        elif liquidity < min_amount_ma20:
-            reasons.append("relay_amount_ma20_below_threshold")
-
-    if str(row.get("is_st") or "").strip() in {"1", "true", "True", "ST"}:
-        reasons.append("relay_is_st")
-
-    return reasons
-
-
-def build_relay_plan_row(
-    trade_date: str,
-    row: Mapping[str, Any],
-    cfg: Mapping[str, Any],
-    liquidity: float,
-) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
-    reasons = relay_reasons(row, cfg, liquidity)
-    action_state = "drop_candidate" if reasons else "watch_auction"
-    planned_status = "drop" if reasons else "candidate"
-    position_cfg = cfg["position_risk"]
-    planned_position = 0.0 if reasons else safe_float(position_cfg["initial_position_pct"], 0.0)
-    strategy_version = cfg["candidate"]["strategy_version"]
-    model_version = row.get("model_version") or strategy_version
-
-    action_plan = {
-        "strategy_version": strategy_version,
-        "model_version": model_version,
-        "action_state": action_state,
-        "planned_status": planned_status,
-        "position_pct": planned_position,
-        "auction": cfg["auction"],
-        "intraday": cfg["intraday"],
-        "exit": cfg["exit"],
-        "position_risk": position_cfg,
-        "drop_reason": reasons,
-        "next_day_buy_condition": "Watch opening auction and intraday VWAP/open-price reclaim; no T+1 data is used here.",
-    }
-
-    features = {
-        key: row.get(key)
-        for key in row.keys()
-        if key not in {"stock_code", "stock_name"}
-    }
-    features["amount_ma20"] = liquidity
-
-    plan_row = {
-        "signal_date": trade_date,
-        "watch_date": "",
-        "model": "relay",
-        "stock_code": row.get("stock_code"),
-        "stock_name": row.get("stock_name"),
-        "model_score": fmt_float(row.get("model_score"), 4),
-        "model_prob": fmt_float(row.get("model_prob"), 4),
-        "strategy_version": strategy_version,
-        "model_version": model_version,
-        "rank_no": row.get("rank_no") or "",
-        "signal_close": fmt_float(row.get("close"), 3),
-        "amount_ma20": fmt_float(liquidity, 2),
-        "board_count": row.get("board_count") or "",
-        "broken_rate": fmt_float(row.get("broken_rate"), 4),
-        "red_rate": fmt_float(row.get("red_rate"), 4),
-        "limit_down_count": row.get("limit_down_count") or "",
-        "pullback": fmt_float(row.get("pullback"), 4),
-        "max_board": row.get("max_board") or "",
-        "daily_candidate_status": "pass" if not reasons else "fail",
-        "action_state": action_state,
-        "planned_status": planned_status,
-        "planned_position_pct": fmt_float(planned_position, 4),
-        "intraday_trigger": "|".join(cfg["intraday"]["triggers"]),
-        "invalidation_rule": "|".join(cfg["intraday"]["invalidation"]),
-        "exit_protocol": cfg["exit"]["default_exit"],
-        "drop_reason": "|".join(reasons),
-    }
-
-    audit_row = {
-        "signal_date": trade_date,
-        "model": "relay",
-        "stock_code": row.get("stock_code"),
-        "stock_name": row.get("stock_name"),
-        "score": safe_float(row.get("model_score"), 0.0),
-        "strategy_version": strategy_version,
-        "model_version": model_version,
-        "action_state": action_state,
-        "planned_position_pct": planned_position,
-        "reason": "|".join(reasons),
-        "features_json": json_dumps(features),
-        "action_plan_json": json_dumps(action_plan),
-    }
-
-    signal_log_row = {
-        "signal_date": trade_date,
-        "model": "relay",
-        "stock_code": row.get("stock_code"),
-        "stock_name": row.get("stock_name"),
-        "score": safe_float(row.get("model_score"), 0.0),
-        "features_json": features,
-        "model_version": model_version,
-        "action_plan_json": action_plan,
-    }
-    return plan_row, audit_row, signal_log_row
-
-
 def write_csv(path: Path, columns: list[str], rows: list[Mapping[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8-sig") as fh:
@@ -624,12 +437,11 @@ def write_csv(path: Path, columns: list[str], rows: list[Mapping[str, Any]]) -> 
 
 def generate_trade_plan(engine, trade_date: str, output_dir: Path, write_db: bool) -> dict[str, Any]:
     ordinary_rows: list[dict[str, Any]] = []
-    relay_rows: list[dict[str, Any]] = []
     audit_rows: list[dict[str, Any]] = []
     signal_log_rows: list[dict[str, Any]] = []
 
     with engine.connect() as conn:
-        for model in ("laowang", "stwg", "ywcx", "fhkq"):
+        for model in ORDINARY_MODEL_ORDER:
             cfg = ordinary_model_plan_config(model)
             for row in load_ordinary_pool(conn, model, trade_date):
                 liquidity = amount_ma20(conn, str(row.get("stock_code")), trade_date)
@@ -640,18 +452,7 @@ def generate_trade_plan(engine, trade_date: str, output_dir: Path, write_db: boo
                 audit_rows.append(audit_row)
                 signal_log_rows.append(signal_row)
 
-        relay_cfg = relay_protocol_config()
-        for row in load_relay_pool(conn, trade_date):
-            liquidity = amount_ma20(conn, str(row.get("stock_code")), trade_date)
-            plan_row, audit_row, signal_row = build_relay_plan_row(
-                trade_date, row, relay_cfg, liquidity
-            )
-            relay_rows.append(plan_row)
-            audit_rows.append(audit_row)
-            signal_log_rows.append(signal_row)
-
     write_csv(output_dir / "ordinary_next_day_plan.csv", ORDINARY_PLAN_COLUMNS, ordinary_rows)
-    write_csv(output_dir / "relay_watchlist.csv", RELAY_WATCHLIST_COLUMNS, relay_rows)
     write_csv(output_dir / "signal_audit.csv", SIGNAL_AUDIT_COLUMNS, audit_rows)
 
     persisted_rows = 0
@@ -662,7 +463,6 @@ def generate_trade_plan(engine, trade_date: str, output_dir: Path, write_db: boo
         "trade_date": trade_date,
         "output_dir": str(output_dir),
         "ordinary_rows": len(ordinary_rows),
-        "relay_rows": len(relay_rows),
         "audit_rows": len(audit_rows),
         "persisted_rows": persisted_rows,
     }

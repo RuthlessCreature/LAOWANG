@@ -1,103 +1,158 @@
 # LAOWANG
 
-A 股日线、分钟线、模型评分和只读 Web UI。默认数据源为 BaoStock，主流程围绕日线增量、四个评分模型、次日接力模型和 Telegram 推送运行。
+A-share daily-line quant workflow for four ordinary numeric models:
 
-## Active Entry Points
+- `LAOWANG`
+- `STWG`
+- `YWCX`
+- `FHKQ`
 
-| 文件 | 作用 |
+The active production path is deliberately small:
+
+```text
+BaoStock daily bars -> stock_daily -> scoring_*.py -> model_*_pool
+                                     -> generate_trade_plan.py
+                                     -> strategy_signal_log / CSV
+                                     -> UI / Telegram / manual trade journal
+```
+
+## Active Files
+
+| File | Purpose |
 | --- | --- |
-| `init.py` | 初始化数据库和核心表结构 |
-| `getDataBaoStock.py` | 拉取日线/分钟线，写入 `stock_info`、`stock_daily`、`stock_minute` |
-| `everyday.py` | 每日主流程：增量抓取日线，然后计算四个评分模型 |
-| `everydayReview.py` | 次日接力增量流程：抓取复盘池并写入接力模型结果 |
-| `ui.py` | 只读 Web UI 和自动任务调度入口 |
-| `tgBot.py` | Telegram 查询与推送 |
-| `backtest_model_follow.py` | 模型跟随、手动计划、Relay hybrid 回测报告 |
-| `optimize_relay_follow.py` | Relay hybrid 参数扫描 |
-| `scoring_laowang.py` | 老王评分 |
-| `scoring_ywcx.py` | 阳痿次新评分 |
-| `scoring_stwg.py` | 缩头乌龟评分 |
-| `scoring_fhkq.py` | FHKQ 连板信号 |
-| `scoring_relay.py` | 次日接力模型评分 |
+| `init.py` | Create the active database tables and indexes. |
+| `getDataBaoStock.py` | Download BaoStock K-line data and maintain ingest watermarks. |
+| `everyday.py` | Daily pipeline: BaoStock daily update, then four scoring models. |
+| `scoring_laowang.py` | LAOWANG score and pool. |
+| `scoring_stwg.py` | STWG score and pool. |
+| `scoring_ywcx.py` | YWCX score and pool. |
+| `scoring_fhkq.py` | FHKQ event score and pool. |
+| `strategy_protocols.py` | Versioned model protocols, thresholds, T+1 buy rules, T+2+ sell rules. |
+| `generate_trade_plan.py` | Generate `ordinary_next_day_plan.csv` and `signal_audit.csv`; optionally write `strategy_signal_log`. |
+| `record_trade.py` | Manual buy/sell journal and export. |
+| `ui.py` | Lightweight read-only Web UI for four pools, plans, and trade records. |
+| `tgBot.py` | Telegram query/push bot. |
+| `tests/smoke_test_generate_trade_plan.py` | SQLite smoke test for plan generation and DB upsert. |
 
-## Quick Start
+## Setup
 
 ```bash
 pip install -r requirements.txt
 python init.py --config config.ini
+```
+
+Runtime config priority:
+
+```text
+--db-url > ASTOCK_DB_URL > --db > config.ini > data/stock.db
+```
+
+Keep real DB passwords, Telegram tokens, and proxy values out of committed docs.
+Use `config.example.ini` and `.env.example` as placeholders only.
+
+## Daily Workflow
+
+```bash
 python everyday.py --config config.ini --initial-start-date 2020-01-01
-python ui.py --config config.ini --start-date 20260101
+python generate_trade_plan.py --config config.ini --write-db
+python ui.py --config config.ini
 ```
 
-BaoStock 需要 `baostock>=0.9.1`。老版本会连接旧的 `www.baostock.com:10030`，可能出现 `10002007 网络接收错误`。
+Open the UI at:
 
-数据库连接优先级：
-
-`--db-url` > `ASTOCK_DB_URL` > `--db` > `config.ini` > `data/stock.db`
-
-## Data Download
-
-日线增量：
-
-```bash
-python getDataBaoStock.py --config config.ini --frequency d --start-date 20200101 --end-date 20260430 --workers 4
+```text
+http://127.0.0.1:8765
 ```
 
-5 分钟线增量：
+## BaoStock Performance Notes
+
+BaoStock is fragile under high concurrency. Treat two independent connections as the practical upper bound.
+
+Recommended daily update:
 
 ```bash
-python getDataBaoStock.py --config config.ini --frequency 5 --start-date 20260201 --end-date 20260430 --minute-backfill-days 3
-```
-
-下载性能参数：
-
-- `--workers`：单进程线程数。BaoStock 单连接仍会串行访问 API，但数据解析和主线程写库可以重叠。
-- `--process-shards N`：启动 N 个独立 BaoStock 进程分片，适合大范围补数据。建议先从 `2` 或 `4` 开始。
-- `--upsert-chunk-size N`：数据库批量写入分块大小，默认 `5000`。
-- `--baostock-proxy`：BaoStock TCP 代理，默认 `auto`；直连失败时会尝试 `BAOSTOCK_PROXY`、`TG_BOT_PROXY`、`http://127.0.0.1:7890`。
-- `--minute-lookback-days N`：分钟线只拉最近 N 天。
-- `--minute-backfill-days N`：分钟线增量时向前回补 N 天，默认 `3`，设为 `0` 表示严格从下一天开始。
-
-`getDataBaoStock.py` 会维护 `stock_ingest_watermark` 水位表，避免每次启动都扫描大体量分钟线表。
-
-## Daily Pipeline
-
-```bash
-python -m everyday --config config.ini \
-  --initial-start-date 2026-04-21 \
-  --getdata-workers 4 \
+python everyday.py --config config.ini \
+  --getdata-workers 2 \
   --getdata-shards 2 \
-  --getdata-write-chunk-size 5000
+  --getdata-write-chunk-size 20000
 ```
 
-`everyday.py` 会读取 `stock_daily` 最新日期，自动决定抓取起点，然后依次运行四个评分模型。UI 自动任务默认在每个交易日 17:35 触发该流程。
+`getDataBaoStock.py` now caps `--process-shards` at `2`. Daily writes are batched before database upsert to reduce transaction overhead.
 
-## Daily Review / Relay
+Minute bars remain available through `getDataBaoStock.py --frequency 5/15/30/60`, but they are no longer part of the active strategy path. Do not run minute backfills unless a new model explicitly needs them.
+
+## Trade Plan Contract
+
+Each model output now carries:
+
+- `t1_buy_condition`: the T+1 manual buy condition.
+- `t2_sell_condition`: the T+2 or later exit condition.
+- `planned_position_pct`: suggested position size when the precheck passes.
+- `skip_reason`: why a row is not eligible for T+1 review.
+
+Generated files:
+
+```text
+reports/trade_plans/YYYYMMDD/ordinary_next_day_plan.csv
+reports/trade_plans/YYYYMMDD/signal_audit.csv
+```
+
+## Manual Trade Journal
 
 ```bash
-python fit_relay_model_file.py --config config.ini --model-file models/relay_model_active.npz
-python getDataDailyReview.py --config config.ini --start-date 20250101 --end-date 20260430
-python scoring_relay.py --config config.ini --start-date 20250101 --end-date 20260430 --model-file models/relay_model_active.npz --full-rebuild
-python everydayReview.py --config config.ini
+python record_trade.py buy \
+  --signal-date 2026-05-11 --model laowang \
+  --stock-code 000001 --buy-date 2026-05-12 \
+  --buy-price 12.30 --shares 1000
+
+python record_trade.py sell \
+  --model laowang --stock-code 000001 \
+  --sell-date 2026-05-14 --sell-price 12.95 \
+  --exit-reason t2_protocol_exit
+
+python record_trade.py export --output-dir reports/trade_journal/
 ```
 
-UI 默认在每日主流程结束后触发一次 `everydayReview.py`，夜间也可按 `--auto-review-time` 独立调度。
+## API Endpoints
 
-## Core Tables
-
-| 表 | 内容 |
+| Route | Purpose |
 | --- | --- |
-| `stock_info` | 股票基础信息 |
-| `stock_daily` | 日线 OHLCV |
-| `stock_minute` | 分钟线 OHLCV |
-| `stock_ingest_watermark` | 每只股票每个频率的入库水位 |
-| `stock_scores_v3` / `stock_levels` | 老王评分与支撑阻力 |
-| `stock_scores_ywcx` / `stock_scores_stwg` | 两个辅助评分模型 |
-| `model_laowang_pool` / `model_ywcx_pool` / `model_stwg_pool` / `model_fhkq` | UI 读取的模型池 |
-| `daily_review_akshare_pool` / `daily_review_xgb_limit_up` | 次日接力原始池 |
-| `model_relay_pool` / `model_relay_registry` | 次日接力评分结果与模型登记 |
-| `strategy_signal_log` / `strategy_trade_journal` | 半自动交易信号审计与人工交易记录 |
+| `/` | Web UI. |
+| `/api/dates` | Available trade dates. |
+| `/api/status` | Daily row counts and pool counts. |
+| `/api/model/laowang` | LAOWANG pool. |
+| `/api/model/stwg` | STWG pool. |
+| `/api/model/ywcx` | YWCX pool. |
+| `/api/model/fhkq` | FHKQ pool. |
+| `/api/plan` | Four-model trade plan from `strategy_signal_log`. |
+| `/api/positions` | Manual trade journal rows. |
 
-## Disclaimer
+## Smoke Test
 
-本项目仅用于学习和研究，不构成投资建议。
+```bash
+python tests/smoke_test_generate_trade_plan.py
+```
+
+## Active Tables
+
+| Table | Purpose |
+| --- | --- |
+| `stock_info` | Stock metadata. |
+| `stock_daily` | Daily OHLCV. |
+| `stock_ingest_watermark` | Latest ingested date per stock/frequency. |
+| `stock_scores_v3` / `stock_levels` | LAOWANG scores and levels. |
+| `stock_scores_stwg` / `model_stwg_pool` | STWG score and pool. |
+| `stock_scores_ywcx` / `model_ywcx_pool` | YWCX score and pool. |
+| `model_laowang_pool` | LAOWANG pool. |
+| `model_fhkq` | FHKQ pool. |
+| `strategy_signal_log` | Signal audit and action plan JSON. |
+| `strategy_trade_journal` | Manual execution journal. |
+
+## Operator Notes
+
+- Keep daily-line models boring and auditable first; do not reintroduce minute data until a concrete feature proves it pays rent.
+- Use `strategy_signal_log` as the contract between model output and manual execution. It gives you replayable decisions instead of half-remembered screenshots.
+- FHKQ is an event model. Treat size as deliberately small unless live journal evidence improves.
+- YWCX is active again, but with smaller size until sample quality is better.
+
+This project is for research and tooling, not investment advice.

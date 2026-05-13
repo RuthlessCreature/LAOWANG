@@ -34,6 +34,8 @@ class OrdinaryModelProtocol:
     hard_stop_pct: float
     structure_stop: str
     max_hold_days: int
+    t1_buy_condition: str
+    t2_sell_condition: str
     profit_arm_pct: Optional[float] = None
     profit_trailing_stop: Optional[str] = None
     paused: bool = False
@@ -46,69 +48,6 @@ class OrdinaryModelProtocol:
         cfg["blocked_tags"] = list(self.blocked_tags)
         cfg["protocol_notes"] = list(self.protocol_notes)
         return cfg
-
-
-@dataclass(frozen=True)
-class RelayCandidateProtocol:
-    strategy_id: str = "relay_hybrid"
-    strategy_version: str = "relay_hybrid_v1"
-    min_score: float = 0.70
-    max_rank_no: int = 2
-    max_board: int = 3
-    max_broken_rate: float = 0.40
-    min_red_rate: float = 0.28
-    max_limit_down_count: int = 15
-    max_pullback: float = 0.08
-    min_amount_ma20: float = 150_000_000.0
-
-
-@dataclass(frozen=True)
-class RelayAuctionProtocol:
-    min_gap: float = -0.01
-    max_gap: float = 0.04
-    min_auction_amount_ratio: float = 0.08
-    block_limit_up_open: bool = True
-    block_limit_down_open: bool = True
-    reject_obvious_price_slope_down: bool = True
-    reject_cancel_risk: bool = True
-
-
-@dataclass(frozen=True)
-class RelayIntradayProtocol:
-    min_first_15m_low_drawdown: float = -0.03
-    triggers: Tuple[str, ...] = (
-        "reclaim_vwap",
-        "reclaim_open_price",
-        "reseal",
-        "divergence_absorbed",
-    )
-    invalidation: Tuple[str, ...] = (
-        "first_15m_ret_lte_-3pct",
-        "cannot_reclaim_vwap",
-        "theme_ladder_broken",
-        "stronger_candidate_replaces",
-    )
-
-
-@dataclass(frozen=True)
-class RelayExitProtocol:
-    weak_open_stop_pct: float = -0.03
-    hard_stop_close_pct: float = -0.035
-    profit_extend_pct: float = 0.05
-    max_hold_days: int = 3
-    default_exit: str = "t2_close_exit"
-    extension_exit: str = "t3_clear"
-
-
-@dataclass(frozen=True)
-class RelayPositionRiskProtocol:
-    initial_position_pct: float = 0.02
-    validated_position_pct: float = 0.04
-    max_strategy_position_pct: float = 0.15
-    max_new_positions_per_day: int = 1
-    halve_after_consecutive_losses: int = 3
-    pause_after_consecutive_losses: int = 5
-    monthly_loss_stop_pct: float = -0.06
 
 
 ORDINARY_MODEL_PROTOCOLS: Dict[str, OrdinaryModelProtocol] = {
@@ -127,6 +66,14 @@ ORDINARY_MODEL_PROTOCOLS: Dict[str, OrdinaryModelProtocol] = {
         hard_stop_pct=-0.05,
         structure_stop="close_below_ma20",
         max_hold_days=20,
+        t1_buy_condition=(
+            "T+1 only: open gap must be -3% to +3%; buy only after price holds above "
+            "signal close or reclaims it intraday, with no risk tag and acceptable liquidity."
+        ),
+        t2_sell_condition=(
+            "T+2 or later: exit on -5% hard stop, close below MA20, or after +12% profit "
+            "arm when price closes below MA10; force exit by max_hold_days."
+        ),
         profit_arm_pct=0.12,
         profit_trailing_stop="close_below_ma10",
         protocol_notes=("trend_low_base", "slow_signal", "do_not_chase_gap_gt_3pct"),
@@ -146,6 +93,14 @@ ORDINARY_MODEL_PROTOCOLS: Dict[str, OrdinaryModelProtocol] = {
         hard_stop_pct=-0.04,
         structure_stop="close_below_ma10_or_region_high",
         max_hold_days=10,
+        t1_buy_condition=(
+            "T+1 only: open gap must be -3% to +4%; buy only on breakout continuation "
+            "above signal close/region high with volume confirmation; no chase above +4%."
+        ),
+        t2_sell_condition=(
+            "T+2 or later: exit on -4% hard stop, close back below MA10 or failed region "
+            "high; after +10% profit arm trail with close below MA5; force exit by max_hold_days."
+        ),
         profit_arm_pct=0.10,
         profit_trailing_stop="close_below_ma5",
         protocol_notes=("breakout_only", "do_not_buy_observation_state"),
@@ -153,7 +108,7 @@ ORDINARY_MODEL_PROTOCOLS: Dict[str, OrdinaryModelProtocol] = {
     "ywcx": OrdinaryModelProtocol(
         model="ywcx",
         strategy_id="ywcx_manual",
-        strategy_version="ywcx_manual_v1_paused",
+        strategy_version="ywcx_manual_v1",
         min_score=65.0,
         min_gap=-0.03,
         max_gap=0.02,
@@ -161,14 +116,22 @@ ORDINARY_MODEL_PROTOCOLS: Dict[str, OrdinaryModelProtocol] = {
         required_tags=("BROKEN_IPO", "NEAR_IPO_LOW", "VOLUME_DRY", "JUST_ABOVE_MA5"),
         any_tags=(),
         blocked_tags=("RISK_FILTERED",),
-        planned_position_pct=0.0,
+        planned_position_pct=0.03,
         hard_stop_pct=-0.04,
         structure_stop="close_below_ma5",
         max_hold_days=5,
+        t1_buy_condition=(
+            "T+1 only: open gap must be -3% to +2%; buy only if price remains just above "
+            "MA5 or reclaims signal close without liquidity collapse."
+        ),
+        t2_sell_condition=(
+            "T+2 or later: exit on -4% hard stop, close below MA5, failed volume recovery, "
+            "or after +8% profit target/reduction; force exit by max_hold_days."
+        ),
         profit_arm_pct=0.08,
         profit_trailing_stop="profit_target_or_close_below_ma5",
-        paused=True,
-        protocol_notes=("paused_until_listing_and_issue_data_fixed",),
+        paused=False,
+        protocol_notes=("small_position_until_sample_size_improves",),
     ),
     "fhkq": OrdinaryModelProtocol(
         model="fhkq",
@@ -185,19 +148,18 @@ ORDINARY_MODEL_PROTOCOLS: Dict[str, OrdinaryModelProtocol] = {
         hard_stop_pct=-0.04,
         structure_stop="event_exit_t2",
         max_hold_days=2,
+        t1_buy_condition=(
+            "T+1 only: buy only if the stock is tradable, not locked limit-down, gap is "
+            "-10% to +3%, and liquidity recovery is still visible; never chase event spikes."
+        ),
+        t2_sell_condition=(
+            "T+2 or later: default event exit/reduce on first sellable day; exit immediately "
+            "on -4% hard stop or liquidity recovery failure; max hold is 2 days."
+        ),
         profit_arm_pct=0.06,
         profit_trailing_stop="first_sellable_day_reduce_or_profit_exit",
         protocol_notes=("event_model", "do_not_apply_trend_ma_entry", "liquidity_recovery_required"),
     ),
-}
-
-
-RELAY_PROTOCOLS = {
-    "candidate": RelayCandidateProtocol(),
-    "auction": RelayAuctionProtocol(),
-    "intraday": RelayIntradayProtocol(),
-    "exit": RelayExitProtocol(),
-    "position_risk": RelayPositionRiskProtocol(),
 }
 
 
@@ -212,14 +174,8 @@ def ordinary_model_plan_config(model: str) -> Dict[str, Any]:
     return ordinary_model_protocol(model).to_plan_config()
 
 
-def relay_protocol_config() -> Dict[str, Dict[str, Any]]:
-    return {name: asdict(protocol) for name, protocol in RELAY_PROTOCOLS.items()}
-
-
 def strategy_versions() -> Dict[str, str]:
-    versions = {model: spec.strategy_version for model, spec in ORDINARY_MODEL_PROTOCOLS.items()}
-    versions["relay"] = RELAY_PROTOCOLS["candidate"].strategy_version
-    return versions
+    return {model: spec.strategy_version for model, spec in ORDINARY_MODEL_PROTOCOLS.items()}
 
 
 def main() -> int:

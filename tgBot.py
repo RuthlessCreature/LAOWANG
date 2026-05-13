@@ -9,7 +9,7 @@ Telegram 机器人（长轮询 + 推送助手）。
 - 推送：`everyday.py` 完成后可调用 push 接口，向所有订阅者推送当日四个股票池。
 
 说明：
-- 机器人 Token 默认读取 `TG_BOT_TOKEN` 环境变量，若未设置则 fallback 到仓库内置 Token。
+- 机器人 Token 读取 `--bot-token` 或 `TG_BOT_TOKEN` 环境变量；缺失时直接退出。
 - 订阅者列表保存在 `data/tg_subscribers.json`，只要主动和 bot 对话一次即可加入。
 - CLI：`python tgBot.py --mode serve`（默认）运行轮询服务；`--mode push` 手动推送一次。
 """
@@ -36,7 +36,6 @@ from sqlalchemy.engine import Engine, create_engine
 
 
 DEFAULT_DB = "data/stock.db"
-DEFAULT_BOT_TOKEN = "8322336287:AAHR4RqsL1SwZsYuRfzNL_rbMNUPL87Bd0c"
 DEFAULT_PROXY = "http://127.0.0.1:7890"
 SUBSCRIBERS_PATH = Path("data/tg_subscribers.json")
 
@@ -133,7 +132,7 @@ def _default_token(token: Optional[str]) -> Optional[str]:
     env = os.getenv("TG_BOT_TOKEN")
     if env and env.strip():
         return env.strip()
-    return DEFAULT_BOT_TOKEN
+    return None
 
 
 def _resolve_proxy(value: Optional[str]) -> Optional[str]:
@@ -330,6 +329,12 @@ POOL_ALIASES: Dict[str, str] = {
     "缩头乌龟": "stwg",
     "乌龟": "stwg",
     "stwg": "stwg",
+    "plan": "__plan__",
+    "计划": "__plan__",
+    "计划单": "__plan__",
+    "positions": "__positions__",
+    "持仓": "__positions__",
+    "positions": "__positions__",
 }
 
 
@@ -365,6 +370,125 @@ def build_summary_text(engine: Engine, keys: Optional[Sequence[str]] = None, *, 
         trade_date, rows = fetch_latest_pool(engine, cfg, limit)
         blocks.append(build_pool_block(cfg, trade_date, rows))
     return "\n\n".join(blocks)
+
+
+def fetch_latest_trade_date(engine: Engine) -> Optional[str]:
+    with engine.connect() as conn:
+        row = conn.execute(text("SELECT MAX(date) FROM stock_daily")).fetchone()
+    return str(row[0]) if row and row[0] else None
+
+
+def fetch_signal_plan(engine: Engine, trade_date: str) -> Dict[str, Any]:
+    ordinary_query = """
+        SELECT
+            signal_date, model, stock_code, stock_name, score, model_version,
+            action_plan_json,
+            CASE
+                WHEN json_extract(action_plan_json, '$.skip_reason') IS NOT NULL
+                 AND json_extract(action_plan_json, '$.skip_reason') != '[]'
+                THEN 'skip'
+                ELSE 'pending_t1_buy_check'
+            END AS action_state,
+            ROUND(COALESCE(json_extract(action_plan_json, '$.position_pct'), 0), 4) AS planned_position_pct
+        FROM strategy_signal_log
+        WHERE signal_date = :td
+          AND model IN ('laowang', 'stwg', 'ywcx', 'fhkq')
+        ORDER BY model, planned_position_pct DESC
+    """
+    with engine.connect() as conn:
+        ordinary_rows = [dict(r) for r in conn.execute(text(ordinary_query), {"td": trade_date}).mappings().all()]
+    return {"ordinary": ordinary_rows}
+
+
+def fetch_positions(engine: Engine, limit: int = 50) -> Dict[str, Any]:
+    query = """
+        SELECT
+            trade_id, signal_date, model, stock_code, stock_name,
+            buy_date, buy_price, buy_shares, buy_amount,
+            sell_date, sell_price, pnl, pnl_pct,
+            exit_reason, trade_status
+        FROM strategy_trade_journal
+        ORDER BY COALESCE(buy_date, signal_date) DESC
+        LIMIT :lim
+    """
+    with engine.connect() as conn:
+        rows = [dict(r) for r in conn.execute(text(query), {"lim": limit}).mappings().all()]
+    open_pos = [r for r in rows if r.get("trade_status") != "CLOSED"]
+    closed = [r for r in rows if r.get("trade_status") == "CLOSED"]
+    pcts = [float(r["pnl_pct"]) for r in closed if r.get("pnl_pct") is not None]
+    wins = sum(1 for p in pcts if p > 0)
+    return {
+        "open": open_pos,
+        "closed": closed,
+        "open_count": len(open_pos),
+        "closed_count": len(closed),
+        "wins": wins,
+        "losses": len(pcts) - wins,
+        "win_rate": wins / len(pcts) if pcts else 0.0,
+        "net_pnl": round(sum(float(r["pnl"]) for r in closed if r.get("pnl") is not None), 2),
+    }
+
+
+def build_plan_text(engine: Engine) -> str:
+    trade_date = fetch_latest_trade_date(engine)
+    if not trade_date:
+        return "No trade dates in stock_daily; run everyday.py first."
+    data = fetch_signal_plan(engine, trade_date)
+    ordinary = data.get("ordinary", [])
+    if not ordinary:
+        return f"({trade_date}) no plan rows; run generate_trade_plan.py first."
+
+    lines = [f"Plan {trade_date}", ""]
+    pending = [r for r in ordinary if r.get("action_state") == "pending_t1_buy_check"]
+    skipped = [r for r in ordinary if r.get("action_state") == "skip"]
+    if pending:
+        lines.append(f"T+1 conditional buys ({len(pending)}):")
+        for r in pending[:12]:
+            pct = float(r.get("planned_position_pct") or 0)
+            lines.append(
+                f"  {r.get('model','').upper()} {r.get('stock_code')} {r.get('stock_name')} "
+                f"score:{_fmt_float(r.get('score'))} pos:{pct*100:.1f}%"
+            )
+    if skipped:
+        lines.append(f"Skipped ({len(skipped)}):")
+        for r in skipped[:5]:
+            lines.append(f"  {r.get('model','').upper()} {r.get('stock_code')} {r.get('stock_name')}")
+        if len(skipped) > 5:
+            lines.append(f"  ... {len(skipped)-5} more")
+    return "\n".join(lines)
+
+def build_positions_text(engine: Engine) -> str:
+    data = fetch_positions(engine)
+    open_pos = data.get("open", [])
+    closed = data.get("closed", [])
+    if not open_pos and not closed:
+        return "暂无持仓记录，请先运行 record_trade.py 录入交易"
+    lines = ["📊 持仓状态", ""]
+    if open_pos:
+        lines.append(f"🔵 持仓中（{data['open_count']} 条）：")
+        for r in open_pos:
+            lines.append(
+                f"  {r.get('model','').upper()} {r.get('stock_code')} {r.get('stock_name')} "
+                f"买:{_fmt_float(r.get('buy_price'))} 日期:{r.get('buy_date')}"
+            )
+    else:
+        lines.append("🔵 持仓中：0 条")
+    if closed:
+        wr = data["win_rate"]
+        net = data["net_pnl"]
+        lines.append(
+            f"📪 已平仓 {data['closed_count']} 条 "
+            f"胜率:{wr*100:.0f}% 净盈亏:¥{net}"
+        )
+        for r in closed[:5]:
+            pct = r.get("pnl_pct") or 0
+            emoji = "✅" if pct > 0 else "❌"
+            lines.append(
+                f"  {emoji} {r.get('model','').upper()} {r.get('stock_code')} "
+                f"买:{_fmt_float(r.get('buy_price'))} 卖:{_fmt_float(r.get('sell_price'))} "
+                f"{pct*100:+.1f}% 原因:{r.get('exit_reason','')}"
+            )
+    return "\n".join(lines)
 
 
 class TelegramClient:
@@ -423,6 +547,8 @@ class BotService:
             "可用命令：\n"
             "- 老王 / 阳痿次新 / 缩头乌龟 / 粪海狂蛆\n"
             "- all / 全部 —— 返回四个股票池\n"
+            "- plan / 计划 —— 查看次日交易计划\n"
+            "- positions / 持仓 —— 查看当前持仓\n"
             "- /start —— 订阅推送"
         )
 
@@ -463,8 +589,14 @@ class BotService:
             return self.help_text
         if normalized in {"all", "全部"}:
             return build_summary_text(self.engine, limit=self.limit)
+        if normalized == "__plan__":
+            return build_plan_text(self.engine)
+        if normalized == "__positions__":
+            return build_positions_text(self.engine)
         if normalized in POOL_ALIASES:
             key = POOL_ALIASES[normalized]
+            if key.startswith("__"):
+                return "未知指令"
             cfg = POOL_CONFIGS[key]
             trade_date, rows = fetch_latest_pool(self.engine, cfg, self.limit)
             return build_pool_block(cfg, trade_date, rows)
@@ -481,7 +613,7 @@ def push_latest_pools(
 ) -> None:
     real_token = _default_token(token)
     if not real_token:
-        logging.info("[tg] 未配置机器人 Token，跳过推送")
+        logging.info("[tg] 未配置机器人 Token，跳过推送；请设置 --bot-token 或 TG_BOT_TOKEN")
         return
     subscribers = store.load()
     if not subscribers:
@@ -500,7 +632,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--config", default=None, help="config.ini 路径")
     parser.add_argument("--db-url", default=None, help="自定义 SQLAlchemy URL")
     parser.add_argument("--db", default=None, help="SQLite 文件路径")
-    parser.add_argument("--bot-token", default=None, help="覆盖 TG_BOT_TOKEN / 默认 Token")
+    parser.add_argument("--bot-token", default=None, help="覆盖 TG_BOT_TOKEN")
     parser.add_argument("--subscriber-file", default=str(SUBSCRIBERS_PATH), help="订阅者文件（JSON）")
     parser.add_argument("--limit", type=int, default=15, help="每个股票池返回条数")
     parser.add_argument("--mode", choices=["serve", "push"], default="serve", help="serve=长轮询, push=立即推送一次")

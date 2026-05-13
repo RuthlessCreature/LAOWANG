@@ -1,47 +1,31 @@
-version: 1
 name: LAOWANG
-summary: >-
-  A 股 K 线入库、模型评分、次日接力和只读 Web UI。当前重点是提升 BaoStock
-  下载与 MySQL 分钟线写入/增量启动性能。
+type: quant-trading-system
+description: A-share quantitative trading pipeline (data → scoring → trade plan → execution)
+tech_stack:
+  - python
+  - sqlalchemy
+  - pymysql
+  - sqlite3
+  - numpy
+  - pandas
+  - baostock
+  - akshare
+  - requests
+
+databases:
+  primary: mysql (astock)
+  fallback: sqlite (data/stock.db)
+
+lifecycle_phase: build
 status: active
-phase: building
-tags:
-  - Python
-  - MySQL
-  - BaoStock
-  - quant
-features:
-  - id: DATA-INGEST
-    title: BaoStock data ingest
-    status: doing
-  - id: DAILY-SCORES
-    title: Daily scoring pipeline
-    status: active
-  - id: RELAY-REVIEW
-    title: Daily review and relay model
-    status: active
-  - id: WEB-UI
-    title: Read-only web UI
-    status: active
-requirements:
-  - id: REQ-PERF-1
-    title: Speed up daily and minute K-line ingest
-    status: doing
-    priority: high
-    summary: Avoid large table scans, support process sharding, and reduce DB write contention.
-progress:
-  summary: Performance refactor in progress.
-  counts:
-    planned: 4
-    doing: 1
-    done: 3
-    blocked: 0
-blockers: []
-next_actions:
-  - Run ingest smoke tests against BaoStock and MySQL with a small stock limit.
-links:
-  - label: repo
-    value: https://github.com/RuthlessCreature/LAOWANG.git
-meta:
-  source: codex-maintained
-  last_reviewed_at: '2026-04-30'
+
+entry_points:
+  init: init.py
+  daily_pipeline: everyday.py
+  trade_plan: generate_trade_plan.py
+  manual_trade: record_trade.py
+  web_ui: ui.py
+  telegram_bot: tgBot.py
+  smoke_test: tests/smoke_test_generate_trade_plan.py
+
+recent_changes: 2026-05-13

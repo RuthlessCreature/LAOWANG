@@ -1,132 +1,132 @@
-# 每日运行 SOP
+# Daily SOP
 
-## 目标
-
-1. 用单一数据库保存 K 线、复盘池和模型结果。
-2. 每日流程覆盖“抓取 -> 评分 -> 展示 -> 推送”。
-3. UI 只读展示，自动任务按交易日定时触发。
-
-## 初始化
+## 1. Initialize
 
 ```bash
 pip install -r requirements.txt
 python init.py --config config.ini
 ```
 
-确认 BaoStock 版本：
+Database priority:
 
-```bash
-python -m pip show baostock
+```text
+--db-url > ASTOCK_DB_URL > --db > config.ini > data/stock.db
 ```
 
-版本必须为 `0.9.1` 或更高；旧版会连接旧服务端，容易报 `10002007 网络接收错误`。
+## 2. Daily Data + Four Scores
 
-数据库连接优先级：
-
-`--db-url` > `ASTOCK_DB_URL` > `--db` > `config.ini` > `data/stock.db`
-
-## 每日主流程
+Recommended default:
 
 ```bash
 python everyday.py --config config.ini \
   --initial-start-date 2020-01-01 \
-  --getdata-workers 4 \
+  --getdata-workers 2 \
   --getdata-shards 2 \
-  --getdata-write-chunk-size 5000
+  --getdata-write-chunk-size 20000
 ```
 
-说明：
+Notes:
 
-- 自动读取 `stock_daily` 最新日期并增量抓取。
-- `--getdata-workers` 会传给 `getDataBaoStock.py`。
-- `--getdata-shards` 会启动多个独立 BaoStock 进程分片，适合大范围补数据。
-- 下载完成后依次运行老王、YWCX、STWG、FHKQ 四个评分模型。
-- `everyday.py` 结束后会尝试触发 Telegram 推送。
+- BaoStock independent process concurrency is capped at 2.
+- `everyday.py` reads the latest `stock_daily` date and only pulls missing daily bars.
+- After data update it runs `scoring_laowang.py`, `scoring_ywcx.py`, `scoring_stwg.py`, and `scoring_fhkq.py`.
+- Minute bars are not part of the active workflow.
 
-## 手动拉取 K 线
-
-日线：
+Manual daily data pull:
 
 ```bash
-python getDataBaoStock.py --config config.ini --frequency d --start-date 20200101 --end-date 20260430 --workers 4
+python getDataBaoStock.py --config config.ini \
+  --frequency d \
+  --start-date 20200101 \
+  --end-date 20260513 \
+  --workers 2 \
+  --process-shards 2 \
+  --upsert-chunk-size 20000
 ```
 
-分钟线：
+## 3. Manual Scoring
 
 ```bash
-python getDataBaoStock.py --config config.ini --frequency 5 --start-date 20260201 --end-date 20260430 --minute-backfill-days 3
+python scoring_laowang.py --config config.ini --start-date 2026-01-01 --end-date 2026-05-13 --workers 16 --top 200 --min-score 60
+python scoring_stwg.py    --config config.ini --start-date 2026-01-01 --end-date 2026-05-13 --workers 16 --top 150 --min-score 55
+python scoring_ywcx.py    --config config.ini --start-date 2026-01-01 --end-date 2026-05-13 --workers 16 --top 120 --min-score 55
+python scoring_fhkq.py    --config config.ini --start-date 2026-01-01 --end-date 2026-05-13 --workers 8
 ```
 
-大范围补分钟线：
+## 4. Generate Trade Plan
 
 ```bash
-python getDataBaoStock.py --config config.ini --frequency 5 --start-date 20200101 --end-date 20260430 --workers 1 --process-shards 4 --upsert-chunk-size 5000
+python generate_trade_plan.py --config config.ini --write-db
 ```
 
-常用参数：
+Outputs:
 
-- `--minute-lookback-days N`：只拉最近 N 天分钟线。
-- `--minute-backfill-days N`：增量时向前回补 N 天；`0` 为严格增量。
-- `--minute-retries N` / `--minute-retry-sleep S`：分钟线失败重试。
-- `--api-min-interval S`：BaoStock 请求最小间隔。
-- `--baostock-proxy auto|direct|none|http://127.0.0.1:7890`：BaoStock 数据端口代理设置。
+- `ordinary_next_day_plan.csv`: four-model rows with `skip` / `conditional_buy`, `t1_buy_condition`, and `t2_sell_condition`.
+- `signal_audit.csv`: full audit rows with feature JSON and action plan JSON.
+- `strategy_signal_log`: written when `--write-db` is enabled.
 
-## 手动评分
+Dry run:
 
 ```bash
-python scoring_laowang.py --config config.ini --start-date 2026-01-01 --end-date 2026-04-30 --workers 32 --top 200 --min-score 60
-python scoring_ywcx.py    --config config.ini --start-date 2026-01-01 --end-date 2026-04-30 --workers 32 --top 120 --min-score 55
-python scoring_stwg.py    --config config.ini --start-date 2026-01-01 --end-date 2026-04-30 --workers 32 --top 150 --min-score 55
-python scoring_fhkq.py    --config config.ini --start-date 2026-01-01 --end-date 2026-04-30 --workers 16
+python generate_trade_plan.py --config config.ini --trade-date 2026-05-11 --no-write-db
 ```
 
-## 次日接力流程
+## 5. Manual Buy/Sell Journal
 
-首次或全量：
+Buy:
 
 ```bash
-python fit_relay_model_file.py --config config.ini --model-file models/relay_model_active.npz
-python getDataDailyReview.py --config config.ini --start-date 20250101 --end-date 20260430
-python scoring_relay.py --config config.ini --start-date 20250101 --end-date 20260430 --model-file models/relay_model_active.npz --full-rebuild
+python record_trade.py buy \
+  --signal-date 2026-05-11 --model laowang \
+  --stock-code 000001 --buy-date 2026-05-12 \
+  --buy-price 12.30 --shares 1000
 ```
 
-日常增量：
+Sell:
 
 ```bash
-python everydayReview.py --config config.ini
+python record_trade.py sell \
+  --model laowang --stock-code 000001 \
+  --sell-date 2026-05-14 --sell-price 12.95 \
+  --exit-reason t2_protocol_exit
 ```
 
-## UI 自动任务
+Export:
 
 ```bash
-python ui.py --config config.ini \
-  --start-date 20260101 \
-  --auto-time 17:35 \
-  --auto-review-time 21:00 \
-  --auto-review-model-file models/relay_model_active.npz
+python record_trade.py export --output-dir reports/trade_journal/
 ```
 
-可选开关：
+## 6. UI / Telegram
 
-- `--disable-auto-update`
-- `--disable-auto-review-update`
-- `--host 0.0.0.0 --port 8000`
+```bash
+python ui.py --config config.ini --host 127.0.0.1 --port 8765
+```
 
-## 校验 SQL
+Telegram:
+
+```powershell
+$env:TG_BOT_TOKEN="123456:REPLACE_WITH_YOUR_TOKEN"
+python tgBot.py --config config.ini --mode serve
+```
+
+## 7. Smoke Test
+
+```bash
+python tests/smoke_test_generate_trade_plan.py
+```
+
+## 8. Quick SQL Checks
 
 ```sql
 SELECT MAX(date) FROM stock_daily;
-SELECT COUNT(*) FROM model_laowang_pool WHERE trade_date='2026-04-30';
-SELECT COUNT(*) FROM model_ywcx_pool   WHERE trade_date='2026-04-30';
-SELECT COUNT(*) FROM model_stwg_pool   WHERE trade_date='2026-04-30';
-SELECT COUNT(*) FROM model_fhkq        WHERE trade_date='2026-04-30';
-SELECT COUNT(*) FROM model_relay_pool  WHERE trade_date='2026-04-30';
-```
+SELECT COUNT(*) FROM model_laowang_pool WHERE trade_date='2026-05-13';
+SELECT COUNT(*) FROM model_stwg_pool    WHERE trade_date='2026-05-13';
+SELECT COUNT(*) FROM model_ywcx_pool    WHERE trade_date='2026-05-13';
+SELECT COUNT(*) FROM model_fhkq         WHERE trade_date='2026-05-13';
 
-分钟线水位：
-
-```sql
-SELECT frequency, COUNT(*), MAX(latest_date)
-FROM stock_ingest_watermark
-GROUP BY frequency;
+SELECT model, COUNT(*)
+FROM strategy_signal_log
+WHERE signal_date='2026-05-13'
+GROUP BY model;
 ```

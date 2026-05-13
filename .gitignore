@@ -1,5 +1,41 @@
-.pyc
-.pdf
-docs/sop.pdf
-*.pyc
-*.pyc
+# Python runtime artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local secrets and machine config
+.env
+.env.*
+!.env.example
+config.ini
+config.local.ini
+config.private.ini
+
+# Local app/tool state
+/.wrangler/
+/.pm/intelligence.json
+
+# Local databases and subscriber state
+/data/*.db
+/data/*.db-shm
+/data/*.db-wal
+/data/*.sqlite
+/data/*.sqlite3
+/data/logs/
+/data/tg_subscribers.json
+
+# Generated reports and probes
+/reports/
+/legacy/reports/
+/legacy/data_logs/
+*.log
+
+# Generated documents
+*.pdf

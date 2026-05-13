@@ -41,6 +41,8 @@ DEFAULT_DB = "data/stock.db"
 MINUTE_TABLE = "stock_minute"
 INGEST_WATERMARK_TABLE = "stock_ingest_watermark"
 DEFAULT_UPSERT_CHUNK_SIZE = 5000
+MAX_BAOSTOCK_PROCESS_SHARDS = 2
+DAILY_FLUSH_MULTIPLIER = 4
 DEFAULT_BAOSTOCK_PROXY = "auto"
 DEFAULT_BAOSTOCK_CONNECT_TIMEOUT = 8.0
 BAOSTOCK_API_LOCK = threading.Lock()
@@ -952,6 +954,36 @@ def upsert_daily(
 ) -> int:
     if df is None or df.empty:
         return 0
+    records = daily_records(stock_code, df)
+    return upsert_daily_records(engine, records, chunk_size=chunk_size)
+
+
+def daily_records(stock_code: str, df: pd.DataFrame) -> List[dict]:
+    records: List[dict] = []
+    for row in df.itertuples(index=False):
+        records.append(
+            {
+                "stock_code": stock_code,
+                "date": str(row.date),
+                "open": float(row.open) if pd.notna(row.open) else None,
+                "high": float(row.high) if pd.notna(row.high) else None,
+                "low": float(row.low) if pd.notna(row.low) else None,
+                "close": float(row.close) if pd.notna(row.close) else None,
+                "volume": float(row.volume) if pd.notna(row.volume) else None,
+                "amount": float(row.amount) if pd.notna(row.amount) else None,
+            }
+        )
+    return records
+
+
+def upsert_daily_records(
+    engine: Engine,
+    records: List[dict],
+    *,
+    chunk_size: int = DEFAULT_UPSERT_CHUNK_SIZE,
+) -> int:
+    if not records:
+        return 0
     stmt = text(
         """
         INSERT INTO stock_daily(stock_code, date, open, high, low, close, volume, amount)
@@ -977,20 +1009,6 @@ def upsert_daily(
           amount=VALUES(amount)
         """
     )
-    records = []
-    for row in df.itertuples(index=False):
-        records.append(
-            {
-                "stock_code": stock_code,
-                "date": str(row.date),
-                "open": float(row.open) if pd.notna(row.open) else None,
-                "high": float(row.high) if pd.notna(row.high) else None,
-                "low": float(row.low) if pd.notna(row.low) else None,
-                "close": float(row.close) if pd.notna(row.close) else None,
-                "volume": float(row.volume) if pd.notna(row.volume) else None,
-                "amount": float(row.amount) if pd.notna(row.amount) else None,
-            }
-        )
     with engine.begin() as conn:
         _execute_in_chunks(conn, stmt, records, chunk_size)
     return len(records)
@@ -1099,7 +1117,14 @@ def _build_shard_cli(args: argparse.Namespace, shard_total: int, shard_index: in
 
 
 def run_process_shards(args: argparse.Namespace) -> int:
-    shard_count = max(1, int(getattr(args, "process_shards", 1) or 1))
+    requested = max(1, int(getattr(args, "process_shards", 1) or 1))
+    shard_count = min(requested, MAX_BAOSTOCK_PROCESS_SHARDS)
+    if requested > MAX_BAOSTOCK_PROCESS_SHARDS:
+        logging.warning(
+            "[getData] BaoStock process shards capped: requested=%d effective=%d",
+            requested,
+            shard_count,
+        )
     if shard_count <= 1:
         return 0
     script = Path(__file__).resolve()
@@ -1128,8 +1153,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--minute-backfill-days", type=int, default=3, help="分钟线增量回补窗口天数（仅frequency!=d）")
     parser.add_argument("--minute-retries", type=int, default=3, help="分钟线拉取失败重试次数（仅frequency!=d）")
     parser.add_argument("--minute-retry-sleep", type=float, default=1.0, help="分钟线重试基础等待秒（指数退避，仅frequency!=d）")
-    parser.add_argument("--workers", type=int, default=16, help="线程数")
-    parser.add_argument("--process-shards", type=int, default=1, help="Spawn N independent BaoStock shard processes")
+    parser.add_argument("--workers", type=int, default=2, help="BaoStock worker threads; keep this low because the API socket is serialized")
+    parser.add_argument("--process-shards", type=int, default=1, help="Independent BaoStock processes; capped at 2 to avoid throttling")
     parser.add_argument("--api-min-interval", type=float, default=0.0, help="BaoStock requests minimum interval seconds")
     parser.add_argument("--upsert-chunk-size", type=int, default=DEFAULT_UPSERT_CHUNK_SIZE, help="DB executemany rows per chunk")
     parser.add_argument("--baostock-proxy", default=DEFAULT_BAOSTOCK_PROXY, help="BaoStock TCP proxy: auto/direct/none/http://127.0.0.1:7890")
@@ -1142,6 +1167,14 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     logging.basicConfig(level=getattr(logging, args.log_level.upper(), logging.INFO), format="%(asctime)s %(levelname)s %(message)s")
 
+    requested_shards = max(1, int(args.process_shards or 1))
+    if requested_shards > MAX_BAOSTOCK_PROCESS_SHARDS:
+        args.process_shards = MAX_BAOSTOCK_PROCESS_SHARDS
+        logging.warning(
+            "[getData] BaoStock process shards capped: requested=%d effective=%d",
+            requested_shards,
+            MAX_BAOSTOCK_PROCESS_SHARDS,
+        )
     if max(1, int(args.process_shards or 1)) > 1:
         return run_process_shards(args)
 
@@ -1254,7 +1287,23 @@ def main(argv: Optional[List[str]] = None) -> int:
                 return
             return code, name, df
 
-    with ThreadPoolExecutor(max_workers=workers) as ex:
+    watermark_batch: List[Tuple[str, str, str]] = []
+    pending_daily_records: List[dict] = []
+    daily_flush_size = max(upsert_chunk_size, upsert_chunk_size * DAILY_FLUSH_MULTIPLIER)
+
+    def flush_pending_daily() -> int:
+        nonlocal pending_daily_records
+        if not pending_daily_records:
+            return 0
+        inserted_count = upsert_daily_records(
+            engine,
+            pending_daily_records,
+            chunk_size=upsert_chunk_size,
+        )
+        pending_daily_records = []
+        return inserted_count
+
+    with ThreadPoolExecutor(max_workers=min(workers, 8)) as ex:
         futs = {ex.submit(worker, code, name): code for code, name, _cap in stocks}
         for fut in as_completed(futs):
             _code = futs[fut]
@@ -1263,24 +1312,34 @@ def main(argv: Optional[List[str]] = None) -> int:
                 if result is not None:
                     code, name, df = result
                     if frequency == "d":
-                        inserted = upsert_daily(engine, code, df, chunk_size=upsert_chunk_size)
-                        if inserted:
+                        records = daily_records(code, df)
+                        if records:
+                            pending_daily_records.extend(records)
                             latest_date = _latest_date_text(df["date"].max())
                             if latest_date:
-                                upsert_watermarks(engine, "d", [(code, latest_date)], chunk_size=upsert_chunk_size)
-                            logging.info("%s(%s) +%d rows", code, name, inserted)
+                                watermark_batch.append(("d", code, latest_date))
+                            logging.debug("%s(%s) +%d rows", code, name, len(records))
+                        if len(pending_daily_records) >= daily_flush_size:
+                            flush_pending_daily()
                     else:
                         inserted = upsert_minute(engine, code, df, frequency, chunk_size=upsert_chunk_size)
                         if inserted:
                             latest_date = _latest_date_text(df["date"].max())
                             if latest_date:
-                                upsert_watermarks(engine, frequency, [(code, latest_date)], chunk_size=upsert_chunk_size)
-                            logging.info("%s(%s) +%d rows(min-%s)", code, name, inserted, frequency)
+                                watermark_batch.append((str(frequency), code, latest_date))
+                            logging.debug("%s(%s) +%d rows(min-%s)", code, name, inserted, frequency)
             except Exception as exc:  # noqa: BLE001
                 logging.exception("更新 %s 失败: %s", _code, exc)
             finally:
                 progress.update(1)
     progress.close()
+    if frequency == "d":
+        flush_pending_daily()
+    if watermark_batch:
+        for freq in {item[0] for item in watermark_batch}:
+            sub = [(code, date) for f, code, date in watermark_batch if f == freq]
+            upsert_watermarks(engine, freq, sub, chunk_size=upsert_chunk_size)
+        logging.info("水位更新 %d 条", len(watermark_batch))
     bs.logout()
     logging.info(
         "K 线更新完成：freq=%s stocks=%d start=%s end=%s lookback=%s backfill=%s",
