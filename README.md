@@ -32,28 +32,41 @@ BaoStock daily bars -> stock_daily -> scoring_*.py -> model_*_pool
 | `record_trade.py` | Manual buy/sell journal and export. |
 | `ui.py` | Lightweight read-only Web UI for four pools, plans, and trade records. |
 | `tgBot.py` | Telegram query/push bot. |
-| `tests/smoke_test_generate_trade_plan.py` | SQLite smoke test for plan generation and DB upsert. |
+| `tests/smoke_test_generate_trade_plan.py` | Smoke test for plan generation and DB upsert; it uses a temporary SQLite fixture only. |
 
 ## Setup
 
+The default runtime database is **MySQL**. Copy the example config, fill in the MySQL credentials, then initialize the schema:
+
 ```bash
 pip install -r requirements.txt
+cp config.example.ini config.ini
 python init.py --config config.ini
 ```
 
-Runtime config priority:
+If you want a local MySQL for development, the bundled compose file is enough:
+
+```bash
+docker compose -f docker-compose.mysql.yml up -d
+```
+
+Production database resolution:
 
 ```text
---db-url > ASTOCK_DB_URL > --db > config.ini > data/stock.db
+--db-url > ASTOCK_DB_URL > config.ini [database].db_url > config.ini [mysql]
 ```
+
+SQLite is only for smoke tests or explicit one-off local probes. Do not treat `data/stock.db` as the normal runtime database.
 
 Keep real DB passwords, Telegram tokens, and proxy values out of committed docs.
 Use `config.example.ini` and `.env.example` as placeholders only.
 
 ## Daily Workflow
 
-```bash
-python everyday.py --config config.ini --initial-start-date 2020-01-01
+These commands assume `config.ini` points to MySQL:
+
+  ```bash
+  python everyday.py --config config.ini --initial-start-date 2026-01-01
 python generate_trade_plan.py --config config.ini --write-db
 python ui.py --config config.ini
 ```
@@ -66,18 +79,18 @@ http://127.0.0.1:8765
 
 ## BaoStock Performance Notes
 
-BaoStock is fragile under high concurrency. Treat two independent connections as the practical upper bound.
+BaoStock is fragile under concurrency. Treat it as a single-flight API: one worker, one process shard.
 
 Recommended daily update:
 
 ```bash
 python everyday.py --config config.ini \
-  --getdata-workers 2 \
-  --getdata-shards 2 \
+  --getdata-workers 1 \
+  --getdata-shards 1 \
   --getdata-write-chunk-size 20000
 ```
 
-`getDataBaoStock.py` now caps `--process-shards` at `2`. Daily writes are batched before database upsert to reduce transaction overhead.
+`getDataBaoStock.py` caps both `--workers` and `--process-shards` at `1`. Daily writes are still batched before database upsert, so database IO stays efficient without parallel BaoStock calls.
 
 Minute bars remain available through `getDataBaoStock.py --frequency 5/15/30/60`, but they are no longer part of the active strategy path. Do not run minute backfills unless a new model explicitly needs them.
 
@@ -128,6 +141,8 @@ python record_trade.py export --output-dir reports/trade_journal/
 | `/api/positions` | Manual trade journal rows. |
 
 ## Smoke Test
+
+The smoke test intentionally creates a temporary SQLite fixture so it can run without touching the MySQL production database.
 
 ```bash
 python tests/smoke_test_generate_trade_plan.py

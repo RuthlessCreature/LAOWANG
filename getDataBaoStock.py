@@ -41,7 +41,8 @@ DEFAULT_DB = "data/stock.db"
 MINUTE_TABLE = "stock_minute"
 INGEST_WATERMARK_TABLE = "stock_ingest_watermark"
 DEFAULT_UPSERT_CHUNK_SIZE = 5000
-MAX_BAOSTOCK_PROCESS_SHARDS = 2
+MAX_BAOSTOCK_WORKERS = 1
+MAX_BAOSTOCK_PROCESS_SHARDS = 1
 DAILY_FLUSH_MULTIPLIER = 4
 DEFAULT_BAOSTOCK_PROXY = "auto"
 DEFAULT_BAOSTOCK_CONNECT_TIMEOUT = 8.0
@@ -1153,8 +1154,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--minute-backfill-days", type=int, default=3, help="分钟线增量回补窗口天数（仅frequency!=d）")
     parser.add_argument("--minute-retries", type=int, default=3, help="分钟线拉取失败重试次数（仅frequency!=d）")
     parser.add_argument("--minute-retry-sleep", type=float, default=1.0, help="分钟线重试基础等待秒（指数退避，仅frequency!=d）")
-    parser.add_argument("--workers", type=int, default=2, help="BaoStock worker threads; keep this low because the API socket is serialized")
-    parser.add_argument("--process-shards", type=int, default=1, help="Independent BaoStock processes; capped at 2 to avoid throttling")
+    parser.add_argument("--workers", type=int, default=1, help="BaoStock worker threads; capped at 1 because parallel requests trigger blocking")
+    parser.add_argument("--process-shards", type=int, default=1, help="Independent BaoStock processes; capped at 1 because parallel logins trigger blocking")
     parser.add_argument("--api-min-interval", type=float, default=0.0, help="BaoStock requests minimum interval seconds")
     parser.add_argument("--upsert-chunk-size", type=int, default=DEFAULT_UPSERT_CHUNK_SIZE, help="DB executemany rows per chunk")
     parser.add_argument("--baostock-proxy", default=DEFAULT_BAOSTOCK_PROXY, help="BaoStock TCP proxy: auto/direct/none/http://127.0.0.1:7890")
@@ -1177,6 +1178,15 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
     if max(1, int(args.process_shards or 1)) > 1:
         return run_process_shards(args)
+
+    requested_workers = max(1, int(args.workers or 1))
+    if requested_workers > MAX_BAOSTOCK_WORKERS:
+        args.workers = MAX_BAOSTOCK_WORKERS
+        logging.warning(
+            "[getData] BaoStock workers capped: requested=%d effective=%d",
+            requested_workers,
+            MAX_BAOSTOCK_WORKERS,
+        )
 
     start = parse_date(args.start_date)
     end = parse_date(args.end_date)

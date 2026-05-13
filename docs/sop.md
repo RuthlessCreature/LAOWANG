@@ -7,11 +7,13 @@ pip install -r requirements.txt
 python init.py --config config.ini
 ```
 
-Database priority:
+This SOP assumes MySQL as the runtime database. Database resolution:
 
 ```text
---db-url > ASTOCK_DB_URL > --db > config.ini > data/stock.db
+--db-url > ASTOCK_DB_URL > config.ini [database].db_url > config.ini [mysql]
 ```
+
+SQLite is reserved for smoke tests or explicit temporary probes.
 
 ## 2. Daily Data + Four Scores
 
@@ -20,14 +22,14 @@ Recommended default:
 ```bash
 python everyday.py --config config.ini \
   --initial-start-date 2020-01-01 \
-  --getdata-workers 2 \
-  --getdata-shards 2 \
+  --getdata-workers 1 \
+  --getdata-shards 1 \
   --getdata-write-chunk-size 20000
 ```
 
 Notes:
 
-- BaoStock independent process concurrency is capped at 2.
+- BaoStock is single-flight: worker concurrency and process shards are capped at 1 to avoid provider blocking.
 - `everyday.py` reads the latest `stock_daily` date and only pulls missing daily bars.
 - After data update it runs `scoring_laowang.py`, `scoring_ywcx.py`, `scoring_stwg.py`, and `scoring_fhkq.py`.
 - Minute bars are not part of the active workflow.
@@ -39,8 +41,8 @@ python getDataBaoStock.py --config config.ini \
   --frequency d \
   --start-date 20200101 \
   --end-date 20260513 \
-  --workers 2 \
-  --process-shards 2 \
+  --workers 1 \
+  --process-shards 1 \
   --upsert-chunk-size 20000
 ```
 

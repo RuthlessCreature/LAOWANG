@@ -136,9 +136,12 @@ def _run_pipeline(args: argparse.Namespace, *, setup_logging: bool) -> None:
     need_fetch = fetch_start <= today_yyyymmdd
     base_cli = _build_common_cli(args)
 
-    get_workers = max(1, int(args.getdata_workers))
+    requested_workers = max(1, int(args.getdata_workers))
+    get_workers = min(requested_workers, 1)
+    if requested_workers > get_workers:
+        logging.warning("[everyday] BaoStock workers capped: requested=%s effective=%s", requested_workers, get_workers)
     requested_shards = max(1, int(getattr(args, "getdata_shards", 1) or 1))
-    get_shards = min(requested_shards, 2)
+    get_shards = min(requested_shards, 1)
     if requested_shards > get_shards:
         logging.warning("[everyday] BaoStock shards capped: requested=%s effective=%s", requested_shards, get_shards)
     get_write_chunk_size = max(1, int(getattr(args, "getdata_write_chunk_size", 5000) or 5000))
@@ -307,8 +310,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--db-url", default=None, help="SQLAlchemy DB URL")
     parser.add_argument("--db", default=None, help="SQLite 文件")
     parser.add_argument("--initial-start-date", default="2000-01-01", help="数据库为空时的起始日期")
-    parser.add_argument("--getdata-workers", type=int, default=2, help="BaoStock worker threads")
-    parser.add_argument("--getdata-shards", type=int, default=2, help="BaoStock process shards; capped at 2")
+    parser.add_argument("--getdata-workers", type=int, default=1, help="BaoStock worker threads; capped at 1")
+    parser.add_argument("--getdata-shards", type=int, default=1, help="BaoStock process shards; capped at 1")
     parser.add_argument("--getdata-write-chunk-size", type=int, default=5000)
     parser.add_argument("--laowang-workers", type=int, default=16)
     parser.add_argument("--ywcx-workers", type=int, default=16)
