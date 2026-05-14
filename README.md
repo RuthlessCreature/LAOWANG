@@ -90,7 +90,7 @@ python everyday.py --config config.ini \
   --getdata-write-chunk-size 20000
 ```
 
-`getDataBaoStock.py` caps both `--workers` and `--process-shards` at `1`. Daily writes are still batched before database upsert, so database IO stays efficient without parallel BaoStock calls.
+`getDataBaoStock.py` caps both `--workers` and `--process-shards` at `1`. It also retries transient BaoStock socket failures, relogs in after broken pipes, and uses a small default API interval. Daily writes are still batched before database upsert, so database IO stays efficient without parallel BaoStock calls.
 
 Minute bars remain available through `getDataBaoStock.py --frequency 5/15/30/60`, but they are no longer part of the active strategy path. Do not run minute backfills unless a new model explicitly needs them.
 

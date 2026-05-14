@@ -30,6 +30,7 @@ python everyday.py --config config.ini \
 Notes:
 
 - BaoStock is single-flight: worker concurrency and process shards are capped at 1 to avoid provider blocking.
+- Transient BaoStock socket errors are retried with relogin and exponential backoff.
 - `everyday.py` reads the latest `stock_daily` date and only pulls missing daily bars.
 - After data update it runs `scoring_laowang.py`, `scoring_ywcx.py`, `scoring_stwg.py`, and `scoring_fhkq.py`.
 - Minute bars are not part of the active workflow.

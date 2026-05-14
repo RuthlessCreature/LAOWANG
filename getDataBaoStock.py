@@ -41,13 +41,16 @@ DEFAULT_DB = "data/stock.db"
 MINUTE_TABLE = "stock_minute"
 INGEST_WATERMARK_TABLE = "stock_ingest_watermark"
 DEFAULT_UPSERT_CHUNK_SIZE = 5000
+DEFAULT_BAOSTOCK_RETRIES = 5
+DEFAULT_BAOSTOCK_RETRY_SLEEP = 2.0
+DEFAULT_BAOSTOCK_API_MIN_INTERVAL = 0.2
 MAX_BAOSTOCK_WORKERS = 1
 MAX_BAOSTOCK_PROCESS_SHARDS = 1
 DAILY_FLUSH_MULTIPLIER = 4
 DEFAULT_BAOSTOCK_PROXY = "auto"
 DEFAULT_BAOSTOCK_CONNECT_TIMEOUT = 8.0
 BAOSTOCK_API_LOCK = threading.Lock()
-BAOSTOCK_API_MIN_INTERVAL_SEC = 0.0
+BAOSTOCK_API_MIN_INTERVAL_SEC = DEFAULT_BAOSTOCK_API_MIN_INTERVAL
 _BAOSTOCK_LAST_CALL_MONO = 0.0
 
 
@@ -381,7 +384,20 @@ def _is_baostock_connection_error(message: object) -> bool:
     text_value = str(message or "").lower()
     return any(
         token in text_value
-        for token in ("timed out", "timeout", "socket", "connection", "\u8fdc\u7a0b\u4e3b\u673a")
+        for token in (
+            "timed out",
+            "timeout",
+            "socket",
+            "connection",
+            "broken pipe",
+            "errno 32",
+            "pipe",
+            "network",
+            "\u8fdc\u7a0b\u4e3b\u673a",
+            "\u7f51\u7edc\u63a5\u6536\u9519\u8bef",
+            "\u63a5\u6536\u6570\u636e\u5f02\u5e38",
+            "\u7f51\u7edc",
+        )
     )
 
 
@@ -425,7 +441,13 @@ def fetch_stock_list() -> List[Tuple[str, str, Optional[float]]]:
     return out
 
 
-def fetch_daily(stock_code: str, start_date: str, end_date: str) -> pd.DataFrame:
+def fetch_daily(
+    stock_code: str,
+    start_date: str,
+    end_date: str,
+    retries: int = DEFAULT_BAOSTOCK_RETRIES,
+    retry_sleep: float = DEFAULT_BAOSTOCK_RETRY_SLEEP,
+) -> pd.DataFrame:
     symbol = _to_bs_symbol(stock_code)
     if not symbol:
         logging.debug("BaoStock skip unsupported code: %s", stock_code)
@@ -434,7 +456,9 @@ def fetch_daily(stock_code: str, start_date: str, end_date: str) -> pd.DataFrame
     bs_end = _ymd_dash(end_date)
     rows = []
     fields = []
-    for attempt in range(2):
+    max_retries = max(0, int(retries))
+    for attempt in range(max_retries + 1):
+        err_msg: Optional[str] = None
         try:
             with BAOSTOCK_API_LOCK:
                 _throttle_baostock_call_locked()
@@ -447,33 +471,39 @@ def fetch_daily(stock_code: str, start_date: str, end_date: str) -> pd.DataFrame
                     adjustflag="2",
                 )
                 if rs.error_code != "0":
-                    if attempt == 0 and _is_baostock_login_error(rs.error_msg):
-                        logging.warning("BaoStock hist login expired %s: %s; relogin", stock_code, rs.error_msg)
+                    err_msg = str(rs.error_msg or rs.error_code)
+                    if _is_baostock_login_error(err_msg) or _is_baostock_connection_error(err_msg):
                         _baostock_relogin_locked()
-                        continue
-                    logging.warning("BaoStock hist failed %s: %s", stock_code, rs.error_msg)
-                    return _empty_daily_frame()
+                    break
                 rows = []
                 while rs.next():
                     rows.append(rs.get_row_data())
                 if rs.error_code != "0":
-                    if attempt == 0 and _is_baostock_login_error(rs.error_msg):
-                        logging.warning("BaoStock hist login expired %s: %s; relogin", stock_code, rs.error_msg)
+                    err_msg = str(rs.error_msg or rs.error_code)
+                    if _is_baostock_login_error(err_msg) or _is_baostock_connection_error(err_msg):
                         _baostock_relogin_locked()
-                        continue
-                    logging.warning("BaoStock hist failed %s: %s", stock_code, rs.error_msg)
-                    return _empty_daily_frame()
+                    break
                 fields = list(getattr(rs, "fields", []) or [])
         except Exception as exc:  # noqa: BLE001
-            if attempt == 0 and _is_baostock_connection_error(exc):
+            err_msg = str(exc)
+            if _is_baostock_connection_error(err_msg) or _is_baostock_login_error(err_msg):
                 try:
                     with BAOSTOCK_API_LOCK:
                         _baostock_relogin_locked()
-                    logging.warning("BaoStock hist connection reset %s: %s; relogin", stock_code, exc)
-                    continue
                 except Exception as relogin_exc:  # noqa: BLE001
-                    logging.warning("BaoStock hist relogin failed %s: %s", stock_code, relogin_exc)
-            logging.warning("BaoStock hist failed %s: %s", stock_code, exc)
+                    err_msg = f"{err_msg}; relogin failed: {relogin_exc}"
+        if err_msg:
+            if attempt < max_retries:
+                logging.warning(
+                    "BaoStock hist failed %s: %s (retry %d/%d)",
+                    stock_code,
+                    err_msg,
+                    attempt + 1,
+                    max_retries,
+                )
+                _sleep_retry(attempt + 1, retry_sleep)
+                continue
+            logging.warning("BaoStock hist failed %s: %s", stock_code, err_msg)
             return _empty_daily_frame()
         break
     if not rows:
@@ -1107,6 +1137,8 @@ def _build_shard_cli(args: argparse.Namespace, shard_total: int, shard_index: in
     _append_cli_arg(cli, "--minute-retries", getattr(args, "minute_retries", None))
     _append_cli_arg(cli, "--minute-retry-sleep", getattr(args, "minute_retry_sleep", None))
     _append_cli_arg(cli, "--workers", getattr(args, "workers", None))
+    _append_cli_arg(cli, "--retries", getattr(args, "retries", None))
+    _append_cli_arg(cli, "--retry-sleep", getattr(args, "retry_sleep", None))
     _append_cli_arg(cli, "--api-min-interval", getattr(args, "api_min_interval", None))
     _append_cli_arg(cli, "--upsert-chunk-size", getattr(args, "upsert_chunk_size", None))
     _append_cli_arg(cli, "--baostock-proxy", getattr(args, "baostock_proxy", None))
@@ -1156,7 +1188,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--minute-retry-sleep", type=float, default=1.0, help="分钟线重试基础等待秒（指数退避，仅frequency!=d）")
     parser.add_argument("--workers", type=int, default=1, help="BaoStock worker threads; capped at 1 because parallel requests trigger blocking")
     parser.add_argument("--process-shards", type=int, default=1, help="Independent BaoStock processes; capped at 1 because parallel logins trigger blocking")
-    parser.add_argument("--api-min-interval", type=float, default=0.0, help="BaoStock requests minimum interval seconds")
+    parser.add_argument("--retries", type=int, default=DEFAULT_BAOSTOCK_RETRIES, help="Daily BaoStock retry count after transient socket errors")
+    parser.add_argument("--retry-sleep", type=float, default=DEFAULT_BAOSTOCK_RETRY_SLEEP, help="Daily BaoStock retry base sleep seconds")
+    parser.add_argument("--api-min-interval", type=float, default=DEFAULT_BAOSTOCK_API_MIN_INTERVAL, help="BaoStock requests minimum interval seconds")
     parser.add_argument("--upsert-chunk-size", type=int, default=DEFAULT_UPSERT_CHUNK_SIZE, help="DB executemany rows per chunk")
     parser.add_argument("--baostock-proxy", default=DEFAULT_BAOSTOCK_PROXY, help="BaoStock TCP proxy: auto/direct/none/http://127.0.0.1:7890")
     parser.add_argument("--baostock-connect-timeout", type=float, default=DEFAULT_BAOSTOCK_CONNECT_TIMEOUT, help="BaoStock TCP connect timeout seconds")
@@ -1212,6 +1246,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     if minute_retries is None:
         minute_retries = 3
     minute_retries = max(0, int(minute_retries))
+    daily_retries = args.retries
+    if daily_retries is None:
+        daily_retries = DEFAULT_BAOSTOCK_RETRIES
+    daily_retries = max(0, int(daily_retries))
+    daily_retry_sleep = args.retry_sleep
+    if daily_retry_sleep is None:
+        daily_retry_sleep = DEFAULT_BAOSTOCK_RETRY_SLEEP
+    daily_retry_sleep = max(0.0, float(daily_retry_sleep))
     minute_retry_sleep = args.minute_retry_sleep
     if minute_retry_sleep is None:
         minute_retry_sleep = 1.0
@@ -1270,7 +1312,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 fetch_start = max(fetch_start, next_day)
             if fetch_start > end:
                 return
-            df = fetch_daily(code, fetch_start, end)
+            df = fetch_daily(code, fetch_start, end, daily_retries, daily_retry_sleep)
             if df.empty or "date" not in df.columns:
                 return
             if latest:
