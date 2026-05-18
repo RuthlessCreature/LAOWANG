@@ -91,190 +91,483 @@ POOL_CONFIGS: Dict[str, Dict[str, Any]] = {
     },
 }
 
+TAG_LABELS = {
+    "TREND_UP": "趋势向上",
+    "LOW_BASE": "低位平台",
+    "PULLBACK": "回踩",
+    "AT_SUPPORT": "支撑附近",
+    "SPACE_OK": "空间充足",
+    "NEAR_RESISTANCE": "临近压力",
+    "RISK_FILTERED": "风险过滤",
+    "STAGE_A_OK": "阶段A",
+    "STAGE_B_COMPRESSED": "阶段B压缩",
+    "VOLUME_DRY_UP": "缩量",
+    "AT_PLATFORM": "平台支撑",
+    "BREAKOUT_R": "突破R",
+    "VOLUME_EXPANSION": "放量突破",
+    "BROKEN_IPO": "破发",
+    "NEAR_IPO_LOW": "接近低点",
+    "VOLUME_DRY": "缩量",
+    "LOW_VOL": "波动极弱",
+    "JUST_ABOVE_MA5": "刚上MA5",
+    "SMALL_FLOAT": "小流通",
+}
+
+DISPLAY_COLUMNS: Dict[str, Dict[str, str]] = {
+    "laowang": {
+        "rank_no": "排名",
+        "stock_code": "代码",
+        "stock_name": "名称",
+        "close": "收盘价",
+        "support_level": "支撑位",
+        "resistance_level": "压力位",
+        "total_score": "总分",
+        "status_tags": "标签",
+    },
+    "ywcx": {
+        "rank_no": "排名",
+        "stock_code": "代码",
+        "stock_name": "名称",
+        "close": "收盘价",
+        "total_score": "总分",
+        "weak_position_score": "位置衰弱",
+        "volume_dry_score": "缩量枯竭",
+        "low_volatility_score": "极弱波动",
+        "status_tags": "标签",
+    },
+    "fhkq": {
+        "stock_code": "代码",
+        "stock_name": "名称",
+        "consecutive_limit_down": "连板天数",
+        "last_limit_down": "前一日跌停",
+        "volume_ratio": "量能比",
+        "amount_ratio": "成交额比",
+        "open_board_flag": "开板标记",
+        "liquidity_exhaust": "流动性衰竭",
+        "fhkq_score": "FHKQ得分",
+        "fhkq_level": "等级",
+    },
+    "stwg": {
+        "rank_no": "排名",
+        "stock_code": "代码",
+        "stock_name": "名称",
+        "close": "收盘价",
+        "total_score": "总分",
+        "stageB_compression_score": "缩量压缩",
+        "breakout_confirmation_score": "突破确认",
+        "status_tags": "标签",
+    },
+}
+
 
 HTML_PAGE = r"""<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LAOWANG</title>
-  <link rel="icon" href="/favicon.ico" />
-  <style>
-    :root {
-      --bg: #f6f7f9;
-      --panel: #ffffff;
-      --text: #20242a;
-      --muted: #68717d;
-      --line: #d9dee6;
-      --blue: #275efe;
-      --green: #0f8f5f;
-      --red: #b42318;
-      --amber: #9a6700;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
-    header { height: 56px; display: flex; align-items: center; gap: 14px; padding: 0 20px; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 2; }
-    h1 { font-size: 18px; margin: 0; letter-spacing: 0; }
-    main { padding: 16px 20px 28px; max-width: 1480px; margin: 0 auto; }
-    .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
-    select, button { height: 34px; border: 1px solid var(--line); background: #fff; border-radius: 6px; padding: 0 10px; color: var(--text); }
-    button { cursor: pointer; }
-    button.primary { border-color: var(--blue); color: #fff; background: var(--blue); }
-    .grid { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
-    .metric { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; min-height: 78px; }
-    .metric b { display: block; font-size: 22px; margin-top: 4px; }
-    .muted { color: var(--muted); }
-    .tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line); margin-top: 8px; }
-    .tab { border: 1px solid transparent; border-bottom: 0; background: transparent; border-radius: 6px 6px 0 0; }
-    .tab.active { background: var(--panel); border-color: var(--line); color: var(--blue); }
-    section { display: none; padding-top: 14px; }
-    section.active { display: block; }
-    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-    .panel-title { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--line); }
-    .table-wrap { overflow: auto; max-height: 68vh; }
-    table { border-collapse: collapse; width: 100%; min-width: 900px; }
-    th, td { border-bottom: 1px solid #edf0f4; padding: 8px 10px; text-align: left; white-space: nowrap; }
-    th { position: sticky; top: 0; background: #f9fafb; z-index: 1; font-weight: 650; }
-    td.wrap { white-space: normal; min-width: 320px; max-width: 520px; }
-    .ok { color: var(--green); font-weight: 650; }
-    .bad { color: var(--red); font-weight: 650; }
-    .warn { color: var(--amber); font-weight: 650; }
-    .empty { padding: 18px; color: var(--muted); }
-    @media (max-width: 900px) {
-      main { padding: 12px; }
-      .grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
-      header { padding: 0 12px; }
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>LAOWANG</h1>
-    <span class="muted">四模型日线工作台</span>
-  </header>
-  <main>
-    <div class="toolbar">
-      <label>交易日 <select id="dateSelect"></select></label>
-      <button class="primary" id="refreshBtn">刷新</button>
-      <span class="muted" id="statusText">loading...</span>
-    </div>
-
-    <div class="grid" id="metrics"></div>
-
-    <div class="tabs">
-      <button class="tab active" data-tab="plan">交易计划</button>
-      <button class="tab" data-tab="laowang">LAOWANG</button>
-      <button class="tab" data-tab="stwg">STWG</button>
-      <button class="tab" data-tab="ywcx">YWCX</button>
-      <button class="tab" data-tab="fhkq">FHKQ</button>
-      <button class="tab" data-tab="positions">交易记录</button>
-    </div>
-
-    <section id="tab-plan" class="active">
-      <div class="panel">
-        <div class="panel-title"><b>交易计划</b><span class="muted">T+1 条件买入 / T+2+ 条件卖出</span></div>
-        <div class="table-wrap"><table id="table-plan"></table><div id="empty-plan" class="empty"></div></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>粪海狂蛆</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <style>
+      :root {
+        --bg: #070a0f;
+        --panel: #0b0f17;
+        --text: #dbe7ff;
+        --muted: #8aa0c7;
+        --line: rgba(0, 229, 255, 0.25);
+        --accent: #00e5ff;
+        --warn: #ffcc66;
+        --err: #ff5577;
+        --ok: #33ffa6;
+        --shadow: rgba(0, 0, 0, 0.45);
+        --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        background:
+          radial-gradient(1200px 800px at 20% 10%, rgba(0,229,255,0.10), transparent 60%),
+          radial-gradient(900px 700px at 80% 15%, rgba(124,92,255,0.10), transparent 55%),
+          linear-gradient(180deg, #05070b 0%, #070a0f 35%, #070a0f 100%);
+        color: var(--text);
+        font-family: var(--sans);
+      }
+      .wrap { max-width: 1320px; margin: 0 auto; padding: 18px 18px 28px; }
+      .topbar {
+        display: flex; gap: 14px; align-items: center; justify-content: space-between;
+        padding: 14px 16px;
+        background: linear-gradient(180deg, rgba(11,15,23,0.95), rgba(11,15,23,0.75));
+        border: 1px solid var(--line);
+        box-shadow: 0 10px 30px var(--shadow);
+        border-radius: 14px;
+        position: sticky; top: 10px; z-index: 10;
+        backdrop-filter: blur(8px);
+      }
+      .brand { display: flex; flex-direction: column; gap: 4px; }
+      .brand .title {
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+      .brand .sub { font-size: 12px; color: var(--muted); }
+      .controls { display: flex; gap: 10px; align-items: center; }
+      select {
+        background: rgba(10,14,22,0.95);
+        border: 1px solid var(--line);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 8px 10px;
+        font-family: var(--mono);
+      }
+      .status {
+        display: flex; gap: 10px; align-items: center;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+      .dot.ok { background: var(--ok); box-shadow: 0 0 10px rgba(51,255,166,0.55); }
+      .dot.warn { background: var(--warn); box-shadow: 0 0 10px rgba(255,204,102,0.55); }
+      .dot.err { background: var(--err); box-shadow: 0 0 10px rgba(255,85,119,0.55); }
+      .panel {
+        margin-top: 18px;
+        background: linear-gradient(180deg, rgba(11,15,23,0.85), rgba(11,15,23,0.55));
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: 0 10px 30px var(--shadow);
+        overflow: hidden;
+      }
+      .panel-header {
+        padding: 12px 14px;
+        display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 1px solid rgba(0,229,255,0.15);
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+      .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0,229,255,0.35) rgba(255,255,255,0.04);
+      }
+      .table-wrap::-webkit-scrollbar { height: 8px; }
+      .table-wrap::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); }
+      .table-wrap::-webkit-scrollbar-thumb {
+        background: rgba(0,229,255,0.35);
+        border-radius: 999px;
+      }
+      .table-wrap table {
+        min-width: 100%;
+        width: max-content;
+      }
+      table { border-collapse: collapse; }
+      thead th {
+        background: rgba(7,10,15,0.90);
+        color: rgba(219,231,255,0.95);
+        font-family: var(--mono);
+        font-size: 12px;
+        padding: 10px 10px;
+        border-bottom: 1px solid rgba(0,229,255,0.22);
+        text-align: left;
+        position: sticky; top: 0;
+      }
+      tbody td {
+        padding: 9px 10px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        font-family: var(--mono);
+        font-size: 12px;
+        color: rgba(219,231,255,0.92);
+        white-space: nowrap;
+      }
+      .wrap-cell {
+        white-space: normal !important;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        line-height: 1.5;
+        min-width: 240px;
+        max-width: 460px;
+      }
+      .tag-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
+      .tag-pill {
+        border: 1px solid rgba(0,229,255,0.25);
+        border-radius: 999px;
+        padding: 2px 6px;
+        font-size: 11px;
+        color: rgba(219,231,255,0.92);
+      }
+      .footer {
+        margin-top: 18px;
+        text-align: center;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .footer .status-line { margin-bottom: 6px; }
+      .footer .disclaimer { margin-top: 6px; opacity: 0.9; }
+      .status-busy { color: var(--warn); }
+      .status-ok { color: var(--ok); }
+      .status-fail { color: var(--err); }
+      @media (max-width: 768px) {
+        .wrap { padding: 12px; }
+        .topbar { flex-direction: column; align-items: flex-start; gap: 8px; }
+        .controls { width: 100%; flex-wrap: wrap; }
+        select { width: 100%; }
+        thead th, tbody td { font-size: 11px; padding: 6px; }
+        .panel { margin-top: 14px; }
+      }
+      .empty {
+        padding: 18px;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <div class="brand">
+          <div class="title">爆头先锋</div>
+          <div class="sub">老王 · 阳痿次新 · 粪海狂蛆 · 缩头乌龟</div>
+        </div>
+        <div class="controls">
+          <label for="tradeDate">最新交易日</label>
+          <select id="tradeDate"></select>
+        </div>
+        <div class="status">
+          <span class="dot" id="statusDot"></span>
+          <span id="statusText">loading</span>
+        </div>
       </div>
-    </section>
 
-    <section id="tab-laowang"><div class="panel"><div class="panel-title"><b>LAOWANG</b><span class="muted" id="meta-laowang"></span></div><div class="table-wrap"><table id="table-laowang"></table><div id="empty-laowang" class="empty"></div></div></div></section>
-    <section id="tab-stwg"><div class="panel"><div class="panel-title"><b>STWG</b><span class="muted" id="meta-stwg"></span></div><div class="table-wrap"><table id="table-stwg"></table><div id="empty-stwg" class="empty"></div></div></div></section>
-    <section id="tab-ywcx"><div class="panel"><div class="panel-title"><b>YWCX</b><span class="muted" id="meta-ywcx"></span></div><div class="table-wrap"><table id="table-ywcx"></table><div id="empty-ywcx" class="empty"></div></div></div></section>
-    <section id="tab-fhkq"><div class="panel"><div class="panel-title"><b>FHKQ</b><span class="muted" id="meta-fhkq"></span></div><div class="table-wrap"><table id="table-fhkq"></table><div id="empty-fhkq" class="empty"></div></div></div></section>
-    <section id="tab-positions"><div class="panel"><div class="panel-title"><b>交易记录</b><span class="muted" id="meta-positions"></span></div><div class="table-wrap"><table id="table-positions"></table><div id="empty-positions" class="empty"></div></div></div></section>
-  </main>
+      <div class="panel">
+        <div class="panel-header">
+          <div>老王 股票池</div>
+          <div id="metaLaowang"></div>
+        </div>
+        <div class="table-wrap">
+          <table id="tableLaowang">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+          <div class="empty" id="emptyLaowang" style="display:none;"></div>
+        </div>
+      </div>
 
-  <script>
-    const MODELS = ["laowang", "stwg", "ywcx", "fhkq"];
-    const $ = (id) => document.getElementById(id);
+      <div class="panel">
+        <div class="panel-header">
+          <div>阳痿次新 股票池</div>
+          <div id="metaYwcx"></div>
+        </div>
+        <div class="table-wrap">
+          <table id="tableYwcx">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+          <div class="empty" id="emptyYwcx" style="display:none;"></div>
+        </div>
+      </div>
 
-    async function api(path) {
-      const res = await fetch(path);
-      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-      return await res.json();
-    }
+      <div class="panel">
+        <div class="panel-header">
+          <div>粪海狂蛆 连板博弈</div>
+          <div id="metaFhkq"></div>
+        </div>
+        <div class="table-wrap">
+          <table id="tableFhkq">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+          <div class="empty" id="emptyFhkq" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div>缩头乌龟 股票池</div>
+          <div id="metaStwg"></div>
+        </div>
+        <div class="table-wrap">
+          <table id="tableStwg">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+          <div class="empty" id="emptyStwg" style="display:none;"></div>
+        </div>
+      </div>
 
-    function esc(v) {
-      if (v === null || v === undefined) return "";
-      return String(v).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
-    }
 
-    function renderTable(tableId, emptyId, payload) {
-      const table = $(tableId);
-      const empty = $(emptyId);
-      const cols = payload.columns || [];
-      const rows = payload.rows || [];
-      table.innerHTML = "";
-      empty.textContent = "";
-      empty.style.display = rows.length ? "none" : "block";
-      if (!rows.length) {
-        empty.textContent = payload.empty_hint || "暂无数据";
-        return;
+
+
+      <div class="footer">
+        <div id="autoStatusMain" class="status-line status-busy">everyday: waiting...</div>
+        <div id="autoStatusReview" class="status-line status-busy">everydayReview: waiting...</div>
+        <div>Georgij Xe & his boys</div>
+        <div class="disclaimer">免责声明：本页面内容仅供学习交流，不构成任何投资建议，盈亏自负。</div>
+      </div>
+    </div>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+
+      function setStatus(kind, text) {
+        const dot = $("statusDot");
+        dot.className = "dot";
+        if (kind) dot.classList.add(kind);
+        $("statusText").textContent = text || "";
       }
-      const thead = `<thead><tr>${cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead>`;
-      const body = rows.map(r => `<tr>${cols.map(c => {
-        const cls = (c.includes("condition") || c.includes("reason")) ? " class='wrap'" : "";
-        return `<td${cls}>${esc(r[c])}</td>`;
-      }).join("")}</tr>`).join("");
-      table.innerHTML = `${thead}<tbody>${body}</tbody>`;
-    }
 
-    function renderMetrics(status) {
-      const counts = status.pool_counts || {};
-      $("metrics").innerHTML = MODELS.map(m => {
-        const val = counts[m] || 0;
-        return `<div class="metric"><span class="muted">${m.toUpperCase()}</span><b>${val}</b><span class="muted">候选</span></div>`;
-      }).join("");
-    }
-
-    async function loadDates() {
-      const data = await api("/api/dates");
-      const select = $("dateSelect");
-      select.innerHTML = (data.dates || []).map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join("");
-      if (data.latest) select.value = data.latest;
-    }
-
-    async function refresh() {
-      const date = $("dateSelect").value;
-      $("statusText").textContent = "刷新中...";
-      const [status, plan, positions, ...models] = await Promise.all([
-        api(`/api/status?trade_date=${encodeURIComponent(date)}`),
-        api(`/api/plan?trade_date=${encodeURIComponent(date)}`),
-        api("/api/positions"),
-        ...MODELS.map(m => api(`/api/model/${m}?trade_date=${encodeURIComponent(date)}`))
-      ]);
-      renderMetrics(status);
-      renderTable("table-plan", "empty-plan", plan);
-      renderTable("table-positions", "empty-positions", positions);
-      $("meta-positions").textContent = `rows=${positions.rows ? positions.rows.length : 0}`;
-      MODELS.forEach((m, i) => {
-        renderTable(`table-${m}`, `empty-${m}`, models[i]);
-        $(`meta-${m}`).textContent = `rows=${models[i].rows ? models[i].rows.length : 0}`;
-      });
-      $("statusText").textContent = `latest=${status.latest_trade_date || "-"} stock_daily=${status.stock_daily_rows || 0}`;
-    }
-
-    document.querySelectorAll(".tab").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
-        document.querySelectorAll("section").forEach(x => x.classList.remove("active"));
-        btn.classList.add("active");
-        $(`tab-${btn.dataset.tab}`).classList.add("active");
-      });
-    });
-    $("refreshBtn").addEventListener("click", refresh);
-    $("dateSelect").addEventListener("change", refresh);
-
-    (async function init() {
-      try {
-        await loadDates();
-        await refresh();
-      } catch (err) {
-        $("statusText").textContent = `加载失败: ${err.message}`;
+      function renderTable(tableId, emptyId, payload) {
+        const table = $(tableId);
+        const thead = table.querySelector("thead");
+        const tbody = table.querySelector("tbody");
+        const empty = $(emptyId);
+        const cols = payload.columns || [];
+        const rows = payload.rows || [];
+        thead.innerHTML = "";
+        tbody.innerHTML = "";
+        if (!cols.length) {
+          empty.style.display = "";
+          empty.textContent = payload.meta && payload.meta.empty_hint ? payload.meta.empty_hint : "no data";
+          return;
+        }
+        const trh = document.createElement("tr");
+        cols.forEach(c => {
+          const th = document.createElement("th");
+          th.textContent = c;
+          trh.appendChild(th);
+        });
+        thead.appendChild(trh);
+        if (!rows.length) {
+          empty.style.display = "";
+          empty.textContent = payload.meta && payload.meta.empty_hint ? payload.meta.empty_hint : "0 rows";
+          return;
+        }
+        empty.style.display = "none";
+        rows.forEach(row => {
+          const tr = document.createElement("tr");
+          cols.forEach(col => {
+            const td = document.createElement("td");
+            const value = row[col];
+            if (Array.isArray(value)) {
+              const wrap = document.createElement("div");
+              wrap.className = "tag-wrap";
+              value.forEach(tag => {
+                const pill = document.createElement("span");
+                pill.className = "tag-pill";
+                pill.textContent = tag;
+                wrap.appendChild(pill);
+              });
+              td.appendChild(wrap);
+            } else {
+              const text = value === null || value === undefined ? "" : String(value);
+              td.textContent = text;
+              if (text.length > 24) td.classList.add("wrap-cell");
+            }
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
       }
-    })();
-  </script>
-</body>
+
+
+      async function apiGet(path) {
+        const resp = await fetch(path, { cache: "no-store" });
+        if (!resp.ok) throw new Error(await resp.text());
+        return await resp.json();
+      }
+
+
+      async function loadDate(dateStr) {
+        if (!dateStr) return;
+        setStatus("warn", "loading");
+        $("metaYwcx").textContent = "";
+        $("metaStwg").textContent = "";
+        $("metaLaowang").textContent = "";
+        $("metaFhkq").textContent = "";
+        const st = await apiGet(`/api/status?trade_date=${encodeURIComponent(dateStr)}`);
+        if (!st.has_stock_daily) {
+          setStatus("err", "该日无K线数据");
+          renderTable("tableLaowang", "emptyLaowang", { columns: [], rows: [], meta: { empty_hint: "no data" }});
+          renderTable("tableYwcx", "emptyYwcx", { columns: [], rows: [], meta: { empty_hint: "no data" }});
+          renderTable("tableFhkq", "emptyFhkq", { columns: [], rows: [], meta: { empty_hint: "no data" }});
+          renderTable("tableStwg", "emptyStwg", { columns: [], rows: [], meta: { empty_hint: "no data" }});
+          return;
+        }
+        const ok = st.laowang_rows > 0 || st.ywcx_rows > 0 || st.fhkq_rows > 0 || st.stwg_rows > 0;
+        setStatus(
+          ok ? "ok" : "warn",
+          `老王:${st.laowang_rows} 阳痿次新:${st.ywcx_rows} 粪海狂蛆:${st.fhkq_rows} 缩头乌龟:${st.stwg_rows}`
+        );
+
+        const [lw, yw, fk, stwg] = await Promise.all([
+          apiGet(`/api/model/laowang?trade_date=${encodeURIComponent(dateStr)}`),
+          apiGet(`/api/model/ywcx?trade_date=${encodeURIComponent(dateStr)}`),
+          apiGet(`/api/model/fhkq?trade_date=${encodeURIComponent(dateStr)}`),
+          apiGet(`/api/model/stwg?trade_date=${encodeURIComponent(dateStr)}`),
+        ]);
+        $("metaLaowang").textContent = `rows=${lw.meta && lw.meta.rows ? lw.meta.rows : lw.rows.length}`;
+        $("metaYwcx").textContent = `rows=${yw.meta && yw.meta.rows ? yw.meta.rows : yw.rows.length}`;
+        $("metaFhkq").textContent = `rows=${fk.meta && fk.meta.rows ? fk.meta.rows : fk.rows.length}`;
+        $("metaStwg").textContent = `rows=${stwg.meta && stwg.meta.rows ? stwg.meta.rows : stwg.rows.length}`;
+        renderTable("tableLaowang", "emptyLaowang", lw);
+        renderTable("tableYwcx", "emptyYwcx", yw);
+        renderTable("tableFhkq", "emptyFhkq", fk);
+        renderTable("tableStwg", "emptyStwg", stwg);
+      }
+
+      async function boot() {
+        const datesPayload = await apiGet("/api/dates");
+        const sel = $("tradeDate");
+        sel.innerHTML = "";
+        (datesPayload.dates || []).forEach(d => {
+          const opt = document.createElement("option");
+          opt.value = d;
+          opt.textContent = d.replaceAll("-", "");
+          sel.appendChild(opt);
+        });
+        const latest = datesPayload.latest || (datesPayload.dates && datesPayload.dates[0]) || "";
+        if (latest) sel.value = latest;
+        sel.addEventListener("change", async () => {
+          await loadDate(sel.value);
+        });
+        if (sel.value) await loadDate(sel.value);
+      }
+
+      function applyAutoStatus(elId, prefix, payload) {
+        const el = $(elId);
+        if (!el) return;
+        const p = payload || {};
+        el.textContent = `${prefix}: ${p.message || "waiting..."}`;
+        el.classList.remove("status-busy", "status-ok", "status-fail");
+        if (p.state === "ok") el.classList.add("status-ok");
+        else if (p.state === "fail") el.classList.add("status-fail");
+        else el.classList.add("status-busy");
+      }
+
+      async function pollAutoStatus() {
+        try {
+          const data = await apiGet("/api/auto-status");
+          if (data && data.everyday !== undefined) {
+            applyAutoStatus("autoStatusMain", "everyday", data.everyday);
+            applyAutoStatus("autoStatusReview", "everydayReview", data.everyday_review);
+          } else {
+            applyAutoStatus("autoStatusMain", "everyday", data);
+            applyAutoStatus("autoStatusReview", "everydayReview", { state: "none", message: "disabled" });
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+      
+      boot().catch(e => {
+        console.error(e);
+        setStatus("err", "load error");
+      });
+      setInterval(pollAutoStatus, 5000);
+      pollAutoStatus();
+    </script>
+  </body>
 </html>
 """
 
@@ -333,6 +626,34 @@ def _parse_plan(raw: Any) -> Dict[str, Any]:
         return {}
 
 
+def _parse_status_tags(raw: Any) -> List[str]:
+    if raw is None or raw == "":
+        return []
+    if isinstance(raw, list):
+        values = raw
+    else:
+        text = str(raw).strip()
+        try:
+            loaded = json.loads(text)
+            values = loaded if isinstance(loaded, list) else [text]
+        except json.JSONDecodeError:
+            values = [part.strip() for part in text.replace(",", "|").split("|") if part.strip()]
+    return [TAG_LABELS.get(str(item), str(item)) for item in values]
+
+
+def _display_rows(model: str, columns: List[str], rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+    mapping = DISPLAY_COLUMNS.get(model, {})
+    display_columns = [mapping.get(col, col) for col in columns]
+    display_rows: List[Dict[str, Any]] = []
+    for row in rows:
+        item: Dict[str, Any] = {}
+        for col in columns:
+            value = row.get(col)
+            item[mapping.get(col, col)] = _parse_status_tags(value) if col == "status_tags" else value
+        display_rows.append(item)
+    return {"columns": display_columns, "rows": display_rows, "meta": {"rows": len(display_rows), "empty_hint": "0 rows"}}
+
+
 class LaowangApp:
     def __init__(self, engine: Engine) -> None:
         self.engine = engine
@@ -349,6 +670,7 @@ class LaowangApp:
         with self.engine.connect() as conn:
             latest = conn.execute(sql_text("SELECT MAX(date) FROM stock_daily")).scalar()
             stock_daily_rows = conn.execute(sql_text("SELECT COUNT(*) FROM stock_daily")).scalar()
+            day_rows = conn.execute(sql_text("SELECT COUNT(*) FROM stock_daily WHERE date = :d"), {"d": date_value}).scalar()
             for model, cfg in POOL_CONFIGS.items():
                 try:
                     count = conn.execute(
@@ -363,6 +685,11 @@ class LaowangApp:
             "latest_trade_date": str(latest) if latest else None,
             "stock_daily_rows": int(stock_daily_rows or 0),
             "pool_counts": pool_counts,
+            "has_stock_daily": int(day_rows or 0) > 0,
+            "laowang_rows": pool_counts.get("laowang", 0),
+            "ywcx_rows": pool_counts.get("ywcx", 0),
+            "fhkq_rows": pool_counts.get("fhkq", 0),
+            "stwg_rows": pool_counts.get("stwg", 0),
         }
 
     def model_rows(self, model: str, trade_date: Optional[str], limit: int = 300) -> Dict[str, Any]:
@@ -384,8 +711,12 @@ class LaowangApp:
             with self.engine.connect() as conn:
                 rows = [dict(row) for row in conn.execute(sql_text(query), {"d": date_value, "lim": int(limit)}).mappings()]
         except SQLAlchemyError as exc:
-            return {"columns": columns, "rows": [], "empty_hint": f"{cfg['table']} unavailable: {exc}"}
-        return {"columns": columns, "rows": rows, "trade_date": date_value}
+            translated = _display_rows(key, columns, [])
+            translated["meta"] = {"rows": 0, "empty_hint": f"{cfg['table']} unavailable: {exc}"}
+            return translated
+        translated = _display_rows(key, columns, rows)
+        translated["trade_date"] = date_value
+        return translated
 
     def plan(self, trade_date: Optional[str]) -> Dict[str, Any]:
         date_value = trade_date or self.dates().get("latest")
@@ -498,6 +829,9 @@ class Handler(BaseHTTPRequestHandler):
                 return
             if path == "/api/positions":
                 _send_json(self, self.app.positions())
+                return
+            if path == "/api/auto-status":
+                _send_json(self, {"everyday": {"state": "disabled", "message": "未集成自动任务"}, "everyday_review": {"state": "disabled", "message": "未集成自动任务"}})
                 return
             _send_json(self, {"error": "not found"}, status=404)
         except Exception as exc:  # noqa: BLE001
