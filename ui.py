@@ -5,8 +5,11 @@
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import logging
+import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional
@@ -15,6 +18,7 @@ from urllib.parse import parse_qs, urlparse
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.engine import Engine
 
+import everyday
 from generate_trade_plan import load_config, make_engine, resolve_db_url, sql_text
 
 
@@ -401,7 +405,6 @@ HTML_PAGE = r"""<!doctype html>
 
       <div class="footer">
         <div id="autoStatusMain" class="status-line status-busy">everyday: waiting...</div>
-        <div id="autoStatusReview" class="status-line status-busy">everydayReview: waiting...</div>
         <div>Georgij Xe & his boys</div>
         <div class="disclaimer">免责声明：本页面内容仅供学习交流，不构成任何投资建议，盈亏自负。</div>
       </div>
@@ -534,11 +537,11 @@ HTML_PAGE = r"""<!doctype html>
         if (sel.value) await loadDate(sel.value);
       }
 
-      function applyAutoStatus(elId, prefix, payload) {
-        const el = $(elId);
+      function applyAutoStatus(payload) {
+        const el = $("autoStatusMain");
         if (!el) return;
         const p = payload || {};
-        el.textContent = `${prefix}: ${p.message || "waiting..."}`;
+        el.textContent = `everyday: ${p.message || "waiting..."}`;
         el.classList.remove("status-busy", "status-ok", "status-fail");
         if (p.state === "ok") el.classList.add("status-ok");
         else if (p.state === "fail") el.classList.add("status-fail");
@@ -548,18 +551,12 @@ HTML_PAGE = r"""<!doctype html>
       async function pollAutoStatus() {
         try {
           const data = await apiGet("/api/auto-status");
-          if (data && data.everyday !== undefined) {
-            applyAutoStatus("autoStatusMain", "everyday", data.everyday);
-            applyAutoStatus("autoStatusReview", "everydayReview", data.everyday_review);
-          } else {
-            applyAutoStatus("autoStatusMain", "everyday", data);
-            applyAutoStatus("autoStatusReview", "everydayReview", { state: "none", message: "disabled" });
-          }
+          applyAutoStatus(data.everyday || data);
         } catch (e) {
           // ignore
         }
       }
-      
+
       boot().catch(e => {
         console.error(e);
         setStatus("err", "load error");
@@ -655,8 +652,9 @@ def _display_rows(model: str, columns: List[str], rows: List[Dict[str, Any]]) ->
 
 
 class LaowangApp:
-    def __init__(self, engine: Engine) -> None:
+    def __init__(self, engine: Engine, job_runner: Optional["DailyJobRunner"] = None) -> None:
         self.engine = engine
+        self.job_runner = job_runner
 
     def dates(self) -> Dict[str, Any]:
         with self.engine.connect() as conn:
@@ -795,6 +793,123 @@ class LaowangApp:
             return {"columns": columns, "rows": [], "empty_hint": f"strategy_trade_journal unavailable: {exc}"}
         return {"columns": columns, "rows": rows}
 
+    def auto_status(self) -> Dict[str, Any]:
+        if not self.job_runner:
+            return {"everyday": {"state": "disabled", "message": "未启用自动任务"}}
+        return {"everyday": self.job_runner.status()}
+
+
+class DailyJobRunner:
+    def __init__(
+        self,
+        *,
+        auto_time: str,
+        config: Optional[str],
+        db_url: Optional[str],
+        db: Optional[str],
+        initial_start: str,
+        getdata_workers: int,
+        getdata_shards: int,
+        getdata_write_chunk_size: int,
+        laowang_workers: int,
+        ywcx_workers: int,
+        stwg_workers: int,
+        fhkq_workers: int,
+        laowang_top: int,
+        laowang_min_score: float,
+        ywcx_top: int,
+        ywcx_min_score: float,
+        stwg_top: int,
+        stwg_min_score: float,
+    ) -> None:
+        self.config = config
+        self.db_url = db_url
+        self.db = db
+        self.initial_start = initial_start
+        self.getdata_workers = int(getdata_workers)
+        self.getdata_shards = int(getdata_shards)
+        self.getdata_write_chunk_size = int(getdata_write_chunk_size)
+        self.laowang_workers = int(laowang_workers)
+        self.ywcx_workers = int(ywcx_workers)
+        self.stwg_workers = int(stwg_workers)
+        self.fhkq_workers = int(fhkq_workers)
+        self.laowang_top = int(laowang_top)
+        self.laowang_min_score = float(laowang_min_score)
+        self.ywcx_top = int(ywcx_top)
+        self.ywcx_min_score = float(ywcx_min_score)
+        self.stwg_top = int(stwg_top)
+        self.stwg_min_score = float(stwg_min_score)
+        self.hour, self.minute = self._parse_time(auto_time)
+        now = dt.datetime.now()
+        target = now.replace(hour=self.hour, minute=self.minute, second=0, microsecond=0)
+        self.last_run_date: Optional[dt.date] = now.date() if now >= target else None
+        self.state = "idle"
+        self.message = f"等待 {self.hour:02d}:{self.minute:02d} 自动更新"
+        self.thread = threading.Thread(target=self._loop, name="DailyJobRunner", daemon=True)
+        self.thread.start()
+
+    def _parse_time(self, value: str) -> tuple[int, int]:
+        try:
+            parts = str(value or "17:35").split(":")
+            hour = max(0, min(23, int(parts[0])))
+            minute = max(0, min(59, int(parts[1]) if len(parts) > 1 else 0))
+            return hour, minute
+        except Exception:
+            return 17, 35
+
+    def _run_job(self) -> None:
+        today = dt.date.today().strftime("%Y%m%d")
+        self.state = "running"
+        self.message = f"{today} everyday 更新中"
+        logging.info("[auto] everyday start")
+        try:
+            everyday.run_once(
+                config=self.config,
+                db_url=self.db_url,
+                db=self.db,
+                initial_start_date=self.initial_start,
+                getdata_workers=self.getdata_workers,
+                getdata_shards=self.getdata_shards,
+                getdata_write_chunk_size=self.getdata_write_chunk_size,
+                laowang_workers=self.laowang_workers,
+                ywcx_workers=self.ywcx_workers,
+                stwg_workers=self.stwg_workers,
+                fhkq_workers=self.fhkq_workers,
+                laowang_top=self.laowang_top,
+                laowang_min_score=self.laowang_min_score,
+                ywcx_top=self.ywcx_top,
+                ywcx_min_score=self.ywcx_min_score,
+                stwg_top=self.stwg_top,
+                stwg_min_score=self.stwg_min_score,
+            )
+            self.state = "ok"
+            self.message = f"{today} everyday 更新完成"
+            logging.info("[auto] everyday finished")
+        except Exception:
+            self.state = "fail"
+            self.message = f"{today} everyday 更新失败"
+            logging.exception("[auto] everyday failed")
+
+    def _loop(self) -> None:
+        while True:
+            now = dt.datetime.now()
+            target = now.replace(hour=self.hour, minute=self.minute, second=0, microsecond=0)
+            if now >= target:
+                today = now.date()
+                if self.last_run_date != today:
+                    if today.weekday() < 5:
+                        self._run_job()
+                    else:
+                        self.state = "idle"
+                        self.message = f"{today.strftime('%Y%m%d')} 非交易日，自动任务跳过"
+                    self.last_run_date = today
+                target += dt.timedelta(days=1)
+            sleep_sec = max(30.0, min(300.0, (target - now).total_seconds()))
+            time.sleep(sleep_sec)
+
+    def status(self) -> Dict[str, str]:
+        return {"state": self.state, "message": self.message}
+
 
 class Handler(BaseHTTPRequestHandler):
     app: LaowangApp
@@ -831,7 +946,7 @@ class Handler(BaseHTTPRequestHandler):
                 _send_json(self, self.app.positions())
                 return
             if path == "/api/auto-status":
-                _send_json(self, {"everyday": {"state": "disabled", "message": "未集成自动任务"}, "everyday_review": {"state": "disabled", "message": "未集成自动任务"}})
+                _send_json(self, self.app.auto_status())
                 return
             _send_json(self, {"error": "not found"}, status=404)
         except Exception as exc:  # noqa: BLE001
@@ -847,6 +962,22 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--log-level", default="INFO")
+    parser.add_argument("--disable-auto-update", action="store_true", help="禁用 17:35 自动执行 everyday.py")
+    parser.add_argument("--auto-time", default="17:35", help="HH:MM，默认 17:35")
+    parser.add_argument("--auto-init-start-date", default="2000-01-01")
+    parser.add_argument("--auto-getdata-workers", type=int, default=1)
+    parser.add_argument("--auto-getdata-shards", type=int, default=1)
+    parser.add_argument("--auto-getdata-write-chunk-size", type=int, default=5000)
+    parser.add_argument("--auto-laowang-workers", type=int, default=16)
+    parser.add_argument("--auto-ywcx-workers", type=int, default=16)
+    parser.add_argument("--auto-stwg-workers", type=int, default=16)
+    parser.add_argument("--auto-fhkq-workers", type=int, default=8)
+    parser.add_argument("--auto-laowang-top", type=int, default=200)
+    parser.add_argument("--auto-laowang-min-score", type=float, default=60.0)
+    parser.add_argument("--auto-ywcx-top", type=int, default=120)
+    parser.add_argument("--auto-ywcx-min-score", type=float, default=55.0)
+    parser.add_argument("--auto-stwg-top", type=int, default=150)
+    parser.add_argument("--auto-stwg-min-score", type=float, default=55.0)
     return parser.parse_args(argv)
 
 
@@ -855,9 +986,33 @@ def main(argv: Optional[List[str]] = None) -> int:
     logging.basicConfig(level=getattr(logging, str(args.log_level).upper(), logging.INFO), format="%(asctime)s %(levelname)s %(message)s")
     cfg = load_config(args.config)
     engine = make_engine(resolve_db_url(args, cfg))
-    Handler.app = LaowangApp(engine)
+    job_runner: Optional[DailyJobRunner] = None
+    if not args.disable_auto_update:
+        job_runner = DailyJobRunner(
+            auto_time=args.auto_time,
+            config=args.config,
+            db_url=args.db_url,
+            db=args.db,
+            initial_start=args.auto_init_start_date,
+            getdata_workers=int(args.auto_getdata_workers),
+            getdata_shards=int(args.auto_getdata_shards),
+            getdata_write_chunk_size=int(args.auto_getdata_write_chunk_size),
+            laowang_workers=int(args.auto_laowang_workers),
+            ywcx_workers=int(args.auto_ywcx_workers),
+            stwg_workers=int(args.auto_stwg_workers),
+            fhkq_workers=int(args.auto_fhkq_workers),
+            laowang_top=int(args.auto_laowang_top),
+            laowang_min_score=float(args.auto_laowang_min_score),
+            ywcx_top=int(args.auto_ywcx_top),
+            ywcx_min_score=float(args.auto_ywcx_min_score),
+            stwg_top=int(args.auto_stwg_top),
+            stwg_min_score=float(args.auto_stwg_min_score),
+        )
+    Handler.app = LaowangApp(engine, job_runner=job_runner)
     server = ThreadingHTTPServer((args.host, int(args.port)), Handler)
     logging.info("LAOWANG UI: http://%s:%d", args.host, int(args.port))
+    if job_runner:
+        logging.info("everyday 自动任务每个交易日 %s 运行", args.auto_time)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
